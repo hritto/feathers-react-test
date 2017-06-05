@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Sidebar, Segment, Button, Menu, Image, Icon, Header } from 'semantic-ui-react'
+import UserList from './userlist';
 
 const SidebarLeftPush = (props) => {
-
   return (
     <div>
       <Segment inverted className='no-margin' >
@@ -30,7 +30,9 @@ const SidebarLeftPush = (props) => {
         </Sidebar>
         <Sidebar.Pusher>
           <Segment basic>
-            <div id='main_content'>App content</div>
+            <div id='main_content'>
+              <UserList {...props.model} />
+            </div>
           </Segment>
         </Sidebar.Pusher>
       </Sidebar.Pushable>

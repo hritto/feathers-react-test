@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Sidebar, Segment, Button, Menu, Image, Icon, Header } from 'semantic-ui-react'
+import UserList from './userlist';
 
 const SidebarLeftOverlay = (props) => {
   return (
@@ -13,7 +14,7 @@ const SidebarLeftOverlay = (props) => {
           </Header>
         </Segment>
         <Sidebar.Pushable as={Segment} className='no-margin' >
-          <Sidebar as={Menu} animation='overlay' width='thin' visible={props.model.visible} icon='labeled' vertical inverted id='main_menu'>
+          <Sidebar as={Menu} animation='overlay' width='thin' visible={props.model.visible} icon='labeled' vertical inverted id='main_menu2'>
             <Menu.Item name='home'>
               <Icon name='home' />
               Home
@@ -29,13 +30,14 @@ const SidebarLeftOverlay = (props) => {
           </Sidebar>
           <Sidebar.Pusher>
             <Segment basic>
-              <div id='main_content'>App content</div>
+              <div id='main_content'>
+                  <UserList {...props.model} />
+              </div>
             </Segment>
           </Sidebar.Pusher>
         </Sidebar.Pushable>
       </div>
     )
-  }
-}
+};
 
-export default SidebarLeftOverlay;
+export default SidebarLeftOverlay

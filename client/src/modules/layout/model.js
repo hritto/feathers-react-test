@@ -34,6 +34,10 @@ const LayoutModel = (data) => {
     dispatchChanged();
   };
 
+  const getLayout = () => {
+    return appState.layout;
+  };
+
   const getStatus = () => {
     return appState.status;
   };
@@ -87,7 +91,8 @@ const LayoutModel = (data) => {
     getRecords: getRecords,
     setVisibility: setVisibility,
     getVisibility: getVisibility,
-    setLayout: setLayout
+    setLayout: setLayout,
+    getLayout: getLayout
   };
 };
 

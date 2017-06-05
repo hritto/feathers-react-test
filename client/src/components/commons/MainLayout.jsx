@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import SidebarLeftPush from './SidebarLeftPush.jsx';
+import SidebarLeftOverlay from './SidebarLeftOverlay.jsx';
 import styles from '../../../assets/css/main_style.css';
 /*
 import R from 'ramda';
@@ -21,12 +22,13 @@ MainLayout.render = R.curry((node, props) => ReactDOM.render(<MainLayout {...pro
 export default MainLayout;
 */
 
-const getSidebar = (layout, props) => layout === "wide" ? <SidebarLeftPush {...props}/> : <SidebarLeftOverlay {...props}/>;
+const getSidebar = (layout, props) => layout === "wide" ? <SidebarLeftPush {...props}/> : <SidebarLeftOverlay {...props}/>
 
 const MainLayout = (props) => {
+  let sidebar = getSidebar(props.model.layout, props);
   return (
     <div className="AppContainer">
-      {getSidebar(props.model.layout, props)}
+      {sidebar}
     </div>
   );
 };

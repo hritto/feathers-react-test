@@ -1,24 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import R from 'ramda';
+import { Image, List } from 'semantic-ui-react'
 
-const Container = children => (<div className="panel panel-default">
-  <div className="panel-body">
-    {children}
-  </div>
-</div>);
+const listItems = (rec) => {
+  return rec.map((number) =>
+  <List.Item key={number._id}>
+    <Image avatar src='/assets/images/avatar/small/helen.jpg' />
+    <List.Content>
+      <List.Header>{number._id + ":  " + number.email}</List.Header>
+    </List.Content>
+  </List.Item>
+)};
 
-const List = children => (<ul>
-  {children}
-</ul>);
-
-const ListItem = (props) => {
-  return (
-    <li key={props._id}>
-      <span key={"sp_"+props._id}>{props._id + ":  " + props.email}</span>
-    </li>
-  )};
-
-const UserList = R.compose(Container, List, R.map(ListItem), R.prop('users'));
+const UserList = (props) => {
+  let list = listItems(props.records);
+  return <List animated verticalAlign='middle'>
+            {list}
+        </List>
+};
 
 export default UserList;
