@@ -34,6 +34,10 @@ const LayoutController = function() {
       */
   };
 
+  const toggleVisibility = () => {
+    model.setVisibility(!model.getVisibility());
+  }
+
 
 
   const setLanguage = (data) =>{
@@ -62,7 +66,8 @@ const LayoutController = function() {
     destroy: destroy,
     setLanguage: setLanguage,
     setState: setState,
-    onAddClick: onAddClick
+    onAddClick: onAddClick,
+    toggleVisibility: toggleVisibility
   };
 };
 

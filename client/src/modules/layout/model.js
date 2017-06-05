@@ -1,30 +1,46 @@
 import signals from 'signals';
 import R from 'ramda';
 
-
 const LayoutModel = (data) => {
 
   let appState = {
     status: "initial",
+    layout: "wide", //small < 1024
+    visible: true,
     records: []
   };
 
-  const usersLens = R.lensProp('records');
-
-  const setRecords = (records) => {
-    appState = R.set(usersLens, records, appState);
-
-    console.log(appState);
-    dispatchChanged();
-  };
-
-  const getAppState = () => {
-    return appState;
-  };
+  //Lenses
+  const visibleLens = R.lensProp('visible');
+  const layoutLens = R.lensProp('layout');
+  const statusLens = R.lensProp('status');
 
   const initialize = function(opts) {
     //setState(opts);
     //dispatchChanged();
+  };
+
+  const getVisibility = () => {
+    return appState.visible;
+  };
+
+  const setVisibility = (visible) => {
+    appState = R.set(visibleLens, visible, appState);
+    dispatchChanged();
+  };
+
+  const setLayout = (layout) => {
+    appState = R.set(layoutLens, layout, appState);
+    dispatchChanged();
+  };
+
+  const getStatus = () => {
+    return appState.status;
+  };
+
+  const setStatus = (status) => {
+    appState = R.set(statusLens, status, appState);
+    dispatchChanged();
   };
 
   const on = {
@@ -37,21 +53,24 @@ const LayoutModel = (data) => {
     });
   };
 
+
+
+
+
+
+  const usersLens = R.lensProp('records');
+  const setRecords = (records) => {
+    appState = R.set(usersLens, records, appState);
+    dispatchChanged();
+  };
+  const getAppState = () => {
+    return appState;
+  };
   const getRecords = () => {
     return appState.records;
   };
 
-  const setState = (state) => {
-    appState = Object.assign({}, state);
-  };
 
-  const getStatus = () => {
-    return appState.status;
-  };
-
-  const setStatus = (state) => {
-    appState.status = state;
-  };
 
   const destroy = () => {
 
@@ -65,7 +84,10 @@ const LayoutModel = (data) => {
     getAppState: getAppState,
     on: on,
     setRecords: setRecords,
-    getRecords: getRecords
+    getRecords: getRecords,
+    setVisibility: setVisibility,
+    getVisibility: getVisibility,
+    setLayout: setLayout
   };
 };
 
