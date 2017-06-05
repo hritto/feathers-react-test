@@ -7,7 +7,7 @@ const SidebarLeftOverlay = (props) => {
         <Segment inverted className='no-margin' >
           <Header as='header' inverted>
             <div className='no-margin' style={{float: 'right', cursor: 'pointer'}} onClick={props.controller.toggleVisibility.bind(this, props.model.visible)}>
-              <Icon size='large' name='align justify' inverted />
+              <Icon size='small' name='align justify' inverted />
             </div>
             Header Content
           </Header>

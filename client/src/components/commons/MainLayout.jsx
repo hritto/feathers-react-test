@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import SidebarLeftPush from './SidebarLeftPush.jsx'
+import SidebarLeftPush from './SidebarLeftPush.jsx';
+import styles from '../../../assets/css/main_style.css';
 /*
 import R from 'ramda';
 import UserList from './userlist';
