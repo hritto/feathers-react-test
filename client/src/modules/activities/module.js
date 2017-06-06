@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { render } from 'react-dom';
 import Model from '../common/model.js';
 import ActivitiesController from './controller.js';
 import Table from '../../components/commons/grid_manager/Table.jsx';
@@ -34,7 +33,7 @@ const Activities = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    render( <Table {...props} />,
+    ReactDOM.render( <Table {...props} />,
       document.getElementById(options.el)
     );
   };

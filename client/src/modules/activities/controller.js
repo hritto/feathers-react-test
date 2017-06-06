@@ -15,7 +15,7 @@ const ActivitiesController = function() {
         .configure(feathers.rest(serverUrl).fetch(fetch))
     const activity = feathersClient.service('/activity');
     return activity.find().then(results => {
-      model.setter('records', results.data, true);
+      model.set('records', results.data, true);
 
       Promise.all([
         users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),

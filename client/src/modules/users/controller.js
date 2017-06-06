@@ -14,7 +14,7 @@ const UsersController = function() {
         .configure(feathers.rest(serverUrl).fetch(fetch))
     const users = feathersClient.service('/users');
     return users.find().then(results => {
-      model.setter('records', results.data, true);
+      model.set('records', results.data, true);
       /*
       Promise.all([
         users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),

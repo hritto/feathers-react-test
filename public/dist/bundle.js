@@ -12143,23 +12143,23 @@ var Model = function Model(data) {
 
   var appState = _ramda2.default.clone(data);
 
+  var on = {
+    changed: new _signals2.default.Signal()
+  };
+
   var initialize = function initialize() {
     dispatchChanged();
   };
 
-  var getter = function getter(prop) {
+  var get = function get(prop) {
     return _ramda2.default.prop(prop, appState);
   };
 
-  var setter = function setter(prop, value, dispatch) {
+  var set = function set(prop, value, dispatch) {
     appState = _ramda2.default.set(_ramda2.default.lensProp(prop), value, appState);
     if (dispatch) {
       dispatchChanged();
     }
-  };
-
-  var on = {
-    changed: new _signals2.default.Signal()
   };
 
   var dispatchChanged = function dispatchChanged() {
@@ -12174,8 +12174,8 @@ var Model = function Model(data) {
     initialize: initialize,
     destroy: destroy,
     on: on,
-    getter: getter,
-    setter: setter
+    get: get,
+    set: set
   };
 };
 
@@ -38688,7 +38688,7 @@ var ActivitiesController = function ActivitiesController() {
       .configure(feathers.rest(serverUrl).fetch(fetch))
     const activity = feathersClient.service('/activity');
     return activity.find().then(results => {
-    model.setter('records', results.data, true);
+    model.set('records', results.data, true);
      Promise.all([
       users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),
       users.create({ email: '2john.doe@gmail.com', password: '22222', role: 'user' }),
@@ -38774,7 +38774,7 @@ var Activities = function Activities(sb) {
 
   var onRender = function onRender(props) {
     props.controller = _controller;
-    (0, _reactDom.render)(_react2.default.createElement(_Table2.default, props), document.getElementById(options.el));
+    _reactDom2.default.render(_react2.default.createElement(_Table2.default, props), document.getElementById(options.el));
   };
 
   var destroy = function destroy(done) {
@@ -38878,21 +38878,20 @@ var LayoutController = function LayoutController() {
   };
 
   var onWindowResize = function onWindowResize() {
-    console.log("resize");
     var viewportWidth = document.documentElement.clientWidth;
-    var actual_layout = model.getter('animation');
+    var actual_layout = model.get('animation');
     adjustResponsiveContents();
     if (viewportWidth < MIN_WIDTH && actual_layout === "push") {
       //setter(prop, value, dispatch)
-      model.setter('visible', false, true);
+      model.set('visible', false, true);
       Promise.delay(500).then(function () {
-        model.setter('animation', 'overlay', true);
+        model.set('animation', 'overlay', true);
       });
     }
     if (viewportWidth > MIN_WIDTH && actual_layout === "overlay") {
-      model.setter('visible', true, true);
+      model.set('visible', true, true);
       Promise.delay(500).then(function () {
-        model.setter('animation', 'push', true);
+        model.set('animation', 'push', true);
       });
     }
   };
@@ -38901,7 +38900,7 @@ var LayoutController = function LayoutController() {
     var viewportWidth = document.documentElement.clientWidth;
     var relative_menu = 180; //El ancho del menú + 20px de margen
     var main_content = document.getElementById('main_content');
-    if (!model.getter('visible')) {
+    if (!model.get('visible')) {
       relative_menu = 30;
     }
     main_content.style.width = viewportWidth - relative_menu + "px";
@@ -38916,8 +38915,8 @@ var LayoutController = function LayoutController() {
   };
 
   var toggleVisibility = function toggleVisibility() {
-    model.setter('visible', !model.getter('visible'), true);
-    if (model.getter('animation') === 'push') {
+    model.set('visible', !model.get('visible'), true);
+    if (model.get('animation') === 'push') {
       adjustResponsiveContents();
     }
   };
@@ -38958,6 +38957,8 @@ var _react = __webpack_require__(1);
 var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = __webpack_require__(80);
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _model2 = __webpack_require__(121);
 
@@ -39005,7 +39006,7 @@ var Layout = function Layout(sb) {
 
   var onRender = function onRender(props) {
     props.controller = _controller;
-    (0, _reactDom.render)(_react2.default.createElement(_MainLayout2.default, props), document.getElementById(options.el));
+    _reactDom2.default.render(_react2.default.createElement(_MainLayout2.default, props), document.getElementById(options.el));
   };
 
   var destroy = function destroy(done) {};
@@ -39044,8 +39045,8 @@ var NavigationController = function NavigationController() {
   };
 
   var menuClick = function menuClick(index) {
-    var current_item = model.getter('current_item') || 0;
-    var config = model.getter('config');
+    var current_item = model.get('current_item') || 0;
+    var config = model.get('config');
     var next = config[index];
     var current = config[current_item];
     var opts = {
@@ -39059,8 +39060,8 @@ var NavigationController = function NavigationController() {
     } else {
       sb.emit("layout.navigation.menuClick", opts);
     }
-    model.setter('focus_index', index, false);
-    model.setter('current_item', index, true);
+    model.set('focus_index', index, false);
+    model.set('current_item', index, true);
   };
 
   var destroy = function destroy() {
@@ -39088,6 +39089,8 @@ var _react = __webpack_require__(1);
 var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = __webpack_require__(80);
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _model2 = __webpack_require__(121);
 
@@ -39154,7 +39157,7 @@ var Navigation = function Navigation(sb) {
 
   var onRender = function onRender(props) {
     props.controller = _controller;
-    (0, _reactDom.render)(_react2.default.createElement(_Navigation2.default, props), document.getElementById(options.el));
+    _reactDom2.default.render(_react2.default.createElement(_Navigation2.default, props), document.getElementById(options.el));
   };
 
   var destroy = function destroy(done) {};
@@ -39193,7 +39196,7 @@ var UsersController = function UsersController() {
     var feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
     var users = feathersClient.service('/users');
     return users.find().then(function (results) {
-      model.setter('records', results.data, true);
+      model.set('records', results.data, true);
       /*
       Promise.all([
         users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),
@@ -39280,7 +39283,7 @@ var Users = function Users(sb) {
 
   var onRender = function onRender(props) {
     props.controller = _controller;
-    (0, _reactDom.render)(_react2.default.createElement(_UserList2.default, props), document.getElementById(options.el));
+    _reactDom2.default.render(_react2.default.createElement(_UserList2.default, props), document.getElementById(options.el));
   };
 
   var destroy = function destroy(done) {

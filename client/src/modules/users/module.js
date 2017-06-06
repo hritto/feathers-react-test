@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { render } from 'react-dom';
 import Model from '../common/model.js';
 import UsersController from './controller.js';
 import UserList from '../../components/commons/UserList.js';
@@ -34,7 +33,7 @@ const Users = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    render( <UserList {...props} />,
+    ReactDOM.render( <UserList {...props} />,
       document.getElementById(options.el)
     );
   };

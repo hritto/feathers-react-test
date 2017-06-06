@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
 import LayoutController from './controller.js';
 import MainLayout from '../../components/commons/MainLayout.jsx';
@@ -35,7 +35,7 @@ const Layout = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    render( <MainLayout {...props} />,
+    ReactDOM.render( <MainLayout {...props} />,
       document.getElementById(options.el)
     );
   };

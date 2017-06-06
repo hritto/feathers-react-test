@@ -12,8 +12,8 @@ const NavigationController = function() {
   };
 
   const menuClick = (index) => {
-    let current_item = model.getter('current_item') || 0;
-    let config = model.getter('config')
+    let current_item = model.get('current_item') || 0;
+    let config = model.get('config')
     let next = config[index];
     let current = config[current_item];
     let opts = {
@@ -27,8 +27,8 @@ const NavigationController = function() {
     } else {
       sb.emit("layout.navigation.menuClick", opts);
     }
-    model.setter('focus_index', index, false);
-    model.setter('current_item', index, true);
+    model.set('focus_index', index, false);
+    model.set('current_item', index, true);
   }
 
   const destroy = () => {

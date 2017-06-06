@@ -32,21 +32,20 @@ const LayoutController = function() {
   };
 
   const onWindowResize = () => {
-    console.log("resize")
     let viewportWidth = document.documentElement.clientWidth;
-    let actual_layout = model.getter('animation');
+    let actual_layout = model.get('animation');
     adjustResponsiveContents();
     if(viewportWidth < MIN_WIDTH && actual_layout === "push"){
       //setter(prop, value, dispatch)
-      model.setter('visible', false, true);
+      model.set('visible', false, true);
       Promise.delay(500).then(function(){
-        model.setter('animation', 'overlay', true);
+        model.set('animation', 'overlay', true);
       });
     }
     if(viewportWidth > MIN_WIDTH && actual_layout === "overlay"){
-      model.setter('visible', true, true);
+      model.set('visible', true, true);
       Promise.delay(500).then(function(){
-        model.setter('animation', 'push', true);
+        model.set('animation', 'push', true);
       });
     }
   };
@@ -56,7 +55,7 @@ const LayoutController = function() {
     let viewportWidth = document.documentElement.clientWidth;
     let relative_menu = 180; //El ancho del menú + 20px de margen
     let main_content = document.getElementById('main_content');
-    if(!model.getter('visible')){
+    if(!model.get('visible')){
       relative_menu = 30;
     }
     main_content.style.width = viewportWidth - relative_menu + "px"	;
@@ -71,8 +70,8 @@ const LayoutController = function() {
   };
 
   const toggleVisibility = () => {
-    model.setter('visible', !model.getter('visible'), true);
-    if(model.getter('animation') === 'push'){
+    model.set('visible', !model.get('visible'), true);
+    if(model.get('animation') === 'push'){
       adjustResponsiveContents();
     }
   };

@@ -5,21 +5,21 @@ const Model = (data) => {
 
   let appState = R.clone(data);
 
+  const on = {
+    changed: new signals.Signal()
+  };
+
   const initialize = function() {
     dispatchChanged();
   };
 
-  const getter = (prop) => R.prop(prop, appState);
+  const get = (prop) => R.prop(prop, appState);
 
-  const setter = (prop, value, dispatch) => {
+  const set = (prop, value, dispatch) => {
     appState = R.set(R.lensProp(prop), value, appState);
     if(dispatch){
       dispatchChanged();
     }
-  };
-
-  const on = {
-    changed: new signals.Signal()
   };
 
   const dispatchChanged = () => {
@@ -36,8 +36,8 @@ const Model = (data) => {
     initialize: initialize,
     destroy: destroy,
     on: on,
-    getter: getter,
-    setter: setter
+    get: get,
+    set: set
   };
 };
 

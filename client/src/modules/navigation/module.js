@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
 import NavigationController from './controller.js';
 import NavigationLayout from '../../components/commons/Navigation.jsx';
@@ -55,7 +55,7 @@ const Navigation = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    render( <NavigationLayout {...props} />,
+    ReactDOM.render( <NavigationLayout {...props} />,
       document.getElementById(options.el)
     );
   };

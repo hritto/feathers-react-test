@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Sidebar, Segment, Button, Menu, Image, Icon, Header } from 'semantic-ui-react'
+import { Sidebar, Container, Segment, Button, Menu, Image, Icon, Header } from 'semantic-ui-react'
 
 const SidebarLeftPush = (props) => {
   return (
