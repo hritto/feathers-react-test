@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
 import UsersController from './controller.js';
-import UserList from '../../components/commons/UserList.js';
+import UsersView from '../../components/users/view.jsx';
 
 if (module.hot) {
   module.hot.accept();
@@ -13,7 +13,11 @@ const Users = function(sb) {
 
   //Estado ---> Model
   let appState = {
-    records: []
+    records: [],
+    title: "Usuarios",
+    icon: "users",
+    route: "users",
+    permission: "users",
   };
 
   let options = null;
@@ -33,7 +37,7 @@ const Users = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    ReactDOM.render( <UserList {...props} />,
+    ReactDOM.render( <UsersView {...props} />,
       document.getElementById(options.el)
     );
   };

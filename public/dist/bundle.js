@@ -38153,7 +38153,16 @@ var MainLayout = function MainLayout(props) {
   return _react2.default.createElement(
     'div',
     { className: 'AppContainer' },
-    _react2.default.createElement(_SidebarLeftPush2.default, props)
+    _react2.default.createElement(_SidebarLeftPush2.default, props),
+    _react2.default.createElement(
+      'footer',
+      null,
+      _react2.default.createElement(
+        'p',
+        null,
+        'For more info... ask your Grandma. Thanks!'
+      )
+    )
   );
 };
 
@@ -38258,7 +38267,7 @@ var SidebarLeftPush = function SidebarLeftPush(props) {
         null,
         _react2.default.createElement(
           _semanticUiReact.Segment,
-          { basic: true },
+          { basic: true, className: 'no-margin-absolute' },
           _react2.default.createElement('div', { id: 'main_content' })
         )
       )
@@ -38289,6 +38298,10 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _semanticUiReact = __webpack_require__(187);
 
+var _ButtonIcon = __webpack_require__(1200);
+
+var _ButtonIcon2 = _interopRequireDefault(_ButtonIcon);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var listItems = function listItems(rec) {
@@ -38300,12 +38313,14 @@ var listItems = function listItems(rec) {
       _react2.default.createElement(_semanticUiReact.Image, { avatar: true, src: '/assets/images/avatar/small/user_min.png' }),
       _react2.default.createElement(
         _semanticUiReact.List.Content,
-        null,
+        { verticalAlign: 'middle' },
         _react2.default.createElement(
-          _semanticUiReact.List.Header,
-          null,
-          record._id + ":  " + record.email
-        )
+          'div',
+          { className: 'list_span' },
+          record.role + ":  " + record.email,
+          ' '
+        ),
+        _react2.default.createElement(_ButtonIcon2.default, { props: { icon: 'edit' } })
       )
     );
   });
@@ -38683,6 +38698,7 @@ var ActivitiesController = function ActivitiesController() {
     options = opts;
     model = mdl;
     sb = opts.sb;
+    adjustResponsiveContents();
     /*
     const feathersClient = feathers()
       .configure(feathers.rest(serverUrl).fetch(fetch))
@@ -38701,6 +38717,13 @@ var ActivitiesController = function ActivitiesController() {
     }).catch(err => console.log('Error occurred:', err));
     });
     */
+  };
+
+  var adjustResponsiveContents = function adjustResponsiveContents() {
+    var main_content = document.getElementById('main_content');
+    var main_menu = document.getElementById('main_menu');
+    var best_height = Math.max(document.documentElement.clientHeight, main_content.clientHeight) + 50;
+    main_menu.style.cssText = 'min-height:' + best_height + 'px !important';
   };
 
   var destroy = function destroy() {
@@ -38738,9 +38761,9 @@ var _controller2 = __webpack_require__(562);
 
 var _controller3 = _interopRequireDefault(_controller2);
 
-var _Table = __webpack_require__(558);
+var _view = __webpack_require__(1197);
 
-var _Table2 = _interopRequireDefault(_Table);
+var _view2 = _interopRequireDefault(_view);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -38754,7 +38777,11 @@ var Activities = function Activities(sb) {
   //Estado ---> Model
 
   var appState = {
-    records: []
+    records: [],
+    title: "Actividades",
+    icon: "game",
+    route: "activities",
+    permission: "activity"
   };
 
   var options = null;
@@ -38774,7 +38801,7 @@ var Activities = function Activities(sb) {
 
   var onRender = function onRender(props) {
     props.controller = _controller;
-    _reactDom2.default.render(_react2.default.createElement(_Table2.default, props), document.getElementById(options.el));
+    _reactDom2.default.render(_react2.default.createElement(_view2.default, props), document.getElementById(options.el));
   };
 
   var destroy = function destroy(done) {
@@ -38898,12 +38925,16 @@ var LayoutController = function LayoutController() {
 
   var adjustResponsiveContents = function adjustResponsiveContents() {
     var viewportWidth = document.documentElement.clientWidth;
-    var relative_menu = 180; //El ancho del menú + 20px de margen
+    var relative_menu = 150; //El ancho del menú + 20px de margen
     var main_content = document.getElementById('main_content');
+    var main_menu = document.getElementById('main_menu');
+
     if (!model.get('visible')) {
-      relative_menu = 30;
+      relative_menu = 0;
     }
     main_content.style.width = viewportWidth - relative_menu + "px";
+    var best_height = Math.max(document.documentElement.clientHeight, main_content.clientHeight) + 50;
+    main_menu.style.cssText = 'min-height:' + best_height + 'px !important';
   };
 
   var initialize = function initialize(opts, mdl) {
@@ -39193,23 +39224,32 @@ var UsersController = function UsersController() {
     options = opts;
     model = mdl;
     sb = opts.sb;
+    adjustResponsiveContents();
     var feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
     var users = feathersClient.service('/users');
+    /*
+    Promise.all([
+      users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),
+      users.create({ email: '2john.doe@gmail.com', password: '22222', role: 'user' }),
+      users.create({ email: '2judy.doe@gmail.com', password: '33333', role: 'user' })
+    ]).then(results => {
+        console.log('created Jane Doe item\n', results[0]);
+        console.log('created John Doe item\n', results[1]);
+        console.log('created Judy Doe item\n', results[2]);
+        return users.find().then(results => console.log('find all items\n', results));
+    }).catch(err => console.log('Error occurred:', err));
+    */
+
     return users.find().then(function (results) {
       model.set('records', results.data, true);
-      /*
-      Promise.all([
-        users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),
-        users.create({ email: '2john.doe@gmail.com', password: '22222', role: 'user' }),
-        users.create({ email: '2judy.doe@gmail.com', password: '33333', role: 'user' })
-      ]).then(results => {
-          console.log('created Jane Doe item\n', results[0]);
-          console.log('created John Doe item\n', results[1]);
-          console.log('created Judy Doe item\n', results[2]);
-          return users.find().then(results => console.log('find all items\n', results));
-      }).catch(err => console.log('Error occurred:', err));
-      */
     });
+  };
+
+  var adjustResponsiveContents = function adjustResponsiveContents() {
+    var main_content = document.getElementById('main_content');
+    var main_menu = document.getElementById('main_menu');
+    var best_height = Math.max(document.documentElement.clientHeight, main_content.clientHeight) + 50;
+    main_menu.style.cssText = 'min-height:' + best_height + 'px !important';
   };
 
   var destroy = function destroy() {
@@ -39247,9 +39287,9 @@ var _controller2 = __webpack_require__(569);
 
 var _controller3 = _interopRequireDefault(_controller2);
 
-var _UserList = __webpack_require__(557);
+var _view = __webpack_require__(1199);
 
-var _UserList2 = _interopRequireDefault(_UserList);
+var _view2 = _interopRequireDefault(_view);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -39263,7 +39303,11 @@ var Users = function Users(sb) {
   //Estado ---> Model
 
   var appState = {
-    records: []
+    records: [],
+    title: "Usuarios",
+    icon: "users",
+    route: "users",
+    permission: "users"
   };
 
   var options = null;
@@ -39283,7 +39327,7 @@ var Users = function Users(sb) {
 
   var onRender = function onRender(props) {
     props.controller = _controller;
-    _reactDom2.default.render(_react2.default.createElement(_UserList2.default, props), document.getElementById(options.el));
+    _reactDom2.default.render(_react2.default.createElement(_view2.default, props), document.getElementById(options.el));
   };
 
   var destroy = function destroy(done) {
@@ -40292,7 +40336,7 @@ exports = module.exports = __webpack_require__(628)(undefined);
 
 
 // module
-exports.push([module.i, "* {\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n\nhtml, body {\n  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';\n  font-weight: 400;\n  color: #333;\n  overflow-y: hidden;\n}\n\n.center-text {\n  text-align: center;\n}\n\nfooter {\n  position: absolute;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  padding: 20px;\n}\n\nfooter p {\n  font-weight: 300;\n  font-size: 1.0em;\n}\n\n.ui.segment.no-margin {\n  margin: 0 !important;\n  border: 0 !important;\n  border-radius: 0;\n  padding-bottom: 8px !important;\n}\n", ""]);
+exports.push([module.i, "* {\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n\nhtml, body {\n  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';\n  font-weight: 400;\n  color: #333;\n  overflow-y: hidden;\n}\n\n.center-text {\n  text-align: center;\n}\n\nfooter {\n  position: absolute;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  padding: 10px;\n  text-align: center;\n  background-color: #dedede;\n  max-height: 50px;\n}\n\nfooter p {\n  font-weight: 300;\n  font-size: 1.0em;\n}\n\n.ui.segment.no-margin {\n  margin: 0 !important;\n  border: 0 !important;\n  border-radius: 0;\n  padding-bottom: 8px !important;\n}\n\n.ui.segment.no-margin-absolute {\n  margin: 0 !important;\n  border: 0 !important;\n  border-radius: 0;\n  padding: 0 !important;\n}\n\n.padding-10 {\n  padding: 20px !important;\n}\n\nh2.ribbon_header {\n  font-size: 1rem !important;\n  margin: 0 !important;\n  border: 0 !important;\n  border-radius: 0 !important;\n  padding: 5px !important;\n  min-height: 30px;\n  background-color: #71a3ba !important;\n  box-shadow: 0 4px 4px #c9dfea !important;\n}\n\n#main_content {\n  padding-bottom: 60px;\n}\n\n.list_span {\n  display: inline;\n  position: relative;\n  top: 8px;\n}\n", ""]);
 
 // exports
 
@@ -97072,6 +97116,199 @@ module.exports = function() {
 module.exports = __webpack_amd_options__;
 
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 1197 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(187);
+
+var _Table = __webpack_require__(558);
+
+var _Table2 = _interopRequireDefault(_Table);
+
+var _header = __webpack_require__(1198);
+
+var _header2 = _interopRequireDefault(_header);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var ActivitiesView = function ActivitiesView(props) {
+  return _react2.default.createElement(
+    'div',
+    { className: 'no-margin-absolute' },
+    _react2.default.createElement(_header2.default, props),
+    _react2.default.createElement(
+      _semanticUiReact.Container,
+      { fluid: true, className: 'padding-10' },
+      _react2.default.createElement(_Table2.default, props),
+      _react2.default.createElement(_Table2.default, props),
+      _react2.default.createElement(_Table2.default, props),
+      _react2.default.createElement(_Table2.default, props),
+      _react2.default.createElement(_Table2.default, props)
+    )
+  );
+};
+
+exports.default = ActivitiesView;
+
+/***/ }),
+/* 1198 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(187);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var RibbonHeader = function RibbonHeader(props) {
+  return _react2.default.createElement(
+    _semanticUiReact.Header,
+    { as: 'h2', block: true, inverted: true, className: 'ribbon_header' },
+    _react2.default.createElement(_semanticUiReact.Icon, { name: props.model.icon }),
+    _react2.default.createElement(
+      _semanticUiReact.Header.Content,
+      null,
+      props.model.title
+    )
+  );
+};
+
+exports.default = RibbonHeader;
+
+/***/ }),
+/* 1199 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(187);
+
+var _UserList = __webpack_require__(557);
+
+var _UserList2 = _interopRequireDefault(_UserList);
+
+var _header = __webpack_require__(1198);
+
+var _header2 = _interopRequireDefault(_header);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var UsersView = function UsersView(props) {
+  return _react2.default.createElement(
+    'div',
+    { className: 'no-margin-absolute' },
+    _react2.default.createElement(_header2.default, props),
+    _react2.default.createElement(
+      _semanticUiReact.Container,
+      { fluid: true, className: 'padding-10' },
+      _react2.default.createElement(_UserList2.default, props)
+    )
+  );
+};
+
+exports.default = UsersView;
+
+/***/ }),
+/* 1200 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(187);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var ModalTest = function ModalTest(props) {
+  return _react2.default.createElement(
+    _semanticUiReact.Modal,
+    { trigger: _react2.default.createElement(
+        _semanticUiReact.Button.Group,
+        null,
+        _react2.default.createElement(_semanticUiReact.Button, { icon: 'pencil', size: 'tiny' }),
+        _react2.default.createElement(_semanticUiReact.Button, { icon: 'delete', size: 'tiny' })
+      ) },
+    _react2.default.createElement(
+      _semanticUiReact.Modal.Header,
+      null,
+      'Select a Photo'
+    ),
+    _react2.default.createElement(
+      _semanticUiReact.Modal.Content,
+      { image: true },
+      _react2.default.createElement(_semanticUiReact.Image, { wrapped: true, size: 'medium', src: '/assets/images/avatar/large/rachel.png' }),
+      _react2.default.createElement(
+        _semanticUiReact.Modal.Description,
+        null,
+        _react2.default.createElement(
+          _semanticUiReact.Header,
+          null,
+          'Default Profile Image'
+        ),
+        _react2.default.createElement(
+          'p',
+          null,
+          'We\'ve found the following gravatar image associated with your e-mail address.'
+        ),
+        _react2.default.createElement(
+          'p',
+          null,
+          'Is it okay to use this photo?'
+        )
+      )
+    )
+  );
+};
+
+var ButtonIcon = function ButtonIcon(props) {
+  return _react2.default.createElement(
+    _semanticUiReact.Button.Group,
+    null,
+    _react2.default.createElement(_semanticUiReact.Button, { icon: 'pencil', size: 'tiny' }),
+    _react2.default.createElement(_semanticUiReact.Button, { icon: 'delete', size: 'tiny' })
+  );
+};
+
+exports.default = ModalTest;
 
 /***/ })
 /******/ ]);

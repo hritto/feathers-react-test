@@ -20,7 +20,10 @@ footer {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 20px;
+  padding: 10px;
+  text-align: center;
+  background-color: #dedede;
+  max-height: 50px;
 }
 
 footer p {
@@ -33,4 +36,36 @@ footer p {
   border: 0 !important;
   border-radius: 0;
   padding-bottom: 8px !important;
+}
+
+.ui.segment.no-margin-absolute {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0;
+  padding: 0 !important;
+}
+
+.padding-10 {
+  padding: 20px !important;
+}
+
+h2.ribbon_header {
+  font-size: 1rem !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 5px !important;
+  min-height: 30px;
+  background-color: #71a3ba !important;
+  box-shadow: 0 4px 4px #c9dfea !important;
+}
+
+#main_content {
+  padding-bottom: 60px;
+}
+
+.list_span {
+  display: inline;
+  position: relative;
+  top: 8px;
 }

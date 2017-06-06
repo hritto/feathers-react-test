@@ -4,13 +4,13 @@ import R from 'ramda';
 
 const item = (m, index, props) => {
   let current = props.model.current_item || 0;
-  return <Menu.Item name={m.title}
+  return (<Menu.Item name={m.title}
               key={m.title}
               active={current === index}
               onClick={props.controller.menuClick.bind(this, index)}>
     <Icon name={m.icon} />
     {m.title}
-  </Menu.Item>
+  </Menu.Item>);
 };
 
 const NavigationLayout = (props) => {

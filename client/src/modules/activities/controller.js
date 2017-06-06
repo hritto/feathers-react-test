@@ -10,6 +10,7 @@ const ActivitiesController = function() {
     options = opts;
     model = mdl;
     sb = opts.sb;
+    adjustResponsiveContents();
       /*
     const feathersClient = feathers()
         .configure(feathers.rest(serverUrl).fetch(fetch))
@@ -30,6 +31,13 @@ const ActivitiesController = function() {
 
     });
     */
+  };
+
+  const adjustResponsiveContents = () => {
+    let main_content = document.getElementById('main_content');
+    let main_menu = document.getElementById('main_menu');
+    let best_height = Math.max(document.documentElement.clientHeight, main_content.clientHeight)+50;
+    main_menu.style.cssText = 'min-height:'+best_height+'px !important';
   };
 
   const destroy = () => {

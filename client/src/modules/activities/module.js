@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
 import ActivitiesController from './controller.js';
-import Table from '../../components/commons/grid_manager/Table.jsx';
+import ActivitiesView from '../../components/activities/view.jsx';
 
 if (module.hot) {
   module.hot.accept();
@@ -13,7 +13,11 @@ const Activities = function(sb) {
 
   //Estado ---> Model
   let appState = {
-    records: []
+    records: [],
+    title: "Actividades",
+    icon: "game",
+    route: "activities",
+    permission: "activity",
   };
 
   let options = null;
@@ -33,7 +37,7 @@ const Activities = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    ReactDOM.render( <Table {...props} />,
+    ReactDOM.render( <ActivitiesView {...props} />,
       document.getElementById(options.el)
     );
   };

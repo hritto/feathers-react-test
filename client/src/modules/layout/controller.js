@@ -53,12 +53,16 @@ const LayoutController = function() {
 
   const adjustResponsiveContents = () => {
     let viewportWidth = document.documentElement.clientWidth;
-    let relative_menu = 180; //El ancho del menú + 20px de margen
+    let relative_menu = 150; //El ancho del menú + 20px de margen
     let main_content = document.getElementById('main_content');
+    let main_menu = document.getElementById('main_menu');
+    
     if(!model.get('visible')){
-      relative_menu = 30;
+      relative_menu = 0;
     }
     main_content.style.width = viewportWidth - relative_menu + "px"	;
+    let best_height = Math.max(document.documentElement.clientHeight, main_content.clientHeight)+50;
+    main_menu.style.cssText = 'min-height:'+best_height+'px !important';
   };
 
   const initialize = (opts, mdl) => {

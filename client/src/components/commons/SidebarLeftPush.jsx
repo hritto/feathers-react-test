@@ -17,7 +17,7 @@ const SidebarLeftPush = (props) => {
           <div id='menu_items'></div>
         </Sidebar>
         <Sidebar.Pusher>
-          <Segment basic>
+          <Segment basic className="no-margin-absolute">
             <div id='main_content' />
           </Segment>
         </Sidebar.Pusher>
