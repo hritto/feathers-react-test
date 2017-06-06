@@ -14,7 +14,6 @@ const Layout = function(sb) {
   //Estado ---> Model
   let appState = {
     status: "initial",
-    layout: "wide", //small < 768
     visible: true,
     animation: "push"
   };
@@ -24,13 +23,14 @@ const Layout = function(sb) {
   let _controller = LayoutController();
   const _sb = sb;
 
-  const initialize = opts => {
+  const initialize = (opts, done) => {
     options = opts;
     _model.on.changed.add(onRender);
+    _model.initialize();
     _controller.initialize({
       sb: _sb
     }, _model);
-    _model.initialize();
+    done();
   };
 
   const onRender = (props) => {

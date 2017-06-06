@@ -14,18 +14,7 @@ const SidebarLeftPush = (props) => {
       </Segment>
       <Sidebar.Pushable as={Segment} className='no-margin' >
         <Sidebar as={Menu} animation={props.model.animation} width='thin' visible={props.model.visible} icon='labeled' vertical inverted id='main_menu'>
-          <Menu.Item name='home'>
-            <Icon name='home' />
-            Home
-          </Menu.Item>
-          <Menu.Item name='gamepad'>
-            <Icon name='gamepad' />
-            Games
-          </Menu.Item>
-          <Menu.Item name='camera'>
-            <Icon name='camera' />
-            Channels
-          </Menu.Item>
+          <div id='menu_items'></div>
         </Sidebar>
         <Sidebar.Pusher>
           <Segment basic>

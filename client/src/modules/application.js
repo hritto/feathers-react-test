@@ -48,6 +48,10 @@ App.application = () => {
     let modules = null;
     let module_config = null;
     let config = null;
+    let subscriptions = {
+      navigation_menu_click: null,
+      logout: null
+    };
 
     const initialize = (opts) => {
       core = new _sa.Core();
@@ -57,21 +61,91 @@ App.application = () => {
       _SaModulesInit.module.init.initialize(core);
       core.boot();
 
+      // Atender a eventos de modulos
+      subscribeEvents();
+
       core.promise.moduleStart(core, "Layout", {
           options: {
               el: 'app'
           }
       }).then(function(){
-        core.promise.moduleStart(core, "Users", {
+        return core.promise.moduleStart(core, "Navigation", {
             options: {
-                el: 'main_content'
+                el: 'menu_items'
             }
-        })
+        });
       });
     };
 
-    var destroy = function() {
+    const subscribeEvents = () => {
+      //Atender al evento click de los botones del menu
+      subscriptions.navigation_menu_click = core.on("layout.navigation.menuClick", _.bind(onNavigationMenuClick));
+      subscriptions.logout = core.on("application.logout", _.bind(onlogOut));
+    };
 
+    const unsubscribeEvents = () => {
+      core.scaleApp.cleanSubscriptions(subscriptions);
+    };
+
+    const promiseStopModules = (data) => {
+      return core.scaleApp.moduleStop('Layout').then(function(){
+
+      });
+    };
+
+    const onNavigationMenuClick = (options) => {
+      // Si no hay un módulo anterior a detener
+      // (es el primer módulo a cargar)
+      //console.log(core.lsInstances());
+      if(!options.current){
+        //console.log(options.module.route);
+        return moduleStart(options.module.modules, options.module.dom, options.module.config, options.module.instanceIds);
+      } else {
+        /*
+         * Los módulos se arrancan/detienen por nombre de instancia (instanceId)
+         * NO por nombre del módulo.
+         * El/los instanceIds vienen en un array en configuración
+         */
+        //Detener el módulo actual
+        return moduleStop(options.current.modules, options.current.dom, options.current.instanceIds).then(function(){
+          //Arrancar el módulo pedido
+          //console.log(options.module.route);
+          return moduleStart(options.module.modules, options.module.dom, options.module.config, options.module.instanceIds);
+        });
+      }
+    };
+
+    const moduleStop = (modules, dom_els, ids) => {
+      let counter = -1;
+      let dom = _.clone(dom_els).reverse();
+      let instances = _.clone(ids).reverse();
+      return Promise.reduce(_.clone(modules).reverse(), function(index, key) {
+          counter++;
+          return core.promise.moduleStop(core, instances[counter], {options: {el: dom[counter]}});
+      }, 0).then(function(){
+        return Promise.resolve();
+      });
+    };
+
+    const moduleStart = (modules, dom_els, config, ids) => {
+      let counter = -1;
+      let opts;
+      return Promise.reduce(modules, function(index, key) {
+        counter++;
+        opts = _.merge(config[counter],{el: dom_els[counter]});
+        return core.promise.moduleStart(core, key, {instanceId: ids[counter], options: opts});
+      }, 0).then(function(){
+        return Promise.resolve();
+      });
+    };
+
+    const onlogOut = () => {
+      //logout();
+    };
+
+    const destroy = () => {
+      // Desatender eventos
+      unsubscribeEvents();
     };
 
     return {

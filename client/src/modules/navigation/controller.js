@@ -1,0 +1,45 @@
+const Promise = require("bluebird");
+
+const NavigationController = function() {
+  let options = null;
+  let model = null;
+  let sb = null;
+
+  const initialize = (opts, mdl) => {
+    options = opts;
+    model = mdl;
+    sb = opts.sb;
+  };
+
+  const menuClick = (index) => {
+    let current_item = model.getter('current_item') || 0;
+    let config = model.getter('config')
+    let next = config[index];
+    let current = config[current_item];
+    let opts = {
+      index: index,
+      module:next,
+      current: current
+    };
+
+    if(current.route === next.route){
+      return;
+    } else {
+      sb.emit("layout.navigation.menuClick", opts);
+    }
+    model.setter('focus_index', index, false);
+    model.setter('current_item', index, true);
+  }
+
+  const destroy = () => {
+    model.destroy();
+  };
+
+  return {
+    initialize: initialize,
+    menuClick: menuClick,
+    destroy: destroy,
+  };
+};
+
+export default NavigationController;

@@ -23,6 +23,7 @@ const LayoutController = function() {
   let options = null;
   let model = null;
   let sb = null;
+  const MIN_WIDTH = 768; // El ancho minimo responsive
 
   const attachWindowEvents = () => {
     window.addEventListener("optimizedResize", function() {
@@ -33,36 +34,47 @@ const LayoutController = function() {
   const onWindowResize = () => {
     console.log("resize")
     let viewportWidth = document.documentElement.clientWidth;
-    let min_width = 768; // El ancho minimo responsive
-    let actual_layout = model.getter('layout');
-    if(viewportWidth < min_width && actual_layout === "wide"){
+    let actual_layout = model.getter('animation');
+    adjustResponsiveContents();
+    if(viewportWidth < MIN_WIDTH && actual_layout === "push"){
       //setter(prop, value, dispatch)
       model.setter('visible', false, true);
       Promise.delay(500).then(function(){
-        model.setter('layout', 'small', false);
         model.setter('animation', 'overlay', true);
       });
     }
-    if(viewportWidth > min_width && actual_layout === "small"){
+    if(viewportWidth > MIN_WIDTH && actual_layout === "overlay"){
       model.setter('visible', true, true);
       Promise.delay(500).then(function(){
-        model.setter('layout', 'wide', false);
         model.setter('animation', 'push', true);
       });
     }
   };
 
 
+  const adjustResponsiveContents = () => {
+    let viewportWidth = document.documentElement.clientWidth;
+    let relative_menu = 180; //El ancho del menú + 20px de margen
+    let main_content = document.getElementById('main_content');
+    if(!model.getter('visible')){
+      relative_menu = 30;
+    }
+    main_content.style.width = viewportWidth - relative_menu + "px"	;
+  };
+
   const initialize = (opts, mdl) => {
     options = opts;
     model = mdl;
     sb = opts.sb;
     attachWindowEvents();
-    //onWindowResize();
+    adjustResponsiveContents();
   };
 
   const toggleVisibility = () => {
     model.setter('visible', !model.getter('visible'), true);
+    if(model.getter('animation') === 'push'){
+      adjustResponsiveContents();
+    }
   };
 
   const detachWindowEvents = () => {

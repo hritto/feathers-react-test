@@ -2,14 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { render } from 'react-dom';
 import Model from '../common/model.js';
-import UsersController from './controller.js';
-import UserList from '../../components/commons/UserList.js';
+import ActivitiesController from './controller.js';
+import Table from '../../components/commons/grid_manager/Table.jsx';
 
 if (module.hot) {
   module.hot.accept();
 }
 
-const Users = function(sb) {
+const Activities = function(sb) {
   'use strict';
 
   //Estado ---> Model
@@ -19,7 +19,7 @@ const Users = function(sb) {
 
   let options = null;
   let _model = Model(appState);
-  let _controller = UsersController();
+  let _controller = ActivitiesController();
   const _sb = sb;
 
   const initialize = (opts, done) => {
@@ -34,7 +34,7 @@ const Users = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    render( <UserList {...props} />,
+    render( <Table {...props} />,
       document.getElementById(options.el)
     );
   };
@@ -51,5 +51,5 @@ const Users = function(sb) {
 };
 
 module.exports = {
-  module: Users
+  module: Activities
 };
