@@ -25,7 +25,7 @@ export default MainLayout;
 const getSidebar = (layout, props) => layout === "wide" ? <SidebarLeftPush {...props}/> : <SidebarLeftOverlay {...props}/>
 
 const MainLayout = (props) => {
-  let sidebar = getSidebar(props.model.layout, props);
+  let sidebar = <SidebarLeftPush {...props}/> //getSidebar(props.model.layout, props);
   return (
     <div className="AppContainer">
       {sidebar}

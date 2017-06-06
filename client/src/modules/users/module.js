@@ -1,27 +1,24 @@
 import React from 'react';
 import { render } from 'react-dom';
 import Model from '../common/model.js';
-import LayoutController from './controller.js';
-import MainLayout from '../../components/commons/MainLayout.jsx';
+import UsersController from './controller.js';
+import UserList from '../../components/commons/UserList.js';
 
 if (module.hot) {
   module.hot.accept();
 }
 
-const Layout = function(sb) {
+const Users = function(sb) {
   'use strict';
 
   //Estado ---> Model
   let appState = {
-    status: "initial",
-    layout: "wide", //small < 768
-    visible: true,
-    animation: "push"
+    records: []
   };
 
   let options = null;
   let _model = Model(appState);
-  let _controller = LayoutController();
+  let _controller = UsersController();
   const _sb = sb;
 
   const initialize = opts => {
@@ -35,7 +32,7 @@ const Layout = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    render( <MainLayout {...props} />,
+    render( <UserList {...props} />,
       document.getElementById(options.el)
     );
   };
@@ -51,5 +48,5 @@ const Layout = function(sb) {
 };
 
 module.exports = {
-  module: Layout
+  module: Users
 };

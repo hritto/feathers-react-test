@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Sidebar, Segment, Button, Menu, Image, Icon, Header } from 'semantic-ui-react'
-import UserList from './userlist';
 
 const SidebarLeftOverlay = (props) => {
   return (
@@ -31,7 +30,7 @@ const SidebarLeftOverlay = (props) => {
           <Sidebar.Pusher>
             <Segment basic>
               <div id='main_content'>
-                  <UserList {...props.model} />
+                  <div id='main_content' />
               </div>
             </Segment>
           </Sidebar.Pusher>

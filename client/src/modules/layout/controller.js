@@ -1,6 +1,5 @@
 const Promise = require("bluebird");
 
-
 (function() {
     var throttle = function(type, name, obj) {
         obj = obj || window;
@@ -27,24 +26,28 @@ const LayoutController = function() {
 
   const attachWindowEvents = () => {
     window.addEventListener("optimizedResize", function() {
-          onWindowResize();
-      });
+      onWindowResize();
+    });
   };
 
   const onWindowResize = () => {
+    console.log("resize")
     let viewportWidth = document.documentElement.clientWidth;
     let min_width = 768; // El ancho minimo responsive
-    let actual_layout = model.getLayout();
+    let actual_layout = model.getter('layout');
     if(viewportWidth < min_width && actual_layout === "wide"){
-      model.setVisibility(false);
+      //setter(prop, value, dispatch)
+      model.setter('visible', false, true);
       Promise.delay(500).then(function(){
-        model.setLayout("small");
+        model.setter('layout', 'small', false);
+        model.setter('animation', 'overlay', true);
       });
     }
     if(viewportWidth > min_width && actual_layout === "small"){
-      model.setVisibility(true);
+      model.setter('visible', true, true);
       Promise.delay(500).then(function(){
-        model.setLayout("wide");
+        model.setter('layout', 'wide', false);
+        model.setter('animation', 'push', true);
       });
     }
   };
@@ -54,32 +57,12 @@ const LayoutController = function() {
     options = opts;
     model = mdl;
     sb = opts.sb;
-    const feathersClient = feathers()
-        .configure(feathers.rest(serverUrl).fetch(fetch))
-    const users = feathersClient.service('/users');
-    return users.find().then(results => {
-
-      model.setRecords(results.data);
-      attachWindowEvents();
-      onWindowResize();
-      //console.log(model.getRecords());
-      /*
-      Promise.all([
-        users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),
-        users.create({ email: '2john.doe@gmail.com', password: '22222', role: 'user' }),
-        users.create({ email: '2judy.doe@gmail.com', password: '33333', role: 'user' })
-      ]).then(results => {
-          console.log('created Jane Doe item\n', results[0]);
-          console.log('created John Doe item\n', results[1]);
-          console.log('created Judy Doe item\n', results[2]);
-          return users.find().then(results => console.log('find all items\n', results));
-      }).catch(err => console.log('Error occurred:', err));
-      */
-    });
+    attachWindowEvents();
+    //onWindowResize();
   };
 
   const toggleVisibility = () => {
-    model.setVisibility(!model.getVisibility());
+    model.setter('visible', !model.getter('visible'), true);
   };
 
   const detachWindowEvents = () => {
@@ -91,17 +74,6 @@ const LayoutController = function() {
     //location.href =  '/?locale=' + data.lang + '&' + $.param( CommonJS.ApplicationContext.getRequestParams() );
   };
 
-  const onAddClick = (el) => {
-    /*
-    model.addUser(
-      {id: 4, name: 'Joselin'}
-    );
-    */
-  };
-
-  const setState = (state) => {
-    model.setState(state);
-  };
 
   const destroy = () => {
     model.destroy();
@@ -112,8 +84,6 @@ const LayoutController = function() {
     initialize: initialize,
     destroy: destroy,
     setLanguage: setLanguage,
-    setState: setState,
-    onAddClick: onAddClick,
     toggleVisibility: toggleVisibility
   };
 };

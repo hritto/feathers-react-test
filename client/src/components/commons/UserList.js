@@ -3,17 +3,18 @@ import ReactDOM from 'react-dom';
 import { Image, List } from 'semantic-ui-react'
 
 const listItems = (rec) => {
-  return rec.map((number) =>
-  <List.Item key={number._id}>
-    <Image avatar src='/assets/images/avatar/small/helen.jpg' />
+  let records = rec || [];
+  return records.map((record) =>
+  <List.Item key={record._id}>
+    <Image avatar src='/assets/images/avatar/small/user_min.png' />
     <List.Content>
-      <List.Header>{number._id + ":  " + number.email}</List.Header>
+      <List.Header>{record._id + ":  " + record.email}</List.Header>
     </List.Content>
   </List.Item>
 )};
 
 const UserList = (props) => {
-  let list = listItems(props.records);
+  let list = listItems(props.model.records);
   return <List animated verticalAlign='middle'>
             {list}
         </List>

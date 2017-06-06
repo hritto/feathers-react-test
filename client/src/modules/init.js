@@ -1,5 +1,6 @@
 const AppModules = AppModules || {};
 const Layout = require('./layout/module.js');
+const Users = require('./users/module.js');
 
 AppModules.init = (function() {
     "use strict";
@@ -10,6 +11,7 @@ AppModules.init = (function() {
     var initialize = function(core) {
         // Registrar los modulos en el application
         core.register("Layout", Layout.module);
+        core.register("Users", Users.module);
 
     };
 

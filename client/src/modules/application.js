@@ -61,6 +61,12 @@ App.application = () => {
           options: {
               el: 'app'
           }
+      }).then(function(){
+        core.promise.moduleStart(core, "Users", {
+            options: {
+                el: 'main_content'
+            }
+        })
       });
     };
 
