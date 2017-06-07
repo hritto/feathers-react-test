@@ -1,4 +1,5 @@
 const Promise = require("bluebird");
+import ResponsiveHelper from '../common/responsive_helpers.js';
 
 const UsersController = function() {
   let options = null;
@@ -10,7 +11,7 @@ const UsersController = function() {
     options = opts;
     model = mdl;
     sb = opts.sb;
-    adjustResponsiveContents();
+    ResponsiveHelper();
     const feathersClient = feathers()
         .configure(feathers.rest(serverUrl).fetch(fetch))
     const users = feathersClient.service('/users');
@@ -33,12 +34,38 @@ const UsersController = function() {
     });
   };
 
-  const adjustResponsiveContents = () => {
-    let main_content = document.getElementById('main_content');
-    let main_menu = document.getElementById('main_menu');
-    let best_height = Math.max(document.documentElement.clientHeight, main_content.clientHeight)+50;
-    main_menu.style.cssText = 'min-height:'+best_height+'px !important';
+  const itemClick = (opts) => {
+    model.set('selected_record_id', opts.id, false);
+    model.set('state', opts.action, true);
   };
+
+  const closeModal = () => {
+    model.set('state', 'initial', true);
+  };
+
+  const actionModal = () => {
+    let action = model.get('state');
+    switch (model.get('state')) {
+      case 'delete':
+
+        break;
+      default:
+
+    }
+    model.set('state', 'initial', true);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    //Validacion
+
+    closeModal();
+  };
+
+  const handleChange = (e) => {
+    model.set(['form', e.target.name], e.target.value, true);
+  };
+
 
   const destroy = () => {
     model.destroy();
@@ -46,6 +73,11 @@ const UsersController = function() {
 
   return {
     initialize: initialize,
+    itemClick: itemClick,
+    closeModal: closeModal,
+    actionModal: actionModal,
+    handleSubmit: handleSubmit,
+    handleChange: handleChange,
     destroy: destroy
   };
 };

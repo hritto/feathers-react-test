@@ -1,23 +1,35 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Image, List } from 'semantic-ui-react'
-import ModalTest from './ButtonIcon.jsx'
+import ButtonIcon from './ButtonIcon.jsx'
 
-const listItems = (rec) => {
-  let records = rec || [];
+const listItems = (props) => {
+  let records = props.model.records || [];
+
   return records.map((record) =>
   <List.Item key={record._id}>
     <Image avatar src='/assets/images/avatar/small/user_min.png' />
-    <List.Content verticalAlign='middle'>
-      <div className='list_span'>{record.role + ":  " + record.email}{' '}</div><ModalTest props={{icon: 'edit'}} />
-
+    <List.Content verticalAlign='middle' style={{width: '300px'}}>
+      <div className='list_span'>{record.role + ":  " + record.email}{' '}</div><ButtonIcon {...props} id={record._id} />
     </List.Content>
   </List.Item>
 )};
 
+const getModal = (props) => {
+  switch (props.model.state) {
+    case "edit":
+      return "";
+      break;
+    default:
+      return "";
+      break;
+  }
+};
+
 const UserList = (props) => {
-  let list = listItems(props.model.records);
-  return (<List animated verticalAlign='middle'>
+  let list = listItems(props);
+  let modal = getModal(props);
+  return (<List verticalAlign='middle'>
             {list}
         </List>);
 };

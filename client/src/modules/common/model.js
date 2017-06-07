@@ -16,7 +16,8 @@ const Model = (data) => {
   const get = (prop) => R.prop(prop, appState);
 
   const set = (prop, value, dispatch) => {
-    appState = R.set(R.lensProp(prop), value, appState);
+    let lens = R.type(prop) === "Array" ? R.lensPath(prop) : R.lensProp(prop);
+    appState = R.set(lens, value, appState);
     if(dispatch){
       dispatchChanged();
     }

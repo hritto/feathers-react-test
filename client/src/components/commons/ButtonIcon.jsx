@@ -1,28 +1,33 @@
 import React from 'react'
-import { Button, Icon, Header, Image, Modal } from 'semantic-ui-react'
+import { Button, Icon } from 'semantic-ui-react'
+import R from 'ramda';
 
-const ModalTest = (props) => (
-  <Modal trigger={<Button.Group>
-    <Button icon='pencil' size='tiny' />
-    <Button icon='delete' size='tiny' />
-  </Button.Group>}>
-    <Modal.Header>Select a Photo</Modal.Header>
-    <Modal.Content image>
-      <Image wrapped size='medium' src='/assets/images/avatar/large/rachel.png' />
-      <Modal.Description>
-        <Header>Default Profile Image</Header>
-        <p>We've found the following gravatar image associated with your e-mail address.</p>
-        <p>Is it okay to use this photo?</p>
-      </Modal.Description>
-    </Modal.Content>
-  </Modal>
-)
+const button = (typ, props) => {
+  let icon = "";
+  let options = {
+    action: typ,
+    id: props.id
+  };
 
-const ButtonIcon = (props) => (
-  <Button.Group>
-    <Button icon='pencil' size='tiny' />
-    <Button icon='delete' size='tiny' />
+  switch (typ) {
+  case 'update':
+    return <Button key={'btn_'+typ} icon='edit' size='tiny' onClick={props.controller.itemClick.bind(this, options)} />
+    break;
+  case 'delete':
+    return <Button key={'btn_'+typ} icon='delete' size='tiny' onClick={props.controller.itemClick.bind(this, options)} />
+    break;
+  }
+};
+
+
+const ButtonIcon = (props) => {
+  let btns = props.model.buttons.map(function(elem){
+    return button(elem, props);
+  })
+  return (
+  <Button.Group style={{float: 'right'}}>
+    {btns}
   </Button.Group>
-)
+)}
 
-export default ModalTest
+export default ButtonIcon

@@ -14,10 +14,27 @@ const Users = function(sb) {
   //Estado ---> Model
   let appState = {
     records: [],
+    selected_record_id: null,
     title: "Usuarios",
     icon: "users",
     route: "users",
     permission: "users",
+    state: "initial", //initial, update, create, delete
+    buttons: ['update', 'create', 'delete'],
+    form_config: {
+      _id: {
+        type: 'hidden'
+      },
+      role: {
+        type: 'combo'
+      },
+      email: {
+        type: 'text'
+      },
+      password: {
+        type: 'password'
+      }
+    }
   };
 
   let options = null;
