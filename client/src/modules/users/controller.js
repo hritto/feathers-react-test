@@ -1,10 +1,13 @@
 const Promise = require("bluebird");
 import ResponsiveHelper from '../common/responsive_helpers.js';
+import R from 'ramda'
 
 const UsersController = function() {
   let options = null;
   let model = null;
   let sb = null;
+  const feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
+  const users = feathersClient.service('/users');
 
 
   const initialize = (opts, mdl) => {
@@ -12,9 +15,8 @@ const UsersController = function() {
     model = mdl;
     sb = opts.sb;
     ResponsiveHelper();
-    const feathersClient = feathers()
-        .configure(feathers.rest(serverUrl).fetch(fetch))
-    const users = feathersClient.service('/users');
+
+    //.update()
     /*
     Promise.all([
       users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),
@@ -34,9 +36,45 @@ const UsersController = function() {
     });
   };
 
+
   const itemClick = (opts) => {
-    model.set('selected_record_id', opts.id, false);
-    model.set('state', opts.action, true);
+    let combo_constructors = model.get(['config','combo_constructors']);
+    let selected_record = {};
+    let promiseCombos = {};
+
+    if(opts.action === 'update'|| opts.action === 'create'){
+      //ver si hay que cargar combos/datos
+      if (combo_constructors && combo_constructors.length){
+        //Cargar los datos de los combos
+        promiseCombos = new Promise(function(resolve, reject){
+          _.map(combo_constructors, function (fn, i, obj) {
+            let func = Object.keys(fn)[0];
+            return fn[func]().then(function(val){
+              if(val && val.data){
+                model.set(['config','combo_values', val.data.name], val.data, false);
+              }
+            });
+          });
+        });
+        if(opts.id){
+          selected_record = R.find(R.propEq('_id', opts.id))(model.get('records'));
+        } else {
+          selected_record = model.getVoidRecord();
+        }
+        //Ya tenemos todos los datos, cambiar el estado
+        model.set('selected_record', selected_record, false);
+        model.set('state', opts.action, true);
+      } else {
+        if(opts.id){
+          selected_record = R.find(R.propEq('_id', opts.id))(model.get('records'));
+        } else {
+          selected_record = model.getVoidRecord();
+        }
+        //Ya tenemos todos los datos, cambiar el estado
+        model.set('selected_record', selected_record, false);
+        model.set('state', opts.action, true);
+      }
+    }
   };
 
   const closeModal = () => {
@@ -55,10 +93,25 @@ const UsersController = function() {
     model.set('state', 'initial', true);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    //Validacion
+  const handleSubmit = (data) => {
 
+    //Validacion: TODO
+    let valid = true;
+
+    if(valid){
+      Promise.all([
+        users.update(data._id, data, {}),
+      ]).then(results => {
+          return users.find().then(results => {
+            model.set('records', results.data, true);
+          });
+      }).catch(err => {
+        //TODO: mensaje de error de servidor
+        console.log('Error occurred:', err)
+      });
+    } else {
+      //TODO: mensaje de error de formulario
+    }
     closeModal();
   };
 

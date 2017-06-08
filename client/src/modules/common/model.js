@@ -13,7 +13,10 @@ const Model = (data) => {
     dispatchChanged();
   };
 
-  const get = (prop) => R.prop(prop, appState);
+  const get = (prop) => {
+    let lens = R.type(prop) === "Array" ? R.lensPath(prop) : R.lensProp(prop);
+    return R.view(lens, appState);
+  };
 
   const set = (prop, value, dispatch) => {
     let lens = R.type(prop) === "Array" ? R.lensPath(prop) : R.lensProp(prop);

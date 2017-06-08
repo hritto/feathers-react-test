@@ -1,39 +1,86 @@
 import React, { Component } from 'react'
 import { Form } from 'semantic-ui-react'
-import R from 'ramda';
+import InputText from './inputs/text.jsx'
+import R from 'ramda'
 
-const FormGroup = (props) => {
-  let record = {};
-  if(props.model.state === 'update') {
-    if(props.model.selected_record_id){
-      record = R.find(R.propEq('_id', props.model.selected_record_id))(props.model.records);
-    }
+class FormGroup extends Component {
+  constructor(props) {
+    super(props);
+    this.state = props.model.selected_record;
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
-  //state = { name: '', email: '', submittedName: '', submittedEmail: '' }
 
-  //handleChange = (e, { name, value }) => this.setState({ [name]: value })
-  /*
-  handleSubmit = e => {
-    e.preventDefault()
-    const { name, email } = this.state
-
-    this.setState({ submittedName: name, submittedEmail: email })
+  handleChange(event) {
+    let pr = event.target.name;
+    let val = event.target.value;
+    this.setState((state) => {
+      const lens = R.lensProp(pr);
+      return R.set(lens, val, state)
+    });
   }
-  */
 
-  //const { name, email, submittedName, submittedEmail } = this.state
+  handleSubmit(event) {
+    this.props.controller.handleSubmit(this.state);
+    event.preventDefault();
+  }
 
-  return (
-    <div>
-      <Form onSubmit={props.controller.handleSubmit.bind(this)}>
-        <Form.Group>
-          <Form.Input placeholder='Rol' name='rol' value={record.role} onChange={props.controller.handleChange.bind(this)} />
-          <Form.Input placeholder='Email' name='email' value={record.email} onChange={props.controller.handleChange.bind(this)} />
-          <Form.Button content='Enviar' />
-        </Form.Group>
-      </Form>
-    </div>
-  )
-};
+  render() {
+    let self = this;
+    let config = this.props.model.config;
+    let fields = _.map(this.state, function (value, key, state) {
+      let p = {
+        campo: key,
+        props: self.props,
+        change: self.handleChange,
+        state: state
+      };
+
+      let el_config = R.find(R.propEq('name', key))(config.fields);
+
+      switch (el_config.type) {
+        case "hidden":
+          return <InputText key={key} {...p} />
+          break;
+        case "text":
+          return <InputText key={key} {...p} />
+          break;
+        case "combo":
+          //combo_data = this.props.model.getComboData(key);
+          return <InputText key={key} {...p} />
+          break;
+        case "textarea":
+          return <InputText key={key} {...p} />
+          break;
+        case "password":
+          return <InputText key={key} {...p} />
+          break;
+        case "boolean":
+          return <InputText key={key} {...p} />
+          break;
+        case "image":
+          return <InputText key={key} {...p} />
+          break
+        case "date":
+          return <InputText key={key} {...p} />
+          break
+        default:
+          return <InputText key={key} {...p} />
+          break;
+      }
+    });
+    console.log("-----------------------")
+    return (
+      <div>
+        <Form onSubmit={this.handleSubmit}>
+
+            {fields}
+            <Form.Button content='Enviar' />
+
+        </Form>
+      </div>
+    )
+  }
+}
 
 export default FormGroup

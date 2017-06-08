@@ -13,27 +13,136 @@ const Users = function(sb) {
 
   //Estado ---> Model
   let appState = {
-    records: [],
-    selected_record_id: null,
     title: "Usuarios",
     icon: "users",
     route: "users",
     permission: "users",
     state: "initial", //initial, update, create, delete
     buttons: ['update', 'create', 'delete'],
-    form_config: {
-      _id: {
-        type: 'hidden'
+    records: [],
+    selected_record: null,
+    config: {
+      combo_constructors: [{
+        gender: function () {
+          return new Promise(function (resolve, reject) {
+            resolve({
+              name: 'gender',
+              data: [
+                { id: 'male', name: 'masculino' },
+                { id: 'female', name: 'femenino' }
+              ]
+            });
+          });
+        }
       },
-      role: {
-        type: 'combo'
-      },
-      email: {
-        type: 'text'
-      },
-      password: {
-        type: 'password'
-      }
+      {
+        role: function () {
+          return new Promise(function (resolve, reject) {
+            resolve({
+              name: 'role',
+              data: [
+                { id: 'admin', name: 'Admin' },
+                { id: 'user', name: 'User' }
+              ]
+            });
+          });
+        }
+      }],
+      combo_values: {},
+      state: 'initial',
+      form_columns: 2,
+      filter: true,
+      fields: [
+        {
+          name: '_id',          type: 'hidden',
+          visibility: false, flex: 0, filter: false,
+          validation: {},
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: ''
+        },
+        {
+          name: 'name',        type: 'text',
+          visibility: true,  flex: 33, filter: true,
+          validation: {required: true},
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'Nombre'
+        },
+        {
+          name: 'surname',        type: 'text',
+          visibility: true,  flex: 33, filter: true,
+          validation: {required: true},
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'Apellidos'
+        },
+        {
+          name: 'email', type: 'text',
+          visibility: true,  flex: 33, filter: true,
+          validation: {required: true, email: true, maxlength: 250},
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'Correo electrónico'
+        },
+        {
+          name: 'gender',        type: 'combo',
+          visibility: false,  flex: 0, filter: false,
+          validation: {},
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'Género'
+        },
+        {
+          name: 'role',        type: 'combo',
+          visibility: false,  flex: 0, filter: false,
+          validation: {},
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'Rol'
+        },
+        {
+          name: 'active',        type: 'boolean',
+          visibility: false,  flex: 0, filter: false,
+          validation: {},
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'Activo'
+        },
+        {
+          name: 'password',        type: 'password',
+          visibility: false,  flex: 0, filter: false,
+          validation: {required: true},
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'contraseña'
+        },
+        {
+          name: 'password_confirmation',        type: 'password',
+          visibility: false,  flex: 0, filter: false,
+          validation: { required: true, equalTo: "password" },
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'Confirmar contraseña'
+        },{
+          name: 'photo', type: 'image',
+          visibility: false,  flex: 0, filter: false,
+          tooltip: '', validation: {},
+          messages: {},
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'Foto'
+        }],
     }
   };
 
