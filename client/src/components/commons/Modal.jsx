@@ -4,8 +4,7 @@ import FormGroup from './grid_manager/Form.jsx'
 
 
 const ModalView = (props) => {
-  if(props.model.state === 'update'){
-
+  if(props.model.state === 'update' || props.model.state === 'create' || props.model.state === 'delete'){
     return (
     <Modal
         open={true}
@@ -15,10 +14,9 @@ const ModalView = (props) => {
         <FormGroup {...props} />
       </Modal.Content>
     </Modal>
-  )}
-
+  )
+}
 return null;
-
 };
 
 export default ModalView

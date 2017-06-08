@@ -9,44 +9,29 @@ const UsersController = function() {
   const feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
   const users = feathersClient.service('/users');
 
-
   const initialize = (opts, mdl) => {
     options = opts;
     model = mdl;
     sb = opts.sb;
     ResponsiveHelper();
-
-    //.update()
-    /*
-    Promise.all([
-      users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),
-      users.create({ email: '2john.doe@gmail.com', password: '22222', role: 'user' }),
-      users.create({ email: '2judy.doe@gmail.com', password: '33333', role: 'user' })
-    ]).then(results => {
-        console.log('created Jane Doe item\n', results[0]);
-        console.log('created John Doe item\n', results[1]);
-        console.log('created Judy Doe item\n', results[2]);
-        return users.find().then(results => console.log('find all items\n', results));
-    }).catch(err => console.log('Error occurred:', err));
-    */
-
     return users.find().then(results => {
       model.set('records', results.data, true);
-
     });
   };
-
 
   const itemClick = (opts) => {
     let combo_constructors = model.get(['config','combo_constructors']);
     let selected_record = {};
-    let promiseCombos = {};
 
-    if(opts.action === 'update'|| opts.action === 'create'){
+    if(opts.action === 'update'){
+      if(!opts.id){
+        closeModal();
+        return;
+      }
       //ver si hay que cargar combos/datos
       if (combo_constructors && combo_constructors.length){
         //Cargar los datos de los combos
-        promiseCombos = new Promise(function(resolve, reject){
+        return new Promise(function(resolve, reject){
           _.map(combo_constructors, function (fn, i, obj) {
             let func = Object.keys(fn)[0];
             return fn[func]().then(function(val){
@@ -55,26 +40,37 @@ const UsersController = function() {
               }
             });
           });
+          return resolve();
+        }).then(function(){
+          getRemoteRecord(opts);
         });
-        if(opts.id){
-          selected_record = R.find(R.propEq('_id', opts.id))(model.get('records'));
-        } else {
-          selected_record = model.getVoidRecord();
-        }
-        //Ya tenemos todos los datos, cambiar el estado
-        model.set('selected_record', selected_record, false);
-        model.set('state', opts.action, true);
       } else {
-        if(opts.id){
-          selected_record = R.find(R.propEq('_id', opts.id))(model.get('records'));
-        } else {
-          selected_record = model.getVoidRecord();
-        }
-        //Ya tenemos todos los datos, cambiar el estado
-        model.set('selected_record', selected_record, false);
-        model.set('state', opts.action, true);
+        getRemoteRecord(opts);
       }
     }
+
+    if(opts.action === 'create'){
+      setSelectedRecord(opts, model.getVoidRecord(), true)
+    }
+
+    if(opts.action === 'delete'){
+      setSelectedRecord(opts, getLocalRecord(opts), true)
+    }
+  };
+
+  const getRemoteRecord = (opts) => {
+    return users.find({ query: { _id: opts.id } }).then(results => {
+      setSelectedRecord(opts, results.data[0], true);
+    });
+  };
+
+  const getLocalRecord = (opts) => {
+    return R.find(R.propEq('_id', opts.id))(model.get('records'));
+  };
+
+  const setSelectedRecord = (opts, record, dispatch) => {
+    model.set('selected_record', record, false);
+    model.set('state', opts.action, dispatch);
   };
 
   const closeModal = () => {
@@ -94,30 +90,50 @@ const UsersController = function() {
   };
 
   const handleSubmit = (data) => {
-
     //Validacion: TODO
-    let valid = true;
-
-    if(valid){
-      Promise.all([
-        users.update(data._id, data, {}),
-      ]).then(results => {
-          return users.find().then(results => {
-            model.set('records', results.data, true);
-          });
-      }).catch(err => {
-        //TODO: mensaje de error de servidor
-        console.log('Error occurred:', err)
-      });
+    let is_valid = true;
+    if(is_valid){
+      if(model.get('state') === 'update'){
+        doUpdate(data);
+      }
     } else {
-      //TODO: mensaje de error de formulario
+    //TODO: mensaje de error de formulario
     }
-    closeModal();
+
   };
 
-  const handleChange = (e) => {
-    model.set(['form', e.target.name], e.target.value, true);
+  const doUpdate = (data) => {
+    Promise.all([
+      users.update(data._id, data, {}),
+    ]).then(results => {
+      debugger;
+      //Actualizar el record en el modelo!!!!!!!!!!!!!!!
+        return users.find().then(results => {
+          model.set('records', results.data, true);
+        });
+    }).catch(err => {
+      //TODO: mensaje de error de servidor
+      console.log('Error occurred:', err)
+    });
+    closeModal();
+    model.set('selected_record', null, false);
   };
+
+  const doDelete = (data) => {
+    Promise.all([
+      users.delete(data._id),
+    ]).then(results => {
+        return users.find().then(results => {
+          model.set('records', results.data, true);
+        });
+    }).catch(err => {
+      //TODO: mensaje de error de servidor
+      console.log('Error occurred:', err)
+    });
+    closeModal();
+    model.set('selected_record', null, false);
+  };
+
 
 
   const destroy = () => {
@@ -130,7 +146,6 @@ const UsersController = function() {
     closeModal: closeModal,
     actionModal: actionModal,
     handleSubmit: handleSubmit,
-    handleChange: handleChange,
     destroy: destroy
   };
 };

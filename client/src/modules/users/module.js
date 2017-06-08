@@ -60,7 +60,7 @@ const Users = function(sb) {
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: ''
+          label: 'ID'
         },
         {
           name: 'name',        type: 'text',

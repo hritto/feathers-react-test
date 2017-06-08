@@ -26,6 +26,21 @@ const Model = (data) => {
     }
   };
 
+  const setRecord = (data) => {
+    let rec = R.find(R.propEq('_id', data._id))(appState.records);
+    appState.records = R.set(rec, data, appState.records)
+
+  };
+
+  const getVoidRecord = () => {
+    let fields = R.clone(appState.config.fields);
+    let rec = {};
+    R.map((o) => {
+      rec = R.set(R.lensProp(o.name), '', rec);
+    }, fields);
+    return rec;
+  };
+
   const dispatchChanged = () => {
     on.changed.dispatch({
       model: appState
@@ -41,7 +56,8 @@ const Model = (data) => {
     destroy: destroy,
     on: on,
     get: get,
-    set: set
+    set: set,
+    getVoidRecord: getVoidRecord
   };
 };
 

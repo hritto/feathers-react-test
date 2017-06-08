@@ -9,7 +9,7 @@ const listItems = (props) => {
   return records.map((record) =>
   <List.Item key={record._id}>
     <Image avatar src='/assets/images/avatar/small/user_min.png' />
-    <List.Content verticalAlign='middle' style={{width: '400px'}}>
+    <List.Content verticalAlign='middle' style={{width: '600px'}}>
       <div className='list_span'>{record.name + " " + record.surname + ":  " + record.email}{' '}</div><ButtonIcon {...props} id={record._id} />
     </List.Content>
   </List.Item>
