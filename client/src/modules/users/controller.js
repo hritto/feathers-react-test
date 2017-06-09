@@ -20,47 +20,79 @@ const UsersController = function() {
   };
 
   const itemClick = (opts) => {
-    let combo_constructors = model.get(['config','combo_constructors']);
-    let selected_record = {};
-
     if(opts.action === 'update'){
-      if(!opts.id){
-        closeModal();
-        return;
-      }
-      //ver si hay que cargar combos/datos
-      if (combo_constructors && combo_constructors.length){
-        //Cargar los datos de los combos
-        return new Promise(function(resolve, reject){
-          _.map(combo_constructors, function (fn, i, obj) {
-            let func = Object.keys(fn)[0];
-            return fn[func]().then(function(val){
-              if(val && val.data){
-                model.set(['config','combo_values', val.data.name], val.data, false);
-              }
-            });
-          });
-          return resolve();
-        }).then(function(){
-          getRemoteRecord(opts);
-        });
-      } else {
-        getRemoteRecord(opts);
-      }
+      updClick(opts);
     }
 
     if(opts.action === 'create'){
-      setSelectedRecord(opts, model.getVoidRecord(), true)
+      addClick(opts);
     }
 
     if(opts.action === 'delete'){
-      setSelectedRecord(opts, getLocalRecord(opts), true)
+      setSelectedRecord(opts, getLocalRecord(opts), false);
+      model.set('state', opts.action, true);
+    }
+  };
+
+  const addClick = (opts) => {
+    let combo_constructors = model.get(['config','combo_constructors']);
+    let selected_record = {};
+    //ver si hay que cargar combos/datos
+    if (combo_constructors && combo_constructors.length){
+      //Cargar los datos de los combos
+      return new Promise(function(resolve, reject){
+        _.map(combo_constructors, function (fn, i, obj) {
+          let func = Object.keys(fn)[0];
+          return fn[func]().then(function(val){
+            if(val && val.data){
+              model.set(['config','combo_values', val.name], val.data, false);
+            }
+          });
+        });
+        return resolve();
+      }).then(function(){
+        setSelectedRecord(opts, model.getVoidRecord(), false);
+        model.set('state', opts.action, true);
+      });
+    } else {
+      setSelectedRecord(opts, model.getVoidRecord(), false);
+      model.set('state', opts.action, true);
+    }
+  };
+
+  const updClick = (opts) => {
+    let combo_constructors = model.get(['config','combo_constructors']);
+    let selected_record = {};
+
+    if(!opts.id){
+      closeModal();
+      return;
+    }
+    //ver si hay que cargar combos/datos
+    if (combo_constructors && combo_constructors.length){
+      //Cargar los datos de los combos
+      return new Promise(function(resolve, reject){
+        _.map(combo_constructors, function (fn, i, obj) {
+          let func = Object.keys(fn)[0];
+          return fn[func]().then(function(val){
+            if(val && val.data){
+              model.set(['config','combo_values', val.name], val.data, false);
+            }
+          });
+        });
+        return resolve();
+      }).then(function(){
+        getRemoteRecord(opts);
+      });
+    } else {
+      getRemoteRecord(opts);
     }
   };
 
   const getRemoteRecord = (opts) => {
     return users.find({ query: { _id: opts.id } }).then(results => {
       setSelectedRecord(opts, results.data[0], true);
+      model.set('state', opts.action, true);
     });
   };
 
@@ -70,7 +102,6 @@ const UsersController = function() {
 
   const setSelectedRecord = (opts, record, dispatch) => {
     model.set('selected_record', record, false);
-    model.set('state', opts.action, dispatch);
   };
 
   const closeModal = () => {
@@ -96,6 +127,12 @@ const UsersController = function() {
       if(model.get('state') === 'update'){
         doUpdate(data);
       }
+      if(model.get('state') === 'create'){
+        doCreate(data);
+      }
+      if(model.get('state') === 'delete'){
+        doDelete(data);
+      }
     } else {
     //TODO: mensaje de error de formulario
     }
@@ -106,11 +143,12 @@ const UsersController = function() {
     Promise.all([
       users.update(data._id, data, {}),
     ]).then(results => {
-      debugger;
-      //Actualizar el record en el modelo!!!!!!!!!!!!!!!
-        return users.find().then(results => {
-          model.set('records', results.data, true);
-        });
+        if(results && results.length){
+          let index = R.findIndex(R.propEq('_id', results[0]._id))(model.get('records')); //=> 1
+          model.setRecord(index, results[0]);
+        } else {
+          //TODO: mensaje de error de servidor
+        }
     }).catch(err => {
       //TODO: mensaje de error de servidor
       console.log('Error occurred:', err)
@@ -121,7 +159,7 @@ const UsersController = function() {
 
   const doDelete = (data) => {
     Promise.all([
-      users.delete(data._id),
+      users.remove(data._id, { query: { _id: data._id }})
     ]).then(results => {
         return users.find().then(results => {
           model.set('records', results.data, true);
@@ -134,6 +172,21 @@ const UsersController = function() {
     model.set('selected_record', null, false);
   };
 
+  const doCreate = (data) => {
+    delete data._id;
+    Promise.all([
+      users.create(data),
+    ]).then(results => {
+        return users.find().then(results => {
+          model.set('records', results.data, true);
+        });
+    }).catch(err => {
+      //TODO: mensaje de error de servidor
+      console.log('Error occurred:', err)
+    });
+    closeModal();
+    model.set('selected_record', null, false);
+  };
 
 
   const destroy = () => {

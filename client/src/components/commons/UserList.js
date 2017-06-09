@@ -5,7 +5,6 @@ import ButtonIcon from './ButtonIcon.jsx'
 
 const listItems = (props) => {
   let records = props.model.records || [];
-
   return records.map((record) =>
   <List.Item key={record._id}>
     <Image avatar src='/assets/images/avatar/small/user_min.png' />

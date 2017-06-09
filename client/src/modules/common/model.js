@@ -26,10 +26,9 @@ const Model = (data) => {
     }
   };
 
-  const setRecord = (data) => {
-    let rec = R.find(R.propEq('_id', data._id))(appState.records);
-    appState.records = R.set(rec, data, appState.records)
-
+  const setRecord = (index, data) => {
+    appState.records = R.update(index,  data, appState.records);
+    dispatchChanged();
   };
 
   const getVoidRecord = () => {
@@ -57,7 +56,8 @@ const Model = (data) => {
     on: on,
     get: get,
     set: set,
-    getVoidRecord: getVoidRecord
+    getVoidRecord: getVoidRecord,
+    setRecord: setRecord
   };
 };
 

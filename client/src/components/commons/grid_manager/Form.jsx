@@ -1,6 +1,14 @@
 import React, { Component } from 'react'
 import { Form } from 'semantic-ui-react'
-import InputText from './inputs/text.jsx'
+//import InputText from './inputs/TextComponent.jsx'
+import SimpleInputText from './inputs/TextSimple.jsx'
+import SimpleInputPassword from './inputs/PasswordSimple.jsx'
+import SimpleInputHidden from './inputs/HiddenSimple.jsx'
+import CheckboxSimple from './inputs/CheckboxSimple.jsx'
+import DropdownSelection from './inputs/DropDown.jsx'
+import SimpleTextArea from './inputs/TextAreaSimple.jsx'
+import SimpleUpload from './inputs/UploadSimple.jsx'
+
 import R from 'ramda'
 
 class FormGroup extends Component {
@@ -11,9 +19,17 @@ class FormGroup extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleChange(event) {
+  handleChange(event, result) {
     let pr = event.target.name;
-    let val = event.target.value;
+    let val = event.target.value
+    if(!pr && !val && result){ //Special fields: radiogroup, dropdown...
+      pr = result.name;
+      val = result.value
+    }
+    if(result.type === "checkbox"){
+      pr = result.name;
+      val = result.checked ? 1 : 0;
+    }
     this.setState((state) => {
       const lens = R.lensProp(pr);
       return R.set(lens, val, state)
@@ -44,40 +60,38 @@ class FormGroup extends Component {
         let el_config = R.find(R.propEq('name', key))(config.fields);
         switch (el_config.type) {
           case "hidden":
-            return <InputText key={key} {...p} />
+            return <SimpleInputHidden key={key} {...p} />
             break;
           case "text":
-            return <InputText key={key} {...p} />
+            return <SimpleInputText key={key} {...p} />
             break;
           case "combo":
-            //combo_data = this.props.model.getComboData(key);
-            return <InputText key={key} {...p} />
+            return <DropdownSelection key={key} {...p} />
             break;
           case "textarea":
-            return <InputText key={key} {...p} />
+            return <SimpleTextArea key={key} {...p} />
             break;
           case "password":
-            return <InputText key={key} {...p} />
+            return <SimpleInputPassword key={key} {...p} />
             break;
           case "boolean":
-            return <InputText key={key} {...p} />
+            return <CheckboxSimple key={key} {...p} />
             break;
           case "image":
-            return <InputText key={key} {...p} />
+            return <SimpleUpload key={key} {...p} />
             break
           case "date":
-            return <InputText key={key} {...p} />
+            return <SimpleInputText key={key} {...p} />
             break
           default:
-            return <InputText key={key} {...p} />
+            return <SimpleInputText key={key} {...p} />
             break;
         }
       });
     }
-    console.log("-----------------------")
     return (
       <div>
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} className="dropzone">
             {fields}
             <Form.Button content='Enviar' />
         </Form>

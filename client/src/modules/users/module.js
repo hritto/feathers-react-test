@@ -28,8 +28,8 @@ const Users = function(sb) {
             resolve({
               name: 'gender',
               data: [
-                { id: 'male', name: 'masculino' },
-                { id: 'female', name: 'femenino' }
+                { key: 'male', value: 'male', text: 'Masculino' },
+                { key: 'female', value: 'female', text: 'Femenino' }
               ]
             });
           });
@@ -41,8 +41,8 @@ const Users = function(sb) {
             resolve({
               name: 'role',
               data: [
-                { id: 'admin', name: 'Admin' },
-                { id: 'user', name: 'User' }
+                { key: 'admin', value: 'admin', text: 'Administrador' },
+                { key: 'user', value: 'user', text: 'Usuario' }
               ]
             });
           });

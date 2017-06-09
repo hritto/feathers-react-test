@@ -12896,9 +12896,9 @@ var Model = function Model(data) {
     }
   };
 
-  var setRecord = function setRecord(data) {
-    var rec = _ramda2.default.find(_ramda2.default.propEq('_id', data._id))(appState.records);
-    appState.records = _ramda2.default.set(rec, data, appState.records);
+  var setRecord = function setRecord(index, data) {
+    appState.records = _ramda2.default.update(index, data, appState.records);
+    dispatchChanged();
   };
 
   var getVoidRecord = function getVoidRecord() {
@@ -12924,7 +12924,8 @@ var Model = function Model(data) {
     on: on,
     get: get,
     set: set,
-    getVoidRecord: getVoidRecord
+    getVoidRecord: getVoidRecord,
+    setRecord: setRecord
   };
 };
 
@@ -38526,7 +38527,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var listItems = function listItems(props) {
   var records = props.model.records || [];
-
   return records.map(function (record) {
     return _react2.default.createElement(
       _semanticUiReact.List.Item,
@@ -38591,9 +38591,33 @@ var _react2 = _interopRequireDefault(_react);
 
 var _semanticUiReact = __webpack_require__(45);
 
-var _text = __webpack_require__(565);
+var _TextSimple = __webpack_require__(1207);
 
-var _text2 = _interopRequireDefault(_text);
+var _TextSimple2 = _interopRequireDefault(_TextSimple);
+
+var _PasswordSimple = __webpack_require__(1210);
+
+var _PasswordSimple2 = _interopRequireDefault(_PasswordSimple);
+
+var _HiddenSimple = __webpack_require__(1211);
+
+var _HiddenSimple2 = _interopRequireDefault(_HiddenSimple);
+
+var _CheckboxSimple = __webpack_require__(1209);
+
+var _CheckboxSimple2 = _interopRequireDefault(_CheckboxSimple);
+
+var _DropDown = __webpack_require__(1206);
+
+var _DropDown2 = _interopRequireDefault(_DropDown);
+
+var _TextAreaSimple = __webpack_require__(1212);
+
+var _TextAreaSimple2 = _interopRequireDefault(_TextAreaSimple);
+
+var _UploadSimple = __webpack_require__(1213);
+
+var _UploadSimple2 = _interopRequireDefault(_UploadSimple);
 
 var _ramda = __webpack_require__(94);
 
@@ -38606,6 +38630,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+//import InputText from './inputs/TextComponent.jsx'
+
 
 var FormGroup = function (_Component) {
   _inherits(FormGroup, _Component);
@@ -38623,9 +38649,18 @@ var FormGroup = function (_Component) {
 
   _createClass(FormGroup, [{
     key: 'handleChange',
-    value: function handleChange(event) {
+    value: function handleChange(event, result) {
       var pr = event.target.name;
       var val = event.target.value;
+      if (!pr && !val && result) {
+        //Special fields: radiogroup, dropdown...
+        pr = result.name;
+        val = result.value;
+      }
+      if (result.type === "checkbox") {
+        pr = result.name;
+        val = result.checked ? 1 : 0;
+      }
       this.setState(function (state) {
         var lens = _ramda2.default.lensProp(pr);
         return _ramda2.default.set(lens, val, state);
@@ -38662,43 +38697,41 @@ var FormGroup = function (_Component) {
           var el_config = _ramda2.default.find(_ramda2.default.propEq('name', key))(config.fields);
           switch (el_config.type) {
             case "hidden":
-              return _react2.default.createElement(_text2.default, _extends({ key: key }, p));
+              return _react2.default.createElement(_HiddenSimple2.default, _extends({ key: key }, p));
               break;
             case "text":
-              return _react2.default.createElement(_text2.default, _extends({ key: key }, p));
+              return _react2.default.createElement(_TextSimple2.default, _extends({ key: key }, p));
               break;
             case "combo":
-              //combo_data = this.props.model.getComboData(key);
-              return _react2.default.createElement(_text2.default, _extends({ key: key }, p));
+              return _react2.default.createElement(_DropDown2.default, _extends({ key: key }, p));
               break;
             case "textarea":
-              return _react2.default.createElement(_text2.default, _extends({ key: key }, p));
+              return _react2.default.createElement(_TextAreaSimple2.default, _extends({ key: key }, p));
               break;
             case "password":
-              return _react2.default.createElement(_text2.default, _extends({ key: key }, p));
+              return _react2.default.createElement(_PasswordSimple2.default, _extends({ key: key }, p));
               break;
             case "boolean":
-              return _react2.default.createElement(_text2.default, _extends({ key: key }, p));
+              return _react2.default.createElement(_CheckboxSimple2.default, _extends({ key: key }, p));
               break;
             case "image":
-              return _react2.default.createElement(_text2.default, _extends({ key: key }, p));
+              return _react2.default.createElement(_UploadSimple2.default, _extends({ key: key }, p));
               break;
             case "date":
-              return _react2.default.createElement(_text2.default, _extends({ key: key }, p));
+              return _react2.default.createElement(_TextSimple2.default, _extends({ key: key }, p));
               break;
             default:
-              return _react2.default.createElement(_text2.default, _extends({ key: key }, p));
+              return _react2.default.createElement(_TextSimple2.default, _extends({ key: key }, p));
               break;
           }
         });
       }
-      console.log("-----------------------");
       return _react2.default.createElement(
         'div',
         null,
         _react2.default.createElement(
           _semanticUiReact.Form,
-          { onSubmit: this.handleSubmit },
+          { onSubmit: this.handleSubmit, className: 'dropzone' },
           fields,
           _react2.default.createElement(_semanticUiReact.Form.Button, { content: 'Enviar' })
         )
@@ -38874,97 +38907,7 @@ var TableLayout = function TableLayout() {
 exports.default = TableLayout;
 
 /***/ }),
-/* 565 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(1);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _semanticUiReact = __webpack_require__(45);
-
-var _ramda = __webpack_require__(94);
-
-var _ramda2 = _interopRequireDefault(_ramda);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var InputText = function (_React$Component) {
-  _inherits(InputText, _React$Component);
-
-  function InputText(props) {
-    _classCallCheck(this, InputText);
-
-    var _this = _possibleConstructorReturn(this, (InputText.__proto__ || Object.getPrototypeOf(InputText)).call(this, props));
-
-    _this.state = {
-      value: _this.props.state[props.campo],
-      field: _this.props.campo
-    };
-    _this.handleChange = _this.handleChange.bind(_this);
-    return _this;
-  }
-
-  _createClass(InputText, [{
-    key: 'shouldComponentUpdate',
-    value: function shouldComponentUpdate(nextProps, nextState) {
-      return this.state.value !== nextState.value ? true : false;
-    }
-  }, {
-    key: 'handleChange',
-    value: function handleChange(e) {
-      var val = e.target.value;
-      this.setState(function (state) {
-        var lens = _ramda2.default.lensProp('value');
-        return _ramda2.default.set(lens, val, state);
-      });
-      //Notificar al padre
-      this.props.change(e);
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var config = this.props.props.model.config;
-      var el_config = _ramda2.default.find(_ramda2.default.propEq('name', this.props.campo))(config.fields);
-      console.log("render -> " + this.state.field);
-      return _react2.default.createElement(
-        _semanticUiReact.Form.Field,
-        null,
-        _react2.default.createElement(
-          'label',
-          null,
-          el_config.label
-        ),
-        _react2.default.createElement(_semanticUiReact.Input, { key: '_' + this.state.field,
-          name: this.state.field,
-          type: 'text',
-          value: this.state.value,
-          onChange: this.handleChange })
-      );
-    }
-  }]);
-
-  return InputText;
-}(_react2.default.Component);
-
-exports.default = InputText;
-
-/***/ }),
+/* 565 */,
 /* 566 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -39014,7 +38957,7 @@ var ButtonCreate = function ButtonCreate(props) {
   return _react2.default.createElement(
     'div',
     null,
-    _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear nuevo usuario', icon: 'add circle', labelPosition: 'left', onClick: props.controller.itemClick.bind(undefined, 'create') })
+    _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear nuevo usuario', icon: 'add circle', labelPosition: 'left', onClick: props.controller.itemClick.bind(undefined, { action: 'create' }) })
   );
 };
 
@@ -39767,47 +39710,79 @@ var UsersController = function UsersController() {
   };
 
   var itemClick = function itemClick(opts) {
-    var combo_constructors = model.get(['config', 'combo_constructors']);
-    var selected_record = {};
-
     if (opts.action === 'update') {
-      if (!opts.id) {
-        closeModal();
-        return;
-      }
-      //ver si hay que cargar combos/datos
-      if (combo_constructors && combo_constructors.length) {
-        //Cargar los datos de los combos
-        return new Promise(function (resolve, reject) {
-          _.map(combo_constructors, function (fn, i, obj) {
-            var func = Object.keys(fn)[0];
-            return fn[func]().then(function (val) {
-              if (val && val.data) {
-                model.set(['config', 'combo_values', val.data.name], val.data, false);
-              }
-            });
-          });
-          return resolve();
-        }).then(function () {
-          getRemoteRecord(opts);
-        });
-      } else {
-        getRemoteRecord(opts);
-      }
+      updClick(opts);
     }
 
     if (opts.action === 'create') {
-      setSelectedRecord(opts, model.getVoidRecord(), true);
+      addClick(opts);
     }
 
     if (opts.action === 'delete') {
-      setSelectedRecord(opts, getLocalRecord(opts), true);
+      setSelectedRecord(opts, getLocalRecord(opts), false);
+      model.set('state', opts.action, true);
+    }
+  };
+
+  var addClick = function addClick(opts) {
+    var combo_constructors = model.get(['config', 'combo_constructors']);
+    var selected_record = {};
+    //ver si hay que cargar combos/datos
+    if (combo_constructors && combo_constructors.length) {
+      //Cargar los datos de los combos
+      return new Promise(function (resolve, reject) {
+        _.map(combo_constructors, function (fn, i, obj) {
+          var func = Object.keys(fn)[0];
+          return fn[func]().then(function (val) {
+            if (val && val.data) {
+              model.set(['config', 'combo_values', val.name], val.data, false);
+            }
+          });
+        });
+        return resolve();
+      }).then(function () {
+        setSelectedRecord(opts, model.getVoidRecord(), false);
+        model.set('state', opts.action, true);
+      });
+    } else {
+      setSelectedRecord(opts, model.getVoidRecord(), false);
+      model.set('state', opts.action, true);
+    }
+  };
+
+  var updClick = function updClick(opts) {
+    var combo_constructors = model.get(['config', 'combo_constructors']);
+    var selected_record = {};
+
+    if (!opts.id) {
+      closeModal();
+      return;
+    }
+    //ver si hay que cargar combos/datos
+    if (combo_constructors && combo_constructors.length) {
+      //Cargar los datos de los combos
+      return new Promise(function (resolve, reject) {
+        _.map(combo_constructors, function (fn, i, obj) {
+          var func = Object.keys(fn)[0];
+          return fn[func]().then(function (val) {
+            if (val && val.data) {
+              model.set(['config', 'combo_values', val.name], val.data, false);
+            }
+          });
+        });
+        return resolve();
+      }).then(function () {
+        getRemoteRecord(opts);
+      });
+    } else {
+      getRemoteRecord(opts);
     }
   };
 
   var getRemoteRecord = function getRemoteRecord(opts) {
     return users.find({ query: { _id: opts.id } }).then(function (results) {
       setSelectedRecord(opts, results.data[0], true);
+      model.set('state', opts.action, true);
     });
   };
 
@@ -39817,7 +39792,6 @@ var UsersController = function UsersController() {
 
   var setSelectedRecord = function setSelectedRecord(opts, record, dispatch) {
     model.set('selected_record', record, false);
-    model.set('state', opts.action, dispatch);
   };
 
   var closeModal = function closeModal() {
@@ -39843,6 +39817,12 @@ var UsersController = function UsersController() {
       if (model.get('state') === 'update') {
         doUpdate(data);
       }
+      if (model.get('state') === 'create') {
+        doCreate(data);
+      }
+      if (model.get('state') === 'delete') {
+        doDelete(data);
+      }
     } else {
       //TODO: mensaje de error de formulario
     }
@@ -39850,12 +39830,12 @@ var UsersController = function UsersController() {
 
   var doUpdate = function doUpdate(data) {
     Promise.all([users.update(data._id, data, {})]).then(function (results) {
-      debugger;
-      //Actualizar el record en el modelo
-      //return users.find().then(results => {
-      var rec = _ramda2.default.find(_ramda2.default.propEq('_id', data._id))(appState.records);
-      model.set(['records', results.data[0]._id], results.data, true);
-      //});
+      if (results && results.length) {
+        var index = _ramda2.default.findIndex(_ramda2.default.propEq('_id', results[0]._id))(model.get('records')); //=> 1
+        model.setRecord(index, results[0]);
+      } else {
+        //TODO: mensaje de error de servidor
+      }
     }).catch(function (err) {
       //TODO: mensaje de error de servidor
       console.log('Error occurred:', err);
@@ -39865,7 +39845,21 @@ var UsersController = function UsersController() {
   };
 
   var doDelete = function doDelete(data) {
-    Promise.all([users.delete(data._id)]).then(function (results) {
+    Promise.all([users.remove(data._id, { query: { _id: data._id } })]).then(function (results) {
+      return users.find().then(function (results) {
+        model.set('records', results.data, true);
+      });
+    }).catch(function (err) {
+      //TODO: mensaje de error de servidor
+      console.log('Error occurred:', err);
+    });
+    closeModal();
+    model.set('selected_record', null, false);
+  };
+
+  var doCreate = function doCreate(data) {
+    delete data._id;
+    Promise.all([users.create(data)]).then(function (results) {
       return users.find().then(function (results) {
         model.set('records', results.data, true);
       });
@@ -39946,7 +39940,7 @@ var Users = function Users(sb) {
           return new Promise(function (resolve, reject) {
             resolve({
               name: 'gender',
-              data: [{ id: 'male', name: 'masculino' }, { id: 'female', name: 'femenino' }]
+              data: [{ key: 'male', value: 'male', text: 'Masculino' }, { key: 'female', value: 'female', text: 'Femenino' }]
             });
           });
         }
@@ -39955,7 +39949,7 @@ var Users = function Users(sb) {
           return new Promise(function (resolve, reject) {
             resolve({
               name: 'role',
-              data: [{ id: 'admin', name: 'Admin' }, { id: 'user', name: 'User' }]
+              data: [{ key: 'admin', value: 'admin', text: 'Administrador' }, { key: 'user', value: 'user', text: 'Usuario' }]
             });
           });
         }
@@ -97855,6 +97849,301 @@ module.exports = function() {
 module.exports = __webpack_amd_options__;
 
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 1205 */,
+/* 1206 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(45);
+
+var _ramda = __webpack_require__(94);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DropdownSelection = function DropdownSelection(props) {
+  var config = props.props.model.config;
+  var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(
+      'label',
+      null,
+      el_config.label
+    ),
+    _react2.default.createElement(_semanticUiReact.Dropdown, { placeholder: 'Seleccionar...',
+      fluid: true, selection: true,
+      options: props.props.model.config.combo_values[props.campo],
+      onChange: props.change,
+      name: props.campo,
+      value: props.state[props.campo] })
+  );
+};
+
+exports.default = DropdownSelection;
+
+/***/ }),
+/* 1207 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(45);
+
+var _ramda = __webpack_require__(94);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SimpleInputText = function SimpleInputText(props) {
+  var config = props.props.model.config;
+  var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(
+      'label',
+      null,
+      el_config.label
+    ),
+    _react2.default.createElement(_semanticUiReact.Input, { key: '_' + props.campo,
+      type: 'text',
+      name: props.campo,
+      onChange: props.change,
+      value: props.state[props.campo] })
+  );
+};
+
+exports.default = SimpleInputText;
+
+/***/ }),
+/* 1208 */,
+/* 1209 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(45);
+
+var _ramda = __webpack_require__(94);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var CheckboxSimple = function CheckboxSimple(props) {
+  var check = function check(e, result) {
+    props.change(e, result);
+  };
+  var config = props.props.model.config;
+  var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  var checkd = props.state[props.campo] === 1 ? true : false;
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(_semanticUiReact.Checkbox, {
+      label: el_config.label,
+      name: props.campo,
+      key: '_' + props.campo,
+      onChange: check.bind(undefined),
+      checked: checkd })
+  );
+};
+
+exports.default = CheckboxSimple;
+
+/***/ }),
+/* 1210 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(45);
+
+var _ramda = __webpack_require__(94);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SimpleInputPassword = function SimpleInputPassword(props) {
+  var config = props.props.model.config;
+  var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(
+      'label',
+      null,
+      el_config.label
+    ),
+    _react2.default.createElement(_semanticUiReact.Input, { key: '_' + props.campo,
+      type: 'password',
+      name: props.campo,
+      onChange: props.change,
+      value: props.state[props.campo] })
+  );
+};
+
+exports.default = SimpleInputPassword;
+
+/***/ }),
+/* 1211 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+        value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(45);
+
+var _ramda = __webpack_require__(94);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SimpleInputHidden = function SimpleInputHidden(props) {
+        return _react2.default.createElement(_semanticUiReact.Input, { key: '_' + props.campo,
+                type: 'hidden',
+                name: props.campo,
+                value: props.state[props.campo] });
+};
+
+exports.default = SimpleInputHidden;
+
+/***/ }),
+/* 1212 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(45);
+
+var _ramda = __webpack_require__(94);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SimpleTextArea = function SimpleTextArea(props) {
+  var config = props.props.model.config;
+  var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(
+      'label',
+      null,
+      el_config.label
+    ),
+    _react2.default.createElement(_semanticUiReact.TextArea, { placeholder: 'Escribir...', autoHeight: true,
+      key: '_' + props.campo,
+      name: props.campo,
+      onChange: props.change,
+      value: props.state[props.campo] })
+  );
+};
+
+exports.default = SimpleTextArea;
+
+/***/ }),
+/* 1213 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(45);
+
+var _ramda = __webpack_require__(94);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SimpleUpload = function SimpleUpload(props) {
+  var config = props.props.model.config;
+  var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(
+      'label',
+      null,
+      el_config.label
+    ),
+    _react2.default.createElement('input', { type: 'file', name: 'file', className: 'dropzone' })
+  );
+};
+
+exports.default = SimpleUpload;
 
 /***/ })
 /******/ ]);
