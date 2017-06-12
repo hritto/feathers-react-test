@@ -41,8 +41,6 @@ app.configure(hooks());
 app.configure(rest());
 app.configure(socketio());
 
-// Set up our services (see `services/index.js`)
-app.configure(services);
 // Upload Service
 app.use('/uploads', // multer parses the file named 'uri'.
     // Without extra params the data is
@@ -69,6 +67,10 @@ app.service('/uploads').before({
         }
     ]
 });
+
+// Set up our services (see `services/index.js`)
+app.configure(services);
+
 
 // Configure middleware (see `middleware/index.js`) - always has to be last
 app.configure(middleware);
