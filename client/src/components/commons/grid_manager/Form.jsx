@@ -55,14 +55,13 @@ class FormGroup extends Component {
   }
 
   handlePhotoSubmit(event) {
-    debugger;
     //this.props.controller.handlePhotoSubmit(this.state);
     event.preventDefault();
     var socket = io('http://localhost:3030');
-    const app = feathers()
+    const appU = feathers()
     .configure(feathers.hooks())
     .configure(feathers.socketio(socket));
-    const uploadService = app.service('uploads');
+    const uploadService = appU.service('uploads');
 
     // Now with Real-Time Support!
     uploadService.on('created', function(file){
@@ -73,42 +72,23 @@ class FormGroup extends Component {
                 paramName: "uri",
                 uploadMultiple: false,
                 init: function(){
+                  debugger;
                     this.on('uploadprogress', function(file, progress){
                         console.log('progresss', progress);
                     });
                 }
             };
-
   }
 
   componentDidMount() {
 
-
-    /*
-    if(this.state.active ==='fotos'){
-      // Let's use DropZone!
-      var myDropzone = new Dropzone("div#myDropzone", { url: "/uploads"});
-      Dropzone.options.myDropzone = {
-          paramName: "uri",
-          uploadMultiple: false,
-          init: function(){
-              this.on('uploadprogress', function(file, progress){
-                  console.log('progresss', progress);
-              });
-          }
-      };
-    }
-    */
   }
 
   componentDidUpdate() {
 
-    debugger;
-
     if(this.state.active ==='fotos'){
-      $("div#my-awsome-dropzone").dropzone({ url: "/uploads" });
-
-      var socket = io('http://localhost:3030');
+      let self = this;
+      const socket = io('http://localhost:3030');
       const app = feathers()
       .configure(feathers.hooks())
       .configure(feathers.socketio(socket));
@@ -119,17 +99,21 @@ class FormGroup extends Component {
           alert('Received file created event!', file);
       });
 
-      Dropzone.options.myAwesomeDropzone = {
-                  paramName: "uri",
-                  uploadMultiple: false,
-                  init: function(){
-                      this.on('uploadprogress', function(file, progress){
-                          console.log('progresss', progress);
-                      });
-                  }
-              };
-
+      $("div#my-awsome-dropzone").dropzone({
+        url: "/uploads",
+        paramName: "uri",
+        uploadMultiple: false,
+        params: {
+          user_id: self.state._id
+        },
+        init: function(){
+            this.on('uploadprogress', function(file, progress){
+                console.log('progresss', progress);
+            });
+        }
+      });
     }
+
   }
 
   handleCancel(event) {

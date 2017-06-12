@@ -41,32 +41,6 @@ app.configure(hooks());
 app.configure(rest());
 app.configure(socketio());
 
-// Upload Service
-app.use('/uploads', // multer parses the file named 'uri'.
-    // Without extra params the data is
-    // temporarely kept in memory
-    multipartMiddleware.single('uri'),
-
-    // another middleware, this time to
-    // transfer the received file to feathers
-    function(req,res,next){
-        req.feathers.file = req.file;
-        next();
-    },
-    blobService({Model: blobStorage}));
-
-app.service('/uploads').before({
-    create: [
-        function(hook) {
-          console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@222222222222222222222222222')
-            if (!hook.data.uri && hook.params.file){
-                const file = hook.params.file;
-                const uri = dauria.getBase64DataURI(file.buffer, file.mimetype);
-                hook.data = {uri: uri};
-            }
-        }
-    ]
-});
 
 // Set up our services (see `services/index.js`)
 app.configure(services);
