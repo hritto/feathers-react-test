@@ -108,15 +108,7 @@ const UsersController = function() {
     model.set('state', 'initial', true);
   };
 
-  const actionModal = () => {
-    let action = model.get('state');
-    switch (model.get('state')) {
-      case 'delete':
-
-        break;
-      default:
-
-    }
+  const handleCancel = () => {
     model.set('state', 'initial', true);
   };
 
@@ -197,7 +189,7 @@ const UsersController = function() {
     initialize: initialize,
     itemClick: itemClick,
     closeModal: closeModal,
-    actionModal: actionModal,
+    handleCancel: handleCancel,
     handleSubmit: handleSubmit,
     destroy: destroy
   };

@@ -60,6 +60,7 @@ app.use('/uploads', // multer parses the file named 'uri'.
 app.service('/uploads').before({
     create: [
         function(hook) {
+          console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@222222222222222222222222222')
             if (!hook.data.uri && hook.params.file){
                 const file = hook.params.file;
                 const uri = dauria.getBase64DataURI(file.buffer, file.mimetype);
