@@ -11,9 +11,16 @@ const hooks = require('feathers-hooks');
 const rest = require('feathers-rest');
 const socketio = require('feathers-socketio');
 
+const blobService = require('feathers-blob');
+const multer = require('multer');
+const multipartMiddleware = multer();
+
 const middleware = require('./middleware');
 const services = require('./services');
 const appHooks = require('./app.hooks');
+
+const fs = require('fs-blob-store');
+const blobStorage = fs(__dirname + '/uploads');
 
 const app = feathers();
 
@@ -36,6 +43,32 @@ app.configure(socketio());
 
 // Set up our services (see `services/index.js`)
 app.configure(services);
+// Upload Service
+app.use('/uploads', // multer parses the file named 'uri'.
+    // Without extra params the data is
+    // temporarely kept in memory
+    multipartMiddleware.single('uri'),
+
+    // another middleware, this time to
+    // transfer the received file to feathers
+    function(req,res,next){
+        req.feathers.file = req.file;
+        next();
+    },
+    blobService({Model: blobStorage}));
+
+app.service('/uploads').before({
+    create: [
+        function(hook) {
+            if (!hook.data.uri && hook.params.file){
+                const file = hook.params.file;
+                const uri = dauria.getBase64DataURI(file.buffer, file.mimetype);
+                hook.data = {uri: uri};
+            }
+        }
+    ]
+});
+
 // Configure middleware (see `middleware/index.js`) - always has to be last
 app.configure(middleware);
 app.hooks(appHooks);

@@ -17,6 +17,15 @@ class FormGroup extends Component {
     this.state = props.model.selected_record;
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.changePhoto = this.changePhoto.bind(this);
+  }
+
+  changePhoto(st) {
+    debugger;
+    this.setState((state) => {
+      const lens = R.lensProp(st.field);
+      return R.set(lens, st.value, state)
+    });
   }
 
   handleChange(event, result) {
@@ -26,7 +35,7 @@ class FormGroup extends Component {
       pr = result.name;
       val = result.value
     }
-    if(result.type === "checkbox"){
+    if(result && result.type === "checkbox"){
       pr = result.name;
       val = result.checked ? 1 : 0;
     }
@@ -46,6 +55,7 @@ class FormGroup extends Component {
     let config = this.props.model.config;
     let fields = '';
     let frase = '';
+    let photo = '';
     if(this.props.model.state === 'delete'){
       frase = '¿Está seguro de borrar al usuario: ' + this.props.model.selected_record.name + " " + this.props.model.selected_record.surname + "?"
       fields = <p>{frase}</p>
@@ -55,6 +65,7 @@ class FormGroup extends Component {
           campo: key,
           props: self.props,
           change: self.handleChange,
+          changePhoto: self.changePhoto,
           state: state
         };
         let el_config = R.find(R.propEq('name', key))(config.fields);
@@ -78,7 +89,7 @@ class FormGroup extends Component {
             return <CheckboxSimple key={key} {...p} />
             break;
           case "image":
-            return <SimpleUpload key={key} {...p} />
+            return <SimpleUpload key={key} {...p} />;
             break
           case "date":
             return <SimpleInputText key={key} {...p} />
@@ -95,6 +106,7 @@ class FormGroup extends Component {
             {fields}
             <Form.Button content='Enviar' />
         </Form>
+        {photo}
       </div>
     )
   }
