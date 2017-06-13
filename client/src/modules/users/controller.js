@@ -8,6 +8,14 @@ const UsersController = function() {
   let sb = null;
   const feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
   const users = feathersClient.service('/users');
+  const media = feathersClient.service('/media');
+
+  const addZero = (i) => {
+    if (i < 10) {
+      i = "0" + i;
+    }
+    return i;
+  };
 
   const initialize = (opts, mdl) => {
     options = opts;
@@ -92,7 +100,10 @@ const UsersController = function() {
   const getRemoteRecord = (opts) => {
     return users.find({ query: { _id: opts.id } }).then(results => {
       setSelectedRecord(opts, results.data[0], true);
-      model.set('state', opts.action, true);
+      return media.find({ query: { type: 'avatar' } }).then(results => {
+        model.set('avatars', results.data, false);
+        model.set('state', opts.action, true);
+      });
     });
   };
 
@@ -178,6 +189,11 @@ const UsersController = function() {
     });
     closeModal();
     model.set('selected_record', null, false);
+  };
+
+  const avatarSelected = (opts) => {
+    debugger;
+    model.set(['selected_record','photo'], opts.url, true);
   };
 
 

@@ -20,6 +20,7 @@ const Users = function(sb) {
     state: "initial", //initial, update, create, delete
     buttons: ['update', 'create', 'delete'],
     records: [],
+    avatars: [],
     selected_record: null,
     config: {
       combo_constructors: [{

@@ -13,20 +13,31 @@ module.exports = {
     }
   },
   afterCreateHook: function(hook) {
-    const dir_path = hook.result.id;
+    const dir_path = '/uploads/media/'+hook.result.id;
     // Una vez creado el fichero,
-    // Si tenemos el id del usuario, lo actualizamos con la nueva imagen
-    if(hook.data.user_id){
-      Promise.all([
-        hook.app.service('users').patch(hook.data.user_id, {photo: dir_path}, {}),
-      ]).then(results => {
-          if(results && results.length){
-            //console.log(results)
-          }
-      }).catch(err => {
-        //TODO: mensaje de error de servidor
-        console.log('Error occurred:', err)
-      });
+    // guardamos los datos de la nueva imagen en la BBDD
+    Promise.all([
+      //hook.app.service('users').patch(hook.data.user_id, {photo: dir_path}, {}),
+      hook.app.service('media').create({
+        url: dir_path,
+        original_name: hook.params.file.originalname,
+        type: hook.data.media_type
+      }),
+    ]).then(results => {
+        if(results && results.length){
+          //console.log(results)
+        }
+    }).catch(err => {
+      //TODO: mensaje de error de servidor
+      console.log('Error occurred:', err)
+    });
+
+  },
+  isImageFile: function(mime) {
+    const imgFiles = ['jpg', 'png', 'gif'];
+    if(mime){
+      return (new RegExp('(' + imgFiles.join('|').replace(/\./g, '\\.') + ')$')).test(mime);
     }
-  }
+  },
+
 }

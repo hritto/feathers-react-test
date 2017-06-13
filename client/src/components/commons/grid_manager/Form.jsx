@@ -7,6 +7,8 @@ import SimpleInputHidden from './inputs/HiddenSimple.jsx'
 import CheckboxSimple from './inputs/CheckboxSimple.jsx'
 import DropdownSelection from './inputs/DropDown.jsx'
 import SimpleTextArea from './inputs/TextAreaSimple.jsx'
+import AvatarSelector from '../AvatarSelector.jsx'
+import SimpleAvatar from './inputs/SimpleAvatar.jsx'
 //import SimpleUpload from './inputs/UploadSimple.jsx'
 import DropzoneComponent from 'react-dropzone-component';
 import R from 'ramda';
@@ -20,9 +22,14 @@ class FormGroup extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.tabCanged = this.tabCanged.bind(this);
+    this.avatarSelected = this.avatarSelected.bind(this);
     this.myDropzone = null;
     //this.uploadedFile = this.uploadedFile.bind(this);
 
+  }
+
+  avatarSelected(opts) {
+    this.setState({photo: opts.url});
   }
 
   handleChange(event, result) {
@@ -84,6 +91,10 @@ class FormGroup extends Component {
     if(this.props.model.state === 'delete'){
       frase = '¿Está seguro de borrar al usuario: ' + this.props.model.selected_record.name + " " + this.props.model.selected_record.surname + "?"
       fields = <p>{frase}</p>
+      form_view = <Segment attached><Form onSubmit={this.handleSubmit}>
+          {fields}
+          <Button content='Enviar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
+      </Form></Segment>
     } else {
       if(this.state.active === 'datos'){
         fields = _.map(this.state, function (value, key, state) {
@@ -114,7 +125,7 @@ class FormGroup extends Component {
               return <CheckboxSimple key={key} {...p} />
               break;
             case "image":
-              return ''; //<SimpleUpload key={key} {...p} />;
+              return <SimpleAvatar key={key} {...p} />;
               break
             case "date":
               return <SimpleInputText key={key} {...p} />
@@ -142,9 +153,11 @@ class FormGroup extends Component {
         const djsConfig = {
           paramName: "uri",
           uploadMultiple: false,
+          acceptedFiles: ".png,.jpg,.gif,.jpeg",
           dictDefaultMessage: 'Arrastre aquí el elemento a subir...',
           params: {
-              user_id: self.state._id
+              user_id: self.state._id,
+              media_type: 'avatar'
           }
         }
         const eventHandlers = {
@@ -162,6 +175,7 @@ class FormGroup extends Component {
         }
         form_view = (
           <Segment attached>
+            <AvatarSelector {...this.props} avatarSelected={this.avatarSelected} />
             <DropzoneComponent config={componentConfig}
                                eventHandlers={eventHandlers}
                                djsConfig={djsConfig} />
@@ -170,15 +184,25 @@ class FormGroup extends Component {
       }
     }
 
-    return (
-      <div>
-        <Menu tabular attached>
-          <Menu.Item name='datos' active={this.state.active === 'datos'} onClick={this.tabCanged}>Datos de la Cuenta</Menu.Item>
-          <Menu.Item name='fotos' active={this.state.active === 'fotos'} onClick={this.tabCanged}>Fotos</Menu.Item>
-        </Menu>
-        {form_view}
-      </div>
-    )
+    if(this.props.model.state === 'delete'){
+      return (
+        <div>
+          {form_view}
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          <Menu tabular attached>
+            <Menu.Item name='datos' active={this.state.active === 'datos'} onClick={this.tabCanged}>Datos de la Cuenta</Menu.Item>
+            <Menu.Item name='fotos' active={this.state.active === 'fotos'} onClick={this.tabCanged}>Fotos</Menu.Item>
+          </Menu>
+          {form_view}
+        </div>
+      )
+    }
+
+
   }
 }
 

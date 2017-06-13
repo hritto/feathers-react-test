@@ -3,7 +3,7 @@ const multipartMiddleware = multer();
 const dauria = require('dauria');
 const hooks = require('./uploads.hooks');
 const path = require("path");
-//const filters = require('./uploads.filters');
+const Hooks = require('./hooks.js');
 
 // feathers-blob service
 const blobService = require('feathers-blob');
@@ -12,7 +12,7 @@ const blobService = require('feathers-blob');
 // storage service like AWS or Google Drive.
 const fs = require('fs-blob-store');
 //The path
-const blobStorage = fs(path.join(__dirname, '..', '..', '..', 'public', 'uploads'));
+const blobStorage = fs(path.join(__dirname, '..', '..', '..', 'public', 'uploads','media'));
 
 module.exports = function () {
   const app = this;
@@ -28,6 +28,7 @@ module.exports = function () {
     // transfer the received file to feathers
     function(req,res,next){
         req.feathers.file = req.file;
+        mimetype = req.file.mimetype;
         next();
     },
     blobService({Model: blobStorage})
