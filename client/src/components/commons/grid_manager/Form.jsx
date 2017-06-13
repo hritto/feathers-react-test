@@ -7,9 +7,10 @@ import SimpleInputHidden from './inputs/HiddenSimple.jsx'
 import CheckboxSimple from './inputs/CheckboxSimple.jsx'
 import DropdownSelection from './inputs/DropDown.jsx'
 import SimpleTextArea from './inputs/TextAreaSimple.jsx'
-import SimpleUpload from './inputs/UploadSimple.jsx'
-
-import R from 'ramda'
+//import SimpleUpload from './inputs/UploadSimple.jsx'
+import DropzoneComponent from 'react-dropzone-component';
+import R from 'ramda';
+const Promise = require("bluebird");
 
 class FormGroup extends Component {
   constructor(props) {
@@ -17,19 +18,11 @@ class FormGroup extends Component {
     this.state = R.merge(props.model.selected_record, {active: 'datos'});
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handlePhotoSubmit = this.handlePhotoSubmit.bind(this);
-
     this.handleCancel = this.handleCancel.bind(this);
     this.tabCanged = this.tabCanged.bind(this);
-    this.changePhoto = this.changePhoto.bind(this);
     this.myDropzone = null;
-  }
+    //this.uploadedFile = this.uploadedFile.bind(this);
 
-  changePhoto(st) {
-    this.setState((state) => {
-      const lens = R.lensProp(st.field);
-      return R.set(lens, st.value, state)
-    });
   }
 
   handleChange(event, result) {
@@ -54,65 +47,19 @@ class FormGroup extends Component {
     event.preventDefault();
   }
 
-  handlePhotoSubmit(event) {
-    //this.props.controller.handlePhotoSubmit(this.state);
-    event.preventDefault();
-    var socket = io('http://localhost:3030');
-    const appU = feathers()
+  componentDidMount() {
+    let self = this;
+    const socket = io('http://localhost:3030');
+    const app = feathers()
     .configure(feathers.hooks())
     .configure(feathers.socketio(socket));
-    const uploadService = appU.service('uploads');
+    const uploadService = app.service('uploads');
 
     // Now with Real-Time Support!
     uploadService.on('created', function(file){
-        alert('Received file created event!', file);
+        //alert('Received file created event!', file);
+        //console.log(self.myDropzone)
     });
-
-    Dropzone.options.myAwesomeDropzone = {
-                paramName: "uri",
-                uploadMultiple: false,
-                init: function(){
-                  debugger;
-                    this.on('uploadprogress', function(file, progress){
-                        console.log('progresss', progress);
-                    });
-                }
-            };
-  }
-
-  componentDidMount() {
-
-  }
-
-  componentDidUpdate() {
-
-    if(this.state.active ==='fotos'){
-      let self = this;
-      const socket = io('http://localhost:3030');
-      const app = feathers()
-      .configure(feathers.hooks())
-      .configure(feathers.socketio(socket));
-      const uploadService = app.service('uploads');
-
-      // Now with Real-Time Support!
-      uploadService.on('created', function(file){
-          alert('Received file created event!', file);
-      });
-
-      $("div#my-awsome-dropzone").dropzone({
-        url: "/uploads",
-        paramName: "uri",
-        uploadMultiple: false,
-        params: {
-          user_id: self.state._id
-        },
-        init: function(){
-            this.on('uploadprogress', function(file, progress){
-                console.log('progresss', progress);
-            });
-        }
-      });
-    }
 
   }
 
@@ -144,7 +91,6 @@ class FormGroup extends Component {
             campo: key,
             props: self.props,
             change: self.handleChange,
-            changePhoto: self.changePhoto,
             state: state
           };
           let el_config = R.find(R.propEq('name', key))(config.fields);
@@ -185,19 +131,45 @@ class FormGroup extends Component {
       }
 
       if(this.state.active === 'fotos'){
-        /*
-        form_view = <Segment attached><Form onSubmit={this.handlePhotoSubmit}>
+        let self = this;
+        let myDropzone = null;
+        const componentConfig = {
+            iconFiletypes: ['.jpg', '.png', '.gif'],
+            showFiletypeIcon: true,
+            postUrl: '/uploads',
 
-            <Button content='Enviar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
-        </Form></Segment>
-        */
-        form_view = <Segment attached>
-          <div id='my-awsome-dropzone' style={{width:'100%', height:'200px'}}></div>
-        </Segment>
+        };
+        const djsConfig = {
+          paramName: "uri",
+          uploadMultiple: false,
+          dictDefaultMessage: 'Arrastre aquí el elemento a subir...',
+          params: {
+              user_id: self.state._id
+          }
+        }
+        const eventHandlers = {
+          init: function(dz){
+              dz.on('uploadprogress', function(file, progress){
+                  console.log('progresss', progress);
+              });
+              self.myDropzone = dz;
+          },
+          complete: function(file) {
+            return Promise.delay(2000).then(function(){
+              self.myDropzone.removeFile(file);
+            });
+          }
+        }
+        form_view = (
+          <Segment attached>
+            <DropzoneComponent config={componentConfig}
+                               eventHandlers={eventHandlers}
+                               djsConfig={djsConfig} />
+          </Segment>
+        );
       }
-
-
     }
+
     return (
       <div>
         <Menu tabular attached>
