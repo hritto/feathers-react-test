@@ -38542,11 +38542,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var listItems = function listItems(props) {
   var records = props.model.records || [];
+  var url_image = '/assets/images/avatar/small/user_min.png';
   return records.map(function (record) {
     return _react2.default.createElement(
       _semanticUiReact.List.Item,
       { key: record._id },
-      _react2.default.createElement(_semanticUiReact.Image, { avatar: true, src: '/assets/images/avatar/small/user_min.png' }),
+      _react2.default.createElement(_semanticUiReact.Image, { avatar: true, src: record.photo ? '/uploads/' + record.photo : url_image }),
       _react2.default.createElement(
         _semanticUiReact.List.Content,
         { verticalAlign: 'middle', style: { width: '600px' } },

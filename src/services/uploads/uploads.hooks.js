@@ -1,5 +1,3 @@
-const dauria = require('dauria');
-const Promise = require("bluebird");
 const Hooks = require('./hooks.js');
 
 module.exports = {

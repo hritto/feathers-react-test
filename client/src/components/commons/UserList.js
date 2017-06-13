@@ -5,9 +5,10 @@ import ButtonIcon from './ButtonIcon.jsx'
 
 const listItems = (props) => {
   let records = props.model.records || [];
+  let url_image = '/assets/images/avatar/small/user_min.png';
   return records.map((record) =>
   <List.Item key={record._id}>
-    <Image avatar src='/assets/images/avatar/small/user_min.png' />
+    <Image avatar src={record.photo ? '/uploads/'+record.photo : url_image} />
     <List.Content verticalAlign='middle' style={{width: '600px'}}>
       <div className='list_span'>{record.name + " " + record.surname + ":  " + record.email}{' '}</div><ButtonIcon {...props} id={record._id} />
     </List.Content>

@@ -14,18 +14,19 @@ module.exports = {
   },
   afterCreateHook: function(hook) {
     const dir_path = hook.result.id;
-    // Una vez creado el fichero, actualizamos el usuario con la imagen
-    Promise.all([
-      hook.app.service('users').patch(hook.data.user_id, {photo: dir_path}, {}),
-    ]).then(results => {
-        if(results && results.length){
-          console.log(results)
-        } else {
-          //TODO: mensaje de error de servidor
-        }
-    }).catch(err => {
-      //TODO: mensaje de error de servidor
-      console.log('Error occurred:', err)
-    });
+    // Una vez creado el fichero,
+    // Si tenemos el id del usuario, lo actualizamos con la nueva imagen
+    if(hook.data.user_id){
+      Promise.all([
+        hook.app.service('users').patch(hook.data.user_id, {photo: dir_path}, {}),
+      ]).then(results => {
+          if(results && results.length){
+            //console.log(results)
+          }
+      }).catch(err => {
+        //TODO: mensaje de error de servidor
+        console.log('Error occurred:', err)
+      });
+    }
   }
 }
