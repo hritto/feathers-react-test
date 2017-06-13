@@ -100,7 +100,7 @@ const UsersController = function() {
   const getRemoteRecord = (opts) => {
     return users.find({ query: { _id: opts.id } }).then(results => {
       setSelectedRecord(opts, results.data[0], true);
-      return media.find({ query: { type: 'avatar' } }).then(results => {
+      return media.find({ query: { type: "avatar", "$limit": 100, } }).then(results => {
         model.set('avatars', results.data, false);
         model.set('state', opts.action, true);
       });
@@ -189,11 +189,6 @@ const UsersController = function() {
     });
     closeModal();
     model.set('selected_record', null, false);
-  };
-
-  const avatarSelected = (opts) => {
-    debugger;
-    model.set(['selected_record','photo'], opts.url, true);
   };
 
 

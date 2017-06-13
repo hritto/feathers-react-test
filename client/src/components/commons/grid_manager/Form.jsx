@@ -65,7 +65,7 @@ class FormGroup extends Component {
     // Now with Real-Time Support!
     uploadService.on('created', function(file){
         //alert('Received file created event!', file);
-        //console.log(self.myDropzone)
+        self.setState({photo: file.id})
     });
 
   }
@@ -154,7 +154,7 @@ class FormGroup extends Component {
           paramName: "uri",
           uploadMultiple: false,
           acceptedFiles: ".png,.jpg,.gif,.jpeg",
-          dictDefaultMessage: 'Arrastre aquí el elemento a subir...',
+          dictDefaultMessage: 'O arrastra aquí la foto que deseas usar...',
           params: {
               user_id: self.state._id,
               media_type: 'avatar'
@@ -176,9 +176,11 @@ class FormGroup extends Component {
         form_view = (
           <Segment attached>
             <AvatarSelector {...this.props} avatarSelected={this.avatarSelected} />
-            <DropzoneComponent config={componentConfig}
-                               eventHandlers={eventHandlers}
-                               djsConfig={djsConfig} />
+            <Segment>
+              <DropzoneComponent config={componentConfig}
+                                 eventHandlers={eventHandlers}
+                                 djsConfig={djsConfig} />
+            </Segment>
           </Segment>
         );
       }

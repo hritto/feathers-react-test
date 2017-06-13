@@ -7,7 +7,11 @@ const filters = require('./media.filters');
 module.exports = function () {
   const app = this;
   const Model = createModel(app);
-  const paginate = app.get('paginate');
+  //const paginate = app.get('paginate');
+  const paginate = {
+      default: 100,
+      max: 200
+    };
 
   const options = {
     name: 'media',
