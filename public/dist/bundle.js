@@ -12910,6 +12910,18 @@ var Model = function Model(data) {
     return rec;
   };
 
+  var append = function append(prop, el) {
+    appState[prop] = _ramda2.default.append(el, appState[prop]);
+    dispatchChanged();
+  };
+
+  var setFieldState = function setFieldState(name, value) {
+    var index = appState.config.fields.findIndex(function (item) {
+      return item.name === name;
+    });
+    appState = _ramda2.default.set(_ramda2.default.lensPath(['config', 'fields', index, 'state']), value, appState);
+  };
+
   var dispatchChanged = function dispatchChanged() {
     on.changed.dispatch({
       model: appState
@@ -12924,8 +12936,10 @@ var Model = function Model(data) {
     on: on,
     get: get,
     set: set,
+    append: append,
     getVoidRecord: getVoidRecord,
-    setRecord: setRecord
+    setRecord: setRecord,
+    setFieldState: setFieldState
   };
 };
 
@@ -38260,32 +38274,35 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _semanticUiReact = __webpack_require__(25);
 
+var _helpers = __webpack_require__(1213);
+
+var _helpers2 = _interopRequireDefault(_helpers);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var imageParser = function imageParser(img) {
-  var default_img = '/assets/images/avatar/small/user_min.png';
-  if (img && img.indexOf('assets') >= 0) {
-    return img;
+var getStyle = function getStyle(avatar, props) {
+  if (_helpers2.default.imageParser(props.sel) === _helpers2.default.imageParser(avatar.url)) {
+    return {
+      border: '3px solid green'
+    };
   }
-  if (img && img.length) {
-    return '/uploads/media/' + img;
-  }
-  return default_img;
+  return {
+    border: 'none'
+  };
 };
 
 var cardItems = function cardItems(props) {
   var avatars = props.model.avatars || [];
   return avatars.map(function (avatar) {
-    return _react2.default.createElement(_semanticUiReact.Card, { key: avatar._id, raised: true, image: imageParser(avatar.url), onClick: props.avatarSelected.bind(undefined, { id: avatar._id, url: avatar.url }) });
+    return _react2.default.createElement(_semanticUiReact.Card, { key: avatar._id, raised: true, style: getStyle(avatar, props), image: _helpers2.default.imageParser(avatar.url), onClick: props.avatarSelected.bind(undefined, { id: avatar._id, url: avatar.url }) });
   });
 };
 
 var AvatarSelector = function AvatarSelector(props) {
-  var list = cardItems(props);
   return _react2.default.createElement(
     _semanticUiReact.Card.Group,
-    { itemsPerRow: 10 },
-    list
+    { itemsPerRow: 10, className: 'card_selector' },
+    cardItems(props)
   );
 };
 
@@ -38366,10 +38383,6 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 var _SidebarLeftPush = __webpack_require__(562);
 
 var _SidebarLeftPush2 = _interopRequireDefault(_SidebarLeftPush);
-
-var _main_style = __webpack_require__(1207);
-
-var _main_style2 = _interopRequireDefault(_main_style);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -38590,18 +38603,11 @@ var _ButtonIcon = __webpack_require__(558);
 
 var _ButtonIcon2 = _interopRequireDefault(_ButtonIcon);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _helpers = __webpack_require__(1213);
 
-var imageParser = function imageParser(img) {
-  var default_img = '/assets/images/avatar/small/user_min.png';
-  if (img && img.indexOf('assets') >= 0) {
-    return img;
-  }
-  if (img && img.length) {
-    return '/uploads/media/' + img;
-  }
-  return default_img;
-};
+var _helpers2 = _interopRequireDefault(_helpers);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var listItems = function listItems(props) {
   var records = props.model.records || [];
@@ -38610,7 +38616,7 @@ var listItems = function listItems(props) {
     return _react2.default.createElement(
       _semanticUiReact.List.Item,
       { key: record._id },
-      _react2.default.createElement(_semanticUiReact.Image, { avatar: true, src: imageParser(record.photo) }),
+      _react2.default.createElement(_semanticUiReact.Image, { avatar: true, src: _helpers2.default.imageParser(record.photo) }),
       _react2.default.createElement(
         _semanticUiReact.List.Content,
         { verticalAlign: 'middle', style: { width: '600px' } },
@@ -38710,6 +38716,14 @@ var _ramda = __webpack_require__(38);
 
 var _ramda2 = _interopRequireDefault(_ramda);
 
+var _helpers = __webpack_require__(1213);
+
+var _helpers2 = _interopRequireDefault(_helpers);
+
+var _bluebird = __webpack_require__(53);
+
+var _bluebird2 = _interopRequireDefault(_bluebird);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -38717,12 +38731,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-//import InputText from './inputs/TextComponent.jsx'
-
-//import SimpleUpload from './inputs/UploadSimple.jsx'
-
-
-var Promise = __webpack_require__(53);
 
 var FormGroup = function (_Component) {
   _inherits(FormGroup, _Component);
@@ -38732,7 +38740,7 @@ var FormGroup = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (FormGroup.__proto__ || Object.getPrototypeOf(FormGroup)).call(this, props));
 
-    _this.state = _ramda2.default.merge(props.model.selected_record, { active: 'datos' });
+    _this.state = _ramda2.default.merge(props.model.selected_record, { active_tab: 'datos' });
     _this.handleChange = _this.handleChange.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
     _this.handleCancel = _this.handleCancel.bind(_this);
@@ -38759,6 +38767,7 @@ var FormGroup = function (_Component) {
         pr = result.name;
         val = result.value;
       }
+      //Caso especial para checkboxes
       if (result && result.type === "checkbox") {
         pr = result.name;
         val = result.checked ? 1 : 0;
@@ -38782,10 +38791,17 @@ var FormGroup = function (_Component) {
       var app = feathers().configure(feathers.hooks()).configure(feathers.socketio(socket));
       var uploadService = app.service('uploads');
 
-      // Now with Real-Time Support!
+      // Callback de la creación de imágenes en el servidor
       uploadService.on('created', function (file) {
-        //alert('Received file created event!', file);
+        //Cambiar la foto del usuario por la recién creada
         self.setState({ photo: file.id });
+        //Agregar la nueva imagen a la lista (local/temporal)
+        self.props.controller.addNewAvatar({
+          "url": _helpers2.default.imageParser(file.id),
+          "original_name": "unknown.png",
+          "mediatype": "avatar",
+          "_id": _.uniqueId('temp')
+        });
       });
     }
   }, {
@@ -38800,7 +38816,7 @@ var FormGroup = function (_Component) {
       var name = _ref.name;
 
       event.preventDefault();
-      this.setState({ active: name });
+      this.setState({ active_tab: name });
     }
   }, {
     key: 'render',
@@ -38831,15 +38847,16 @@ var FormGroup = function (_Component) {
           )
         );
       } else {
-        if (this.state.active === 'datos') {
+        if (this.state.active_tab === 'datos') {
           fields = _.map(this.state, function (value, key, state) {
+            var el_config = _ramda2.default.find(_ramda2.default.propEq('name', key))(config.fields) || {};
             var p = {
               campo: key,
               props: self.props,
               change: self.handleChange,
-              state: state
+              state: state,
+              field_state: el_config.state
             };
-            var el_config = _ramda2.default.find(_ramda2.default.propEq('name', key))(config.fields);
             switch (el_config.type) {
               case "hidden":
                 return _react2.default.createElement(_HiddenSimple2.default, _extends({ key: key }, p));
@@ -38866,7 +38883,7 @@ var FormGroup = function (_Component) {
                 return _react2.default.createElement(_TextSimple2.default, _extends({ key: key }, p));
                 break;
               default:
-                return _react2.default.createElement(_TextSimple2.default, _extends({ key: key }, p));
+                return ''; //No es un campo del formulario
                 break;
             }
           });
@@ -38877,13 +38894,13 @@ var FormGroup = function (_Component) {
               _semanticUiReact.Form,
               { onSubmit: this.handleSubmit },
               fields,
-              _react2.default.createElement(_semanticUiReact.Button, { content: 'Enviar', primary: true }),
+              _react2.default.createElement(_semanticUiReact.Button, { content: 'Guardar', primary: true }),
               _react2.default.createElement(_semanticUiReact.Button, { content: 'Cancelar', onClick: this.handleCancel, secondary: true })
             )
           );
         }
 
-        if (this.state.active === 'fotos') {
+        if (this.state.active_tab === 'fotos') {
           var _self = this;
           var myDropzone = null;
           var componentConfig = {
@@ -38899,7 +38916,7 @@ var FormGroup = function (_Component) {
             dictDefaultMessage: 'O arrastra aquí la foto que deseas usar...',
             params: {
               user_id: _self.state._id,
-              media_type: 'avatar'
+              mediatype: 'avatar'
             }
           };
           var eventHandlers = {
@@ -38910,7 +38927,7 @@ var FormGroup = function (_Component) {
               _self.myDropzone = dz;
             },
             complete: function complete(file) {
-              return Promise.delay(2000).then(function () {
+              return _bluebird2.default.delay(2000).then(function () {
                 _self.myDropzone.removeFile(file);
               });
             }
@@ -38918,7 +38935,7 @@ var FormGroup = function (_Component) {
           form_view = _react2.default.createElement(
             _semanticUiReact.Segment,
             { attached: true },
-            _react2.default.createElement(_AvatarSelector2.default, _extends({}, this.props, { avatarSelected: this.avatarSelected })),
+            _react2.default.createElement(_AvatarSelector2.default, _extends({}, this.props, { avatarSelected: this.avatarSelected, sel: this.state.photo })),
             _react2.default.createElement(
               _semanticUiReact.Segment,
               null,
@@ -38945,13 +38962,13 @@ var FormGroup = function (_Component) {
             { tabular: true, attached: true },
             _react2.default.createElement(
               _semanticUiReact.Menu.Item,
-              { name: 'datos', active: this.state.active === 'datos', onClick: this.tabCanged },
+              { name: 'datos', active: this.state.active_tab === 'datos', onClick: this.tabCanged },
               'Datos de la Cuenta'
             ),
             _react2.default.createElement(
               _semanticUiReact.Menu.Item,
-              { name: 'fotos', active: this.state.active === 'fotos', onClick: this.tabCanged },
-              'Fotos'
+              { name: 'fotos', active: this.state.active_tab === 'fotos', onClick: this.tabCanged },
+              'Avatar'
             )
           ),
           form_view
@@ -39157,6 +39174,14 @@ var CheckboxSimple = function CheckboxSimple(props) {
   var config = props.props.model.config;
   var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
   var checkd = props.state[props.campo] === 1 ? true : false;
+  var label = '';
+  if (el_config.state === 'error') {
+    label = _react2.default.createElement(
+      _semanticUiReact.Label,
+      { basic: true, color: 'red', pointing: 'left' },
+      'Please enter a value'
+    );
+  }
   return _react2.default.createElement(
     _semanticUiReact.Form.Field,
     null,
@@ -39165,7 +39190,8 @@ var CheckboxSimple = function CheckboxSimple(props) {
       name: props.campo,
       key: '_' + props.campo,
       onChange: check.bind(undefined),
-      checked: checkd })
+      checked: checkd }),
+    label
   );
 };
 
@@ -39197,6 +39223,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var DropdownSelection = function DropdownSelection(props) {
   var config = props.props.model.config;
   var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  var label = '';
+  if (el_config.state === 'error') {
+    label = _react2.default.createElement(
+      _semanticUiReact.Label,
+      { basic: true, color: 'red', pointing: 'below' },
+      el_config.message
+    );
+  }
   return _react2.default.createElement(
     _semanticUiReact.Form.Field,
     null,
@@ -39205,6 +39239,7 @@ var DropdownSelection = function DropdownSelection(props) {
       null,
       el_config.label
     ),
+    label,
     _react2.default.createElement(_semanticUiReact.Dropdown, { placeholder: 'Seleccionar...',
       fluid: true, selection: true,
       options: props.props.model.config.combo_values[props.campo],
@@ -39274,6 +39309,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var SimpleInputPassword = function SimpleInputPassword(props) {
   var config = props.props.model.config;
   var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  if (el_config.state === 'error') {
+    return _react2.default.createElement(
+      _semanticUiReact.Form.Field,
+      null,
+      _react2.default.createElement(
+        'label',
+        null,
+        el_config.label
+      ),
+      _react2.default.createElement(
+        _semanticUiReact.Label,
+        { basic: true, color: 'red', pointing: 'below' },
+        el_config.message
+      ),
+      _react2.default.createElement(_semanticUiReact.Input, { error: true, key: '_' + props.campo,
+        type: 'password',
+        name: props.campo,
+        onChange: props.change,
+        value: props.state[props.campo] })
+    );
+  }
   return _react2.default.createElement(
     _semanticUiReact.Form.Field,
     null,
@@ -39313,18 +39369,11 @@ var _ramda = __webpack_require__(38);
 
 var _ramda2 = _interopRequireDefault(_ramda);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _helpers = __webpack_require__(1213);
 
-var imageParser = function imageParser(img) {
-  var default_img = '/assets/images/avatar/small/user_min.png';
-  if (img && img.indexOf('assets') >= 0) {
-    return img;
-  }
-  if (img && img.length) {
-    return '/uploads/media/' + img;
-  }
-  return default_img;
-};
+var _helpers2 = _interopRequireDefault(_helpers);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var SimpleAvatar = function SimpleAvatar(props) {
   var config = props.props.model.config;
@@ -39340,7 +39389,7 @@ var SimpleAvatar = function SimpleAvatar(props) {
     _react2.default.createElement(
       'div',
       null,
-      _react2.default.createElement(_semanticUiReact.Image, { src: imageParser(props.state.photo), avatar: true }),
+      _react2.default.createElement(_semanticUiReact.Image, { src: _helpers2.default.imageParser(props.state.photo), avatar: true }),
       _react2.default.createElement(
         'span',
         null,
@@ -39378,6 +39427,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var SimpleTextArea = function SimpleTextArea(props) {
   var config = props.props.model.config;
   var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  if (el_config.state === 'error') {
+    return _react2.default.createElement(
+      _semanticUiReact.Form.Field,
+      null,
+      _react2.default.createElement(
+        'label',
+        null,
+        el_config.label
+      ),
+      _react2.default.createElement(
+        _semanticUiReact.Label,
+        { basic: true, color: 'red', pointing: 'below' },
+        el_config.message
+      ),
+      _react2.default.createElement(_semanticUiReact.TextArea, { error: true, placeholder: 'Escribir...', autoHeight: true,
+        key: '_' + props.campo,
+        name: props.campo,
+        onChange: props.change,
+        value: props.state[props.campo] })
+    );
+  }
   return _react2.default.createElement(
     _semanticUiReact.Form.Field,
     null,
@@ -39422,6 +39492,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var SimpleInputText = function SimpleInputText(props) {
   var config = props.props.model.config;
   var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  if (el_config.state === 'error') {
+    return _react2.default.createElement(
+      _semanticUiReact.Form.Field,
+      null,
+      _react2.default.createElement(
+        'label',
+        null,
+        el_config.label
+      ),
+      _react2.default.createElement(
+        _semanticUiReact.Label,
+        { basic: true, color: 'red', pointing: 'below', key: 'error_' + props.campo },
+        el_config.message
+      ),
+      _react2.default.createElement(_semanticUiReact.Input, { error: true, key: '_' + props.campo,
+        type: 'text',
+        name: props.campo,
+        onChange: props.change,
+        value: props.state[props.campo] })
+    );
+  }
   return _react2.default.createElement(
     _semanticUiReact.Form.Field,
     null,
@@ -40216,6 +40307,10 @@ var _responsive_helpers = __webpack_require__(302);
 
 var _responsive_helpers2 = _interopRequireDefault(_responsive_helpers);
 
+var _validators = __webpack_require__(1214);
+
+var _validators2 = _interopRequireDefault(_validators);
+
 var _ramda = __webpack_require__(38);
 
 var _ramda2 = _interopRequireDefault(_ramda);
@@ -40232,13 +40327,6 @@ var UsersController = function UsersController() {
   var feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
   var users = feathersClient.service('/users');
   var media = feathersClient.service('/media');
-
-  var addZero = function addZero(i) {
-    if (i < 10) {
-      i = "0" + i;
-    }
-    return i;
-  };
 
   var initialize = function initialize(opts, mdl) {
     options = opts;
@@ -40274,6 +40362,7 @@ var UsersController = function UsersController() {
       return new Promise(function (resolve, reject) {
         _.map(combo_constructors, function (fn, i, obj) {
           var func = Object.keys(fn)[0];
+          //EL inicializados de los combos siempre es un promise
           return fn[func]().then(function (val) {
             if (val && val.data) {
               model.set(['config', 'combo_values', val.name], val.data, false);
@@ -40323,7 +40412,7 @@ var UsersController = function UsersController() {
   var getRemoteRecord = function getRemoteRecord(opts) {
     return users.find({ query: { _id: opts.id } }).then(function (results) {
       setSelectedRecord(opts, results.data[0], true);
-      return media.find({ query: { type: "avatar", "$limit": 100 } }).then(function (results) {
+      return media.find({ query: { mediatype: "avatar", "$limit": 100 } }).then(function (results) {
         model.set('avatars', results.data, false);
         model.set('state', opts.action, true);
       });
@@ -40347,9 +40436,7 @@ var UsersController = function UsersController() {
   };
 
   var handleSubmit = function handleSubmit(data) {
-    //Validacion: TODO
-    var is_valid = true;
-    if (is_valid) {
+    if (validateFields(data)) {
       if (model.get('state') === 'update') {
         doUpdate(data);
       }
@@ -40361,36 +40448,53 @@ var UsersController = function UsersController() {
       }
     } else {
       //TODO: mensaje de error de formulario
+      model.set('state', model.get('state'), true);
     }
   };
 
+  var validateFields = function validateFields(data) {
+    var is_valid = true;
+    var config_fields = model.get(['config', 'fields']);
+    _.map(data, function (field, key) {
+      var config = _ramda2.default.find(_ramda2.default.propEq('name', key))(config_fields);
+      if (!_validators2.default.validateField(field, name, config)) {
+        is_valid = false;
+        model.setFieldState(key, 'error');
+      } else {
+        model.setFieldState(key, 'initial');
+      }
+    });
+    return is_valid;
+  };
+
   var doUpdate = function doUpdate(data) {
-    Promise.all([users.update(data._id, data, {})]).then(function (results) {
+    return Promise.all([users.update(data._id, data, {})]).then(function (results) {
       if (results && results.length) {
         var index = _ramda2.default.findIndex(_ramda2.default.propEq('_id', results[0]._id))(model.get('records')); //=> 1
         model.setRecord(index, results[0]);
+        resetState();
       } else {
         //TODO: mensaje de error de servidor
+        resetState();
       }
     }).catch(function (err) {
       //TODO: mensaje de error de servidor
       console.log('Error occurred:', err);
+      resetState();
     });
-    closeModal();
-    model.set('selected_record', null, false);
   };
 
   var doDelete = function doDelete(data) {
     Promise.all([users.remove(data._id, { query: { _id: data._id } })]).then(function (results) {
       return users.find().then(function (results) {
         model.set('records', results.data, true);
+        resetState();
       });
     }).catch(function (err) {
       //TODO: mensaje de error de servidor
       console.log('Error occurred:', err);
+      resetState();
     });
-    closeModal();
-    model.set('selected_record', null, false);
   };
 
   var doCreate = function doCreate(data) {
@@ -40398,13 +40502,22 @@ var UsersController = function UsersController() {
     Promise.all([users.create(data)]).then(function (results) {
       return users.find().then(function (results) {
         model.set('records', results.data, true);
+        resetState();
       });
     }).catch(function (err) {
       //TODO: mensaje de error de servidor
       console.log('Error occurred:', err);
+      resetState();
     });
+  };
+
+  var resetState = function resetState() {
     closeModal();
     model.set('selected_record', null, false);
+  };
+
+  var addNewAvatar = function addNewAvatar(file) {
+    model.append('avatars', file);
   };
 
   var destroy = function destroy() {
@@ -40417,6 +40530,7 @@ var UsersController = function UsersController() {
     closeModal: closeModal,
     handleCancel: handleCancel,
     handleSubmit: handleSubmit,
+    addNewAvatar: addNewAvatar,
     destroy: destroy
   };
 };
@@ -40498,84 +40612,93 @@ var Users = function Users(sb) {
       fields: [{
         name: '_id', type: 'hidden',
         visibility: false, flex: 0, filter: false,
+        message: '',
         validation: {},
         constructor: null,
         wrapped: false,
         form_visible: true,
-        label: 'ID'
+        label: 'ID',
+        state: 'initial'
       }, {
         name: 'name', type: 'text',
         visibility: true, flex: 33, filter: true,
         validation: { required: true },
+        message: 'Por favor, ingrese un valor.',
         constructor: null,
         wrapped: false,
         form_visible: true,
-        label: 'Nombre'
+        label: 'Nombre',
+        state: 'initial'
       }, {
         name: 'surname', type: 'text',
         visibility: true, flex: 33, filter: true,
         validation: { required: true },
+        message: 'Por favor, ingrese un valor.',
         constructor: null,
         wrapped: false,
         form_visible: true,
-        label: 'Apellidos'
+        label: 'Apellidos',
+        state: 'initial'
       }, {
         name: 'email', type: 'text',
         visibility: true, flex: 33, filter: true,
-        validation: { required: true, email: true, maxlength: 250 },
+        validation: { required: true, email: true },
+        message: 'Por favor, ingrese un valor válido.',
         constructor: null,
         wrapped: false,
         form_visible: true,
-        label: 'Correo electrónico'
+        label: 'Correo electrónico',
+        state: 'initial'
       }, {
         name: 'gender', type: 'combo',
         visibility: false, flex: 0, filter: false,
         validation: {},
+        message: '',
         constructor: null,
         wrapped: false,
         form_visible: true,
-        label: 'Género'
+        label: 'Género',
+        state: 'initial'
       }, {
         name: 'role', type: 'combo',
         visibility: false, flex: 0, filter: false,
         validation: {},
+        message: '',
         constructor: null,
         wrapped: false,
         form_visible: true,
-        label: 'Rol'
+        label: 'Rol',
+        state: 'initial'
       }, {
         name: 'active', type: 'boolean',
         visibility: false, flex: 0, filter: false,
         validation: {},
+        message: '',
         constructor: null,
         wrapped: false,
         form_visible: true,
-        label: 'Activo'
+        label: 'Activo',
+        state: 'initial'
       }, {
         name: 'password', type: 'password',
         visibility: false, flex: 0, filter: false,
         validation: { required: true },
+        message: 'Por favor, ingrese un valor.',
         constructor: null,
         wrapped: false,
         form_visible: true,
-        label: 'contraseña'
-      }, {
-        name: 'password_confirmation', type: 'password',
-        visibility: false, flex: 0, filter: false,
-        validation: { required: true, equalTo: "password" },
-        constructor: null,
-        wrapped: false,
-        form_visible: true,
-        label: 'Confirmar contraseña'
+        label: 'contraseña',
+        state: 'initial'
       }, {
         name: 'photo', type: 'image',
         visibility: false, flex: 0, filter: false,
-        tooltip: '', validation: {},
+        tooltip: '', validation: {}, message: '',
         messages: {},
         constructor: null,
         wrapped: false,
         form_visible: true,
-        label: 'Foto'
+        label: 'Foto',
+        state: 'initial'
       }]
     }
   };
@@ -41598,102 +41721,8 @@ __webpack_require__(206)('asyncIterator');
 __webpack_require__(206)('observable');
 
 /***/ }),
-/* 642 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(643)(undefined);
-// imports
-
-
-// module
-exports.push([module.i, "* {\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n\nhtml, body {\n  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';\n  font-weight: 400;\n  color: #333;\n  overflow-y: hidden;\n}\n\n.center-text {\n  text-align: center;\n}\n\nfooter {\n  position: absolute;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  padding: 10px;\n  text-align: center;\n  background-color: #dedede;\n  max-height: 50px;\n}\n\nfooter p {\n  font-weight: 300;\n  font-size: 1.0em;\n}\n\n.ui.segment.no-margin {\n  margin: 0 !important;\n  border: 0 !important;\n  border-radius: 0;\n  padding-bottom: 8px !important;\n}\n\n.ui.segment.no-margin-absolute {\n  margin: 0 !important;\n  border: 0 !important;\n  border-radius: 0;\n  padding: 0 !important;\n}\n\n.padding-10 {\n  padding: 20px !important;\n}\n\nh2.ribbon_header {\n  font-size: 1rem !important;\n  margin: 0 !important;\n  border: 0 !important;\n  border-radius: 0 !important;\n  padding: 5px !important;\n  min-height: 30px;\n  background-color: #71a3ba !important;\n  box-shadow: 0 4px 4px #c9dfea !important;\n}\n\n#main_content {\n  padding-bottom: 60px;\n}\n\n.list_span {\n  display: inline;\n  position: relative;\n  top: 8px;\n}\n", ""]);
-
-// exports
-
-
-/***/ }),
-/* 643 */
-/***/ (function(module, exports) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-// css base code, injected by the css-loader
-module.exports = function(useSourceMap) {
-	var list = [];
-
-	// return the list of modules as css string
-	list.toString = function toString() {
-		return this.map(function (item) {
-			var content = cssWithMappingToString(item, useSourceMap);
-			if(item[2]) {
-				return "@media " + item[2] + "{" + content + "}";
-			} else {
-				return content;
-			}
-		}).join("");
-	};
-
-	// import a list of modules into the list
-	list.i = function(modules, mediaQuery) {
-		if(typeof modules === "string")
-			modules = [[null, modules, ""]];
-		var alreadyImportedModules = {};
-		for(var i = 0; i < this.length; i++) {
-			var id = this[i][0];
-			if(typeof id === "number")
-				alreadyImportedModules[id] = true;
-		}
-		for(i = 0; i < modules.length; i++) {
-			var item = modules[i];
-			// skip already imported module
-			// this implementation is not 100% perfect for weird media query combinations
-			//  when a module is imported multiple times with different media queries.
-			//  I hope this will never occur (Hey this way we have smaller bundles)
-			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-				if(mediaQuery && !item[2]) {
-					item[2] = mediaQuery;
-				} else if(mediaQuery) {
-					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-				}
-				list.push(item);
-			}
-		}
-	};
-	return list;
-};
-
-function cssWithMappingToString(item, useSourceMap) {
-	var content = item[1] || '';
-	var cssMapping = item[3];
-	if (!cssMapping) {
-		return content;
-	}
-
-	if (useSourceMap && typeof btoa === 'function') {
-		var sourceMapping = toComment(cssMapping);
-		var sourceURLs = cssMapping.sources.map(function (source) {
-			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
-		});
-
-		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
-	}
-
-	return [content].join('\n');
-}
-
-// Adapted from convert-source-map (MIT)
-function toComment(sourceMap) {
-	// eslint-disable-next-line no-undef
-	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
-	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
-
-	return '/*# ' + data + ' */';
-}
-
-
-/***/ }),
+/* 642 */,
+/* 643 */,
 /* 644 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -100159,491 +100188,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*jslint onevar:true, undef:true, newcap:true,
 
 
 /***/ }),
-/* 1207 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(642);
-if(typeof content === 'string') content = [[module.i, content, '']];
-// Prepare cssTransformation
-var transform;
-
-var options = {}
-options.transform = transform
-// add the styles to the DOM
-var update = __webpack_require__(1208)(content, options);
-if(content.locals) module.exports = content.locals;
-// Hot Module Replacement
-if(false) {
-	// When the styles change, update the <style> tags
-	if(!content.locals) {
-		module.hot.accept("!!../../../node_modules/css-loader/index.js!./main_style.css", function() {
-			var newContent = require("!!../../../node_modules/css-loader/index.js!./main_style.css");
-			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-			update(newContent);
-		});
-	}
-	// When the module is disposed, remove the <style> tags
-	module.hot.dispose(function() { update(); });
-}
-
-/***/ }),
-/* 1208 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-
-var stylesInDom = {};
-
-var	memoize = function (fn) {
-	var memo;
-
-	return function () {
-		if (typeof memo === "undefined") memo = fn.apply(this, arguments);
-		return memo;
-	};
-};
-
-var isOldIE = memoize(function () {
-	// Test for IE <= 9 as proposed by Browserhacks
-	// @see http://browserhacks.com/#hack-e71d8692f65334173fee715c222cb805
-	// Tests for existence of standard globals is to allow style-loader
-	// to operate correctly into non-standard environments
-	// @see https://github.com/webpack-contrib/style-loader/issues/177
-	return window && document && document.all && !window.atob;
-});
-
-var getElement = (function (fn) {
-	var memo = {};
-
-	return function(selector) {
-		if (typeof memo[selector] === "undefined") {
-			memo[selector] = fn.call(this, selector);
-		}
-
-		return memo[selector]
-	};
-})(function (target) {
-	return document.querySelector(target)
-});
-
-var singleton = null;
-var	singletonCounter = 0;
-var	stylesInsertedAtTop = [];
-
-var	fixUrls = __webpack_require__(1209);
-
-module.exports = function(list, options) {
-	if (typeof DEBUG !== "undefined" && DEBUG) {
-		if (typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
-	}
-
-	options = options || {};
-
-	options.attrs = typeof options.attrs === "object" ? options.attrs : {};
-
-	// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-	// tags it will allow on a page
-	if (!options.singleton) options.singleton = isOldIE();
-
-	// By default, add <style> tags to the <head> element
-	if (!options.insertInto) options.insertInto = "head";
-
-	// By default, add <style> tags to the bottom of the target
-	if (!options.insertAt) options.insertAt = "bottom";
-
-	var styles = listToStyles(list, options);
-
-	addStylesToDom(styles, options);
-
-	return function update (newList) {
-		var mayRemove = [];
-
-		for (var i = 0; i < styles.length; i++) {
-			var item = styles[i];
-			var domStyle = stylesInDom[item.id];
-
-			domStyle.refs--;
-			mayRemove.push(domStyle);
-		}
-
-		if(newList) {
-			var newStyles = listToStyles(newList, options);
-			addStylesToDom(newStyles, options);
-		}
-
-		for (var i = 0; i < mayRemove.length; i++) {
-			var domStyle = mayRemove[i];
-
-			if(domStyle.refs === 0) {
-				for (var j = 0; j < domStyle.parts.length; j++) domStyle.parts[j]();
-
-				delete stylesInDom[domStyle.id];
-			}
-		}
-	};
-};
-
-function addStylesToDom (styles, options) {
-	for (var i = 0; i < styles.length; i++) {
-		var item = styles[i];
-		var domStyle = stylesInDom[item.id];
-
-		if(domStyle) {
-			domStyle.refs++;
-
-			for(var j = 0; j < domStyle.parts.length; j++) {
-				domStyle.parts[j](item.parts[j]);
-			}
-
-			for(; j < item.parts.length; j++) {
-				domStyle.parts.push(addStyle(item.parts[j], options));
-			}
-		} else {
-			var parts = [];
-
-			for(var j = 0; j < item.parts.length; j++) {
-				parts.push(addStyle(item.parts[j], options));
-			}
-
-			stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
-		}
-	}
-}
-
-function listToStyles (list, options) {
-	var styles = [];
-	var newStyles = {};
-
-	for (var i = 0; i < list.length; i++) {
-		var item = list[i];
-		var id = options.base ? item[0] + options.base : item[0];
-		var css = item[1];
-		var media = item[2];
-		var sourceMap = item[3];
-		var part = {css: css, media: media, sourceMap: sourceMap};
-
-		if(!newStyles[id]) styles.push(newStyles[id] = {id: id, parts: [part]});
-		else newStyles[id].parts.push(part);
-	}
-
-	return styles;
-}
-
-function insertStyleElement (options, style) {
-	var target = getElement(options.insertInto)
-
-	if (!target) {
-		throw new Error("Couldn't find a style target. This probably means that the value for the 'insertInto' parameter is invalid.");
-	}
-
-	var lastStyleElementInsertedAtTop = stylesInsertedAtTop[stylesInsertedAtTop.length - 1];
-
-	if (options.insertAt === "top") {
-		if (!lastStyleElementInsertedAtTop) {
-			target.insertBefore(style, target.firstChild);
-		} else if (lastStyleElementInsertedAtTop.nextSibling) {
-			target.insertBefore(style, lastStyleElementInsertedAtTop.nextSibling);
-		} else {
-			target.appendChild(style);
-		}
-		stylesInsertedAtTop.push(style);
-	} else if (options.insertAt === "bottom") {
-		target.appendChild(style);
-	} else {
-		throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
-	}
-}
-
-function removeStyleElement (style) {
-	if (style.parentNode === null) return false;
-	style.parentNode.removeChild(style);
-
-	var idx = stylesInsertedAtTop.indexOf(style);
-	if(idx >= 0) {
-		stylesInsertedAtTop.splice(idx, 1);
-	}
-}
-
-function createStyleElement (options) {
-	var style = document.createElement("style");
-
-	options.attrs.type = "text/css";
-
-	addAttrs(style, options.attrs);
-	insertStyleElement(options, style);
-
-	return style;
-}
-
-function createLinkElement (options) {
-	var link = document.createElement("link");
-
-	options.attrs.type = "text/css";
-	options.attrs.rel = "stylesheet";
-
-	addAttrs(link, options.attrs);
-	insertStyleElement(options, link);
-
-	return link;
-}
-
-function addAttrs (el, attrs) {
-	Object.keys(attrs).forEach(function (key) {
-		el.setAttribute(key, attrs[key]);
-	});
-}
-
-function addStyle (obj, options) {
-	var style, update, remove, result;
-
-	// If a transform function was defined, run it on the css
-	if (options.transform && obj.css) {
-	    result = options.transform(obj.css);
-
-	    if (result) {
-	    	// If transform returns a value, use that instead of the original css.
-	    	// This allows running runtime transformations on the css.
-	    	obj.css = result;
-	    } else {
-	    	// If the transform function returns a falsy value, don't add this css.
-	    	// This allows conditional loading of css
-	    	return function() {
-	    		// noop
-	    	};
-	    }
-	}
-
-	if (options.singleton) {
-		var styleIndex = singletonCounter++;
-
-		style = singleton || (singleton = createStyleElement(options));
-
-		update = applyToSingletonTag.bind(null, style, styleIndex, false);
-		remove = applyToSingletonTag.bind(null, style, styleIndex, true);
-
-	} else if (
-		obj.sourceMap &&
-		typeof URL === "function" &&
-		typeof URL.createObjectURL === "function" &&
-		typeof URL.revokeObjectURL === "function" &&
-		typeof Blob === "function" &&
-		typeof btoa === "function"
-	) {
-		style = createLinkElement(options);
-		update = updateLink.bind(null, style, options);
-		remove = function () {
-			removeStyleElement(style);
-
-			if(style.href) URL.revokeObjectURL(style.href);
-		};
-	} else {
-		style = createStyleElement(options);
-		update = applyToTag.bind(null, style);
-		remove = function () {
-			removeStyleElement(style);
-		};
-	}
-
-	update(obj);
-
-	return function updateStyle (newObj) {
-		if (newObj) {
-			if (
-				newObj.css === obj.css &&
-				newObj.media === obj.media &&
-				newObj.sourceMap === obj.sourceMap
-			) {
-				return;
-			}
-
-			update(obj = newObj);
-		} else {
-			remove();
-		}
-	};
-}
-
-var replaceText = (function () {
-	var textStore = [];
-
-	return function (index, replacement) {
-		textStore[index] = replacement;
-
-		return textStore.filter(Boolean).join('\n');
-	};
-})();
-
-function applyToSingletonTag (style, index, remove, obj) {
-	var css = remove ? "" : obj.css;
-
-	if (style.styleSheet) {
-		style.styleSheet.cssText = replaceText(index, css);
-	} else {
-		var cssNode = document.createTextNode(css);
-		var childNodes = style.childNodes;
-
-		if (childNodes[index]) style.removeChild(childNodes[index]);
-
-		if (childNodes.length) {
-			style.insertBefore(cssNode, childNodes[index]);
-		} else {
-			style.appendChild(cssNode);
-		}
-	}
-}
-
-function applyToTag (style, obj) {
-	var css = obj.css;
-	var media = obj.media;
-
-	if(media) {
-		style.setAttribute("media", media)
-	}
-
-	if(style.styleSheet) {
-		style.styleSheet.cssText = css;
-	} else {
-		while(style.firstChild) {
-			style.removeChild(style.firstChild);
-		}
-
-		style.appendChild(document.createTextNode(css));
-	}
-}
-
-function updateLink (link, options, obj) {
-	var css = obj.css;
-	var sourceMap = obj.sourceMap;
-
-	/*
-		If convertToAbsoluteUrls isn't defined, but sourcemaps are enabled
-		and there is no publicPath defined then lets turn convertToAbsoluteUrls
-		on by default.  Otherwise default to the convertToAbsoluteUrls option
-		directly
-	*/
-	var autoFixUrls = options.convertToAbsoluteUrls === undefined && sourceMap;
-
-	if (options.convertToAbsoluteUrls || autoFixUrls) {
-		css = fixUrls(css);
-	}
-
-	if (sourceMap) {
-		// http://stackoverflow.com/a/26603875
-		css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
-	}
-
-	var blob = new Blob([css], { type: "text/css" });
-
-	var oldSrc = link.href;
-
-	link.href = URL.createObjectURL(blob);
-
-	if(oldSrc) URL.revokeObjectURL(oldSrc);
-}
-
-
-/***/ }),
-/* 1209 */
-/***/ (function(module, exports) {
-
-
-/**
- * When source maps are enabled, `style-loader` uses a link element with a data-uri to
- * embed the css on the page. This breaks all relative urls because now they are relative to a
- * bundle instead of the current page.
- *
- * One solution is to only use full urls, but that may be impossible.
- *
- * Instead, this function "fixes" the relative urls to be absolute according to the current page location.
- *
- * A rudimentary test suite is located at `test/fixUrls.js` and can be run via the `npm test` command.
- *
- */
-
-module.exports = function (css) {
-  // get current location
-  var location = typeof window !== "undefined" && window.location;
-
-  if (!location) {
-    throw new Error("fixUrls requires window.location");
-  }
-
-	// blank or null?
-	if (!css || typeof css !== "string") {
-	  return css;
-  }
-
-  var baseUrl = location.protocol + "//" + location.host;
-  var currentDir = baseUrl + location.pathname.replace(/\/[^\/]*$/, "/");
-
-	// convert each url(...)
-	/*
-	This regular expression is just a way to recursively match brackets within
-	a string.
-
-	 /url\s*\(  = Match on the word "url" with any whitespace after it and then a parens
-	   (  = Start a capturing group
-	     (?:  = Start a non-capturing group
-	         [^)(]  = Match anything that isn't a parentheses
-	         |  = OR
-	         \(  = Match a start parentheses
-	             (?:  = Start another non-capturing groups
-	                 [^)(]+  = Match anything that isn't a parentheses
-	                 |  = OR
-	                 \(  = Match a start parentheses
-	                     [^)(]*  = Match anything that isn't a parentheses
-	                 \)  = Match a end parentheses
-	             )  = End Group
-              *\) = Match anything and then a close parens
-          )  = Close non-capturing group
-          *  = Match anything
-       )  = Close capturing group
-	 \)  = Match a close parens
-
-	 /gi  = Get all matches, not the first.  Be case insensitive.
-	 */
-	var fixedCss = css.replace(/url\s*\(((?:[^)(]|\((?:[^)(]+|\([^)(]*\))*\))*)\)/gi, function(fullMatch, origUrl) {
-		// strip quotes (if they exist)
-		var unquotedOrigUrl = origUrl
-			.trim()
-			.replace(/^"(.*)"$/, function(o, $1){ return $1; })
-			.replace(/^'(.*)'$/, function(o, $1){ return $1; });
-
-		// already a full url? no change
-		if (/^(#|data:|http:\/\/|https:\/\/|file:\/\/\/)/i.test(unquotedOrigUrl)) {
-		  return fullMatch;
-		}
-
-		// convert the url to a full url
-		var newUrl;
-
-		if (unquotedOrigUrl.indexOf("//") === 0) {
-		  	//TODO: should we add protocol?
-			newUrl = unquotedOrigUrl;
-		} else if (unquotedOrigUrl.indexOf("/") === 0) {
-			// path should be relative to the base url
-			newUrl = baseUrl + unquotedOrigUrl; // already starts with '/'
-		} else {
-			// path should be relative to current directory
-			newUrl = currentDir + unquotedOrigUrl.replace(/^\.\//, ""); // Strip leading './'
-		}
-
-		// send back the fixed url(...)
-		return "url(" + JSON.stringify(newUrl) + ")";
-	});
-
-	// send back the fixed css
-	return fixedCss;
-};
-
-
-/***/ }),
+/* 1207 */,
+/* 1208 */,
+/* 1209 */,
 /* 1210 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -100719,6 +100266,59 @@ module.exports = function() {
 module.exports = __webpack_amd_options__;
 
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 1213 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  imageParser: function imageParser(img) {
+    var default_img = '/assets/images/avatar/small/user_min.png';
+    if (img && img.indexOf('assets') >= 0) {
+      return img;
+    }
+    if (img && img.length && img.indexOf('uploads') < 0) {
+      return '/uploads/media/' + img;
+    }
+    if (img && img.length) {
+      return img;
+    }
+    return default_img;
+  }
+};
+
+/***/ }),
+/* 1214 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  validateField: function validateField(data, name, config) {
+    var is_valid = true;
+    if (config) {
+      var validations = config.validation;
+      _.each(config.validation, function (validate, key) {
+        //Regla para required
+        if (key === 'required') {
+          if (!data || data && data.trim() === '') {
+            is_valid = false;
+          }
+        }
+        //Regla para email
+        if (key === 'email') {
+          var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          is_valid = re.test(data);
+        }
+      });
+    }
+    return is_valid;
+  }
+};
 
 /***/ })
 /******/ ]);

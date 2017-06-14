@@ -1,17 +1,8 @@
 import React from 'react'
 import { Form, Image } from 'semantic-ui-react'
 import R from 'ramda'
+import Helpers from '../../helpers.js';
 
-const imageParser = (img) => {
-  let default_img = '/assets/images/avatar/small/user_min.png';
-  if(img && img.indexOf('assets')>=0){
-    return img;
-  }
-  if(img && img.length){
-    return '/uploads/media/'+img;
-  }
-  return default_img;
-};
 
 const SimpleAvatar = (props) => {
   let config = props.props.model.config;
@@ -20,7 +11,7 @@ const SimpleAvatar = (props) => {
     <Form.Field>
       <label>{el_config.label}</label>
       <div>
-        <Image src={imageParser(props.state.photo)} avatar />
+        <Image src={Helpers.imageParser(props.state.photo)} avatar />
         <span>{props.state.name}</span>
       </div>
     </Form.Field>

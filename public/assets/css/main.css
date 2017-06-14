@@ -69,3 +69,16 @@ h2.ribbon_header {
   position: relative;
   top: 8px;
 }
+
+.card_selector {
+  max-height: 400px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.ui.input.error input {
+  background-color: #FFF6F6 !important;
+  border-color: #E0B4B4 !important;
+  color: #9F3A38 !important;
+  box-shadow: none !important;
+}

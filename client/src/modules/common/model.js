@@ -40,6 +40,17 @@ const Model = (data) => {
     return rec;
   };
 
+  const append = (prop, el) => {
+    appState[prop] = R.append(el, appState[prop]);
+    dispatchChanged();
+  };
+
+  const setFieldState = (name, value) => {
+    const index = appState.config.fields.findIndex(item => item.name === name);
+    appState = R.set(R.lensPath(['config', 'fields', index ,'state']), value, appState);
+
+  };
+
   const dispatchChanged = () => {
     on.changed.dispatch({
       model: appState
@@ -56,8 +67,10 @@ const Model = (data) => {
     on: on,
     get: get,
     set: set,
+    append: append,
     getVoidRecord: getVoidRecord,
-    setRecord: setRecord
+    setRecord: setRecord,
+    setFieldState: setFieldState
   };
 };
 

@@ -8,7 +8,8 @@ module.exports = {
       const uri = dauria.getBase64DataURI(file.buffer, file.mimetype);
       hook.data = {
         uri: uri,
-        user_id: hook.data.user_id
+        user_id: hook.data.user_id,
+        mediatype: hook.data.mediatype
       };
     }
   },
@@ -21,7 +22,7 @@ module.exports = {
       hook.app.service('media').create({
         url: dir_path,
         original_name: hook.params.file.originalname,
-        type: hook.data.media_type
+        mediatype: hook.data.mediatype
       }),
     ]).then(results => {
         if(results && results.length){

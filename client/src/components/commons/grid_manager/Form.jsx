@@ -1,23 +1,23 @@
-import React, { Component } from 'react'
-import { Form, Button, Menu, Segment } from 'semantic-ui-react'
-//import InputText from './inputs/TextComponent.jsx'
-import SimpleInputText from './inputs/TextSimple.jsx'
-import SimpleInputPassword from './inputs/PasswordSimple.jsx'
-import SimpleInputHidden from './inputs/HiddenSimple.jsx'
-import CheckboxSimple from './inputs/CheckboxSimple.jsx'
-import DropdownSelection from './inputs/DropDown.jsx'
-import SimpleTextArea from './inputs/TextAreaSimple.jsx'
-import AvatarSelector from '../AvatarSelector.jsx'
-import SimpleAvatar from './inputs/SimpleAvatar.jsx'
-//import SimpleUpload from './inputs/UploadSimple.jsx'
+import React, { Component } from 'react';
+import { Form, Button, Menu, Segment } from 'semantic-ui-react';
+import SimpleInputText from './inputs/TextSimple.jsx';
+import SimpleInputPassword from './inputs/PasswordSimple.jsx';
+import SimpleInputHidden from './inputs/HiddenSimple.jsx';
+import CheckboxSimple from './inputs/CheckboxSimple.jsx';
+import DropdownSelection from './inputs/DropDown.jsx';
+import SimpleTextArea from './inputs/TextAreaSimple.jsx';
+import AvatarSelector from '../AvatarSelector.jsx';
+import SimpleAvatar from './inputs/SimpleAvatar.jsx';
 import DropzoneComponent from 'react-dropzone-component';
 import R from 'ramda';
-const Promise = require("bluebird");
+import Helpers from '../helpers.js';
+import Promise from 'bluebird';
+
 
 class FormGroup extends Component {
   constructor(props) {
     super(props);
-    this.state = R.merge(props.model.selected_record, {active: 'datos'});
+    this.state = R.merge(props.model.selected_record, {active_tab: 'datos'});
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
@@ -39,6 +39,7 @@ class FormGroup extends Component {
       pr = result.name;
       val = result.value
     }
+    //Caso especial para checkboxes
     if(result && result.type === "checkbox"){
       pr = result.name;
       val = result.checked ? 1 : 0;
@@ -62,12 +63,18 @@ class FormGroup extends Component {
     .configure(feathers.socketio(socket));
     const uploadService = app.service('uploads');
 
-    // Now with Real-Time Support!
+    // Callback de la creación de imágenes en el servidor
     uploadService.on('created', function(file){
-        //alert('Received file created event!', file);
+        //Cambiar la foto del usuario por la recién creada
         self.setState({photo: file.id})
+        //Agregar la nueva imagen a la lista (local/temporal)
+        self.props.controller.addNewAvatar({
+          "url":Helpers.imageParser(file.id),
+          "original_name":"unknown.png",
+          "mediatype":"avatar",
+          "_id":_.uniqueId('temp')
+        });
     });
-
   }
 
   handleCancel(event) {
@@ -77,7 +84,7 @@ class FormGroup extends Component {
 
   tabCanged(event, { name }) {
     event.preventDefault();
-    this.setState({ active: name })
+    this.setState({ active_tab: name })
   }
 
   render() {
@@ -96,15 +103,16 @@ class FormGroup extends Component {
           <Button content='Enviar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
       </Form></Segment>
     } else {
-      if(this.state.active === 'datos'){
+      if(this.state.active_tab === 'datos'){
         fields = _.map(this.state, function (value, key, state) {
+          let el_config = R.find(R.propEq('name', key))(config.fields) || {};
           let p = {
             campo: key,
             props: self.props,
             change: self.handleChange,
-            state: state
+            state: state,
+            field_state: el_config.state
           };
-          let el_config = R.find(R.propEq('name', key))(config.fields);
           switch (el_config.type) {
             case "hidden":
               return <SimpleInputHidden key={key} {...p} />
@@ -131,17 +139,17 @@ class FormGroup extends Component {
               return <SimpleInputText key={key} {...p} />
               break
             default:
-              return <SimpleInputText key={key} {...p} />
+              return ''; //No es un campo del formulario
               break;
           }
         });
         form_view = <Segment attached><Form onSubmit={this.handleSubmit}>
             {fields}
-            <Button content='Enviar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
+            <Button content='Guardar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
         </Form></Segment>
       }
 
-      if(this.state.active === 'fotos'){
+      if(this.state.active_tab === 'fotos'){
         let self = this;
         let myDropzone = null;
         const componentConfig = {
@@ -157,7 +165,7 @@ class FormGroup extends Component {
           dictDefaultMessage: 'O arrastra aquí la foto que deseas usar...',
           params: {
               user_id: self.state._id,
-              media_type: 'avatar'
+              mediatype: 'avatar'
           }
         }
         const eventHandlers = {
@@ -175,7 +183,7 @@ class FormGroup extends Component {
         }
         form_view = (
           <Segment attached>
-            <AvatarSelector {...this.props} avatarSelected={this.avatarSelected} />
+            <AvatarSelector {...this.props} avatarSelected={this.avatarSelected} sel={this.state.photo} />
             <Segment>
               <DropzoneComponent config={componentConfig}
                                  eventHandlers={eventHandlers}
@@ -196,8 +204,8 @@ class FormGroup extends Component {
       return (
         <div>
           <Menu tabular attached>
-            <Menu.Item name='datos' active={this.state.active === 'datos'} onClick={this.tabCanged}>Datos de la Cuenta</Menu.Item>
-            <Menu.Item name='fotos' active={this.state.active === 'fotos'} onClick={this.tabCanged}>Fotos</Menu.Item>
+            <Menu.Item name='datos' active={this.state.active_tab === 'datos'} onClick={this.tabCanged}>Datos de la Cuenta</Menu.Item>
+            <Menu.Item name='fotos' active={this.state.active_tab === 'fotos'} onClick={this.tabCanged}>Avatar</Menu.Item>
           </Menu>
           {form_view}
         </div>

@@ -57,92 +57,101 @@ const Users = function(sb) {
         {
           name: '_id',          type: 'hidden',
           visibility: false, flex: 0, filter: false,
+          message: '',
           validation: {},
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: 'ID'
+          label: 'ID',
+          state: 'initial'
         },
         {
           name: 'name',        type: 'text',
           visibility: true,  flex: 33, filter: true,
           validation: {required: true},
+          message: 'Por favor, ingrese un valor.',
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: 'Nombre'
+          label: 'Nombre',
+          state: 'initial'
         },
         {
           name: 'surname',        type: 'text',
           visibility: true,  flex: 33, filter: true,
           validation: {required: true},
+          message: 'Por favor, ingrese un valor.',
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: 'Apellidos'
+          label: 'Apellidos',
+          state: 'initial'
         },
         {
           name: 'email', type: 'text',
           visibility: true,  flex: 33, filter: true,
-          validation: {required: true, email: true, maxlength: 250},
+          validation: {required: true, email: true},
+          message: 'Por favor, ingrese un valor válido.',
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: 'Correo electrónico'
+          label: 'Correo electrónico',
+          state: 'initial'
         },
         {
           name: 'gender',        type: 'combo',
           visibility: false,  flex: 0, filter: false,
           validation: {},
+          message: '',
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: 'Género'
+          label: 'Género',
+          state: 'initial'
         },
         {
           name: 'role',        type: 'combo',
           visibility: false,  flex: 0, filter: false,
           validation: {},
+          message: '',
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: 'Rol'
+          label: 'Rol',
+          state: 'initial'
         },
         {
           name: 'active',        type: 'boolean',
           visibility: false,  flex: 0, filter: false,
           validation: {},
+          message: '',
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: 'Activo'
+          label: 'Activo',
+          state: 'initial'
         },
         {
           name: 'password',        type: 'password',
           visibility: false,  flex: 0, filter: false,
           validation: {required: true},
+          message: 'Por favor, ingrese un valor.',
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: 'contraseña'
+          label: 'contraseña',
+          state: 'initial'
         },
         {
-          name: 'password_confirmation',        type: 'password',
-          visibility: false,  flex: 0, filter: false,
-          validation: { required: true, equalTo: "password" },
-          constructor: null,
-          wrapped: false,
-          form_visible: true,
-          label: 'Confirmar contraseña'
-        },{
           name: 'photo', type: 'image',
           visibility: false,  flex: 0, filter: false,
-          tooltip: '', validation: {},
+          tooltip: '', validation: {}, message: '',
           messages: {},
           constructor: null,
           wrapped: false,
           form_visible: true,
-          label: 'Foto'
+          label: 'Foto',
+          state: 'initial'
         }],
     }
   };

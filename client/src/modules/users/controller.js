@@ -1,5 +1,6 @@
 const Promise = require("bluebird");
 import ResponsiveHelper from '../common/responsive_helpers.js';
+import Validators from '../common/validators.js';
 import R from 'ramda'
 
 const UsersController = function() {
@@ -9,13 +10,6 @@ const UsersController = function() {
   const feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
   const users = feathersClient.service('/users');
   const media = feathersClient.service('/media');
-
-  const addZero = (i) => {
-    if (i < 10) {
-      i = "0" + i;
-    }
-    return i;
-  };
 
   const initialize = (opts, mdl) => {
     options = opts;
@@ -51,6 +45,7 @@ const UsersController = function() {
       return new Promise(function(resolve, reject){
         _.map(combo_constructors, function (fn, i, obj) {
           let func = Object.keys(fn)[0];
+          //EL inicializados de los combos siempre es un promise
           return fn[func]().then(function(val){
             if(val && val.data){
               model.set(['config','combo_values', val.name], val.data, false);
@@ -100,7 +95,7 @@ const UsersController = function() {
   const getRemoteRecord = (opts) => {
     return users.find({ query: { _id: opts.id } }).then(results => {
       setSelectedRecord(opts, results.data[0], true);
-      return media.find({ query: { type: "avatar", "$limit": 100, } }).then(results => {
+      return media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
         model.set('avatars', results.data, false);
         model.set('state', opts.action, true);
       });
@@ -124,9 +119,7 @@ const UsersController = function() {
   };
 
   const handleSubmit = (data) => {
-    //Validacion: TODO
-    let is_valid = true;
-    if(is_valid){
+    if( validateFields(data) ){
       if(model.get('state') === 'update'){
         doUpdate(data);
       }
@@ -138,26 +131,42 @@ const UsersController = function() {
       }
     } else {
     //TODO: mensaje de error de formulario
+    model.set('state', model.get('state'), true);
     }
+  };
 
+  const validateFields = (data) => {
+    let is_valid = true;
+    let config_fields = model.get(['config', 'fields']);
+    _.map(data, function(field, key){
+      let config = R.find(R.propEq('name', key))(config_fields)
+      if(!Validators.validateField(field, name, config)){
+        is_valid = false;
+        model.setFieldState(key, 'error');
+      } else {
+        model.setFieldState(key, 'initial');
+      }
+    })
+    return is_valid;
   };
 
   const doUpdate = (data) => {
-    Promise.all([
+    return Promise.all([
       users.update(data._id, data, {}),
     ]).then(results => {
         if(results && results.length){
           let index = R.findIndex(R.propEq('_id', results[0]._id))(model.get('records')); //=> 1
           model.setRecord(index, results[0]);
+          resetState();
         } else {
           //TODO: mensaje de error de servidor
+          resetState();
         }
     }).catch(err => {
       //TODO: mensaje de error de servidor
       console.log('Error occurred:', err)
+      resetState();
     });
-    closeModal();
-    model.set('selected_record', null, false);
   };
 
   const doDelete = (data) => {
@@ -166,13 +175,14 @@ const UsersController = function() {
     ]).then(results => {
         return users.find().then(results => {
           model.set('records', results.data, true);
+          resetState();
         });
     }).catch(err => {
       //TODO: mensaje de error de servidor
       console.log('Error occurred:', err)
+      resetState();
     });
-    closeModal();
-    model.set('selected_record', null, false);
+
   };
 
   const doCreate = (data) => {
@@ -182,15 +192,23 @@ const UsersController = function() {
     ]).then(results => {
         return users.find().then(results => {
           model.set('records', results.data, true);
+          resetState();
         });
     }).catch(err => {
       //TODO: mensaje de error de servidor
       console.log('Error occurred:', err)
+      resetState();
     });
+  };
+
+  const resetState = () => {
     closeModal();
     model.set('selected_record', null, false);
   };
 
+  const addNewAvatar = (file) => {
+    model.append('avatars', file);
+  };
 
   const destroy = () => {
     model.destroy();
@@ -202,6 +220,7 @@ const UsersController = function() {
     closeModal: closeModal,
     handleCancel: handleCancel,
     handleSubmit: handleSubmit,
+    addNewAvatar: addNewAvatar,
     destroy: destroy
   };
 };

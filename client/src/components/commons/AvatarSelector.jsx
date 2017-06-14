@@ -1,28 +1,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Card } from 'semantic-ui-react'
+import { Card } from 'semantic-ui-react';
+import Helpers from './helpers.js';
 
-const imageParser = (img) => {
-  let default_img = '/assets/images/avatar/small/user_min.png';
-  if(img && img.indexOf('assets')>=0){
-    return img;
+const getStyle = (avatar, props) => {
+  if(Helpers.imageParser(props.sel) === Helpers.imageParser(avatar.url)){
+    return {
+      border: '3px solid green'
+    };
   }
-  if(img && img.length){
-    return '/uploads/media/'+img;
-  }
-  return default_img;
+  return {
+    border: 'none'
+  };
 };
 
 const cardItems = (props) => {
   const avatars = props.model.avatars || [];
   return avatars.map((avatar) =>
-  <Card key={avatar._id} raised image={imageParser(avatar.url)} onClick={props.avatarSelected.bind(this, {id: avatar._id, url: avatar.url})} />
+  <Card key={avatar._id} raised style={getStyle(avatar, props)} image={Helpers.imageParser(avatar.url)} onClick={props.avatarSelected.bind(this, {id: avatar._id, url: avatar.url})} />
 )};
 
 const AvatarSelector = (props) => {
-  let list = cardItems(props);
-  return (<Card.Group itemsPerRow={10}>
-            {list}
+  return (<Card.Group itemsPerRow={10} className="card_selector">
+            {cardItems(props)}
         </Card.Group>);
 };
 
