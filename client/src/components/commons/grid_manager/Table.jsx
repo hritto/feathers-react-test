@@ -1,7 +1,64 @@
 import React from 'react'
-import { Icon, Label, Menu, Table } from 'semantic-ui-react'
+import { Icon, Label, Menu, Table, Image } from 'semantic-ui-react'
+import ButtonIcon from '../ButtonIcon.jsx';
+import Helpers from '../helpers.js';
+import R from 'ramda';
 
-const TableLayout = () => {
+
+const TableHeader = (props) => {
+  return (
+    <Table.Row>
+      <Table.HeaderCell>Header</Table.HeaderCell>
+      <Table.HeaderCell>Header</Table.HeaderCell>
+      <Table.HeaderCell>Header</Table.HeaderCell>
+    </Table.Row>
+  );
+};
+
+
+const _row = (records) => {
+  return records.map((record) =>
+  <Table.Row  key={record._id}>
+    {_cells(record)}
+  </Table.Row>);
+};
+
+const _cells = (record) => {
+  return record.map((field) => {
+      return (
+        <Table.Cell  key={record._id}>
+          {field.value}
+        </Table.Cell>
+      )
+  });
+};
+
+
+const TableBody = (props) => {
+  debugger;
+  const rows = R.map(_row(props.model.records), props.model.records);
+  return (
+    <Table.Body>
+      {rows}
+    </Table.Body>
+  )
+};
+
+const TableRow = (props) => {
+
+};
+
+const TableLayout = (props) => {
+  return (<Table celled>
+            <TableHeader {...props} />
+            <TableBody {...props} />
+        </Table>);
+};
+
+
+
+
+const TableLayout2 = (props) => {
   return (
     <Table celled>
       <Table.Header>

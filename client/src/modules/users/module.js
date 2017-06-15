@@ -67,7 +67,7 @@ const Users = function(sb) {
         },
         {
           name: 'name',        type: 'text',
-          visibility: true,  flex: 33, filter: true,
+          visibility: true,  flex: 30, filter: true,
           validation: {required: true},
           message: 'Por favor, ingrese un valor.',
           constructor: null,
@@ -78,7 +78,7 @@ const Users = function(sb) {
         },
         {
           name: 'surname',        type: 'text',
-          visibility: true,  flex: 33, filter: true,
+          visibility: true,  flex: 30, filter: true,
           validation: {required: true},
           message: 'Por favor, ingrese un valor.',
           constructor: null,
@@ -89,7 +89,7 @@ const Users = function(sb) {
         },
         {
           name: 'email', type: 'text',
-          visibility: true,  flex: 33, filter: true,
+          visibility: true,  flex: 20, filter: true,
           validation: {required: true, email: true},
           message: 'Por favor, ingrese un valor válido.',
           constructor: null,
@@ -111,7 +111,7 @@ const Users = function(sb) {
         },
         {
           name: 'role',        type: 'combo',
-          visibility: false,  flex: 0, filter: false,
+          visibility: true,  flex: 10, filter: false,
           validation: {},
           message: '',
           constructor: null,
@@ -122,7 +122,7 @@ const Users = function(sb) {
         },
         {
           name: 'active',        type: 'boolean',
-          visibility: false,  flex: 0, filter: false,
+          visibility: true,  flex: 5, filter: false,
           validation: {},
           message: '',
           constructor: null,
@@ -144,7 +144,7 @@ const Users = function(sb) {
         },
         {
           name: 'photo', type: 'image',
-          visibility: false,  flex: 0, filter: false,
+          visibility: true,  flex: 5, filter: false,
           tooltip: '', validation: {}, message: '',
           messages: {},
           constructor: null,

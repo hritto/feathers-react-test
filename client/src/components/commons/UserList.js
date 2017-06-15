@@ -16,20 +16,8 @@ const listItems = (props) => {
   </List.Item>
 )};
 
-const getModal = (props) => {
-  switch (props.model.state) {
-    case "edit":
-      return "";
-      break;
-    default:
-      return "";
-      break;
-  }
-};
-
 const UserList = (props) => {
   let list = listItems(props);
-  let modal = getModal(props);
   return (<List selection verticalAlign='middle'>
             {list}
         </List>);
