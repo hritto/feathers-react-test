@@ -4,111 +4,92 @@ import ButtonIcon from '../ButtonIcon.jsx';
 import Helpers from '../helpers.js';
 import R from 'ramda';
 
+const _renderHeader = (record, config) => {
+  let columns = R.keys(record[0]),
+    display = '',
+    width = '',
+    column_name = '',
+    conf = null,
+    header = R.map((column) => {
+      display = '';
+      conf = R.find(R.propEq('name', column))(config) || {};
+      //Si tiene un nombre que no es el nombre por defecto
+      column_name = conf.name;
 
-const TableHeader = (props) => {
+      if(!conf.visibility){
+        display = 'none';
+      }
+      width = conf.flex + '%';
+      return <th style={{display: display, width: width}} key={'th_'+column_name}>{column_name}</th>;
+    }, columns);
+    return (
+      <Table.Header>
+        <tr key='theader_row'>{header}</tr>
+      </Table.Header>
+    )
+};
+
+
+const _row = (record, config) => {
+  let columns = R.keys(record),
+    style = '',
+    display = '',
+    width = '',
+    content = '',
+    text = '',
+    col_type = '',
+    row_id = '',
+    conf = null,
+    cells = R.map((column) => {
+      debugger;
+      conf = R.find(R.propEq('name', column))(config) || {};
+      col_type = conf.type;
+      text = record[column];
+      // El renderer es una funciÃ³n para formatear los valores de los campos cuando es necesario
+      content = text;
+      if(!conf.visibility){
+        display = 'none';
+      }
+      width = conf.flex + '%';
+      row_id = 'cell-' + conf['name'] + record['_id'];
+
+      return <td style={{display: display, width: width}} key={row_id}>{content}</td>;
+    }, columns);
+
+  return <tr key={'row_'+record._id}>{cells}</tr>
+};
+
+const _renderBody = (records, config) => {
+  const rows = R.map((record) => _row(record, config), records);
   return (
-    <Table.Row>
-      <Table.HeaderCell>Header</Table.HeaderCell>
-      <Table.HeaderCell>Header</Table.HeaderCell>
-      <Table.HeaderCell>Header</Table.HeaderCell>
-    </Table.Row>
-  );
-};
-
-
-const _row = (records) => {
-  return records.map((record) =>
-  <Table.Row  key={record._id}>
-    {_cells(record)}
-  </Table.Row>);
-};
-
-const _cells = (record) => {
-  return record.map((field) => {
-      return (
-        <Table.Cell  key={record._id}>
-          {field.value}
-        </Table.Cell>
-      )
-  });
-};
-
-
-const TableBody = (props) => {
-  debugger;
-  const rows = R.map(_row(props.model.records), props.model.records);
-  return (
-    <Table.Body>
+    <tbody>
       {rows}
-    </Table.Body>
+    </tbody>
   )
 };
 
-const TableRow = (props) => {
-
-};
 
 const TableLayout = (props) => {
-  return (<Table celled>
-            <TableHeader {...props} />
-            <TableBody {...props} />
-        </Table>);
+  const records = props.model.records || [];
+  let no_data = '';
+  //let columns = R.keys(records[0]);
+  let config = props.model.config;
+
+  if(records.length){
+    let head = _renderHeader(records, config.fields);
+    let body = _renderBody(records, config.fields);
+    return (
+      <div id={"table_"+props.title}>
+        <Table celled>
+          {head}
+          {body}
+        </Table>
+      </div>
+    );
+  } else {
+    // Si no hay datos
+    return <p className="no_data">No hay datos para mostrar...</p>
+  }
 };
-
-
-
-
-const TableLayout2 = (props) => {
-  return (
-    <Table celled>
-      <Table.Header>
-        <Table.Row>
-          <Table.HeaderCell>Header</Table.HeaderCell>
-          <Table.HeaderCell>Header</Table.HeaderCell>
-          <Table.HeaderCell>Header</Table.HeaderCell>
-        </Table.Row>
-      </Table.Header>
-
-      <Table.Body>
-        <Table.Row>
-          <Table.Cell>
-            <Label ribbon>First</Label>
-          </Table.Cell>
-          <Table.Cell>Cell</Table.Cell>
-          <Table.Cell>Cell</Table.Cell>
-        </Table.Row>
-        <Table.Row>
-          <Table.Cell>Cell</Table.Cell>
-          <Table.Cell>Cell</Table.Cell>
-          <Table.Cell>Cell</Table.Cell>
-        </Table.Row>
-        <Table.Row>
-          <Table.Cell>Cell</Table.Cell>
-          <Table.Cell>Cell</Table.Cell>
-          <Table.Cell>Cell</Table.Cell>
-        </Table.Row>
-      </Table.Body>
-
-      <Table.Footer>
-      <Table.Row>
-        <Table.HeaderCell colSpan='3'>
-          <Menu floated='right' pagination>
-            <Menu.Item as='a' icon>
-              <Icon name='left chevron' />
-            </Menu.Item>
-            <Menu.Item as='a'>1</Menu.Item>
-            <Menu.Item as='a'>2</Menu.Item>
-            <Menu.Item as='a'>3</Menu.Item>
-            <Menu.Item as='a'>4</Menu.Item>
-            <Menu.Item as='a' icon>
-              <Icon name='right chevron' />
-            </Menu.Item>
-          </Menu>
-        </Table.HeaderCell>
-      </Table.Row>
-      </Table.Footer>
-    </Table>
-  )
-}
 
 export default TableLayout
