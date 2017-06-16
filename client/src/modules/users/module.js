@@ -43,7 +43,10 @@ const Users = function(sb) {
               name: 'role',
               data: [
                 { key: 'admin', value: 'admin', text: 'Administrador' },
-                { key: 'user', value: 'user', text: 'Usuario' }
+                { key: 'editor', value: 'editor', text: 'Editor' },
+                { key: 'profesor', value: 'profesor', text: 'Profesor' },
+                { key: 'user', value: 'user', text: 'Usuario' },
+                { key: 'student', value: 'student', text: 'Alumno' }
               ]
             });
           });
@@ -67,7 +70,7 @@ const Users = function(sb) {
         },
         {
           name: 'name',        type: 'text',
-          visibility: true,  flex: 30, filter: true,
+          visibility: true,  flex: 40, filter: true,
           validation: {required: true},
           message: 'Por favor, ingrese un valor.',
           constructor: null,
@@ -78,7 +81,7 @@ const Users = function(sb) {
         },
         {
           name: 'surname',        type: 'text',
-          visibility: true,  flex: 30, filter: true,
+          visibility: false,  flex: 0, filter: true,
           validation: {required: true},
           message: 'Por favor, ingrese un valor.',
           constructor: null,
@@ -89,7 +92,7 @@ const Users = function(sb) {
         },
         {
           name: 'email', type: 'text',
-          visibility: true,  flex: 20, filter: true,
+          visibility: true,  flex: 30, filter: true,
           validation: {required: true, email: true},
           message: 'Por favor, ingrese un valor válido.',
           constructor: null,
@@ -100,25 +103,39 @@ const Users = function(sb) {
         },
         {
           name: 'gender',        type: 'combo',
-          visibility: false,  flex: 0, filter: false,
-          validation: {},
-          message: '',
-          constructor: null,
-          wrapped: false,
-          form_visible: true,
-          label: 'Género',
-          state: 'initial'
-        },
-        {
-          name: 'role',        type: 'combo',
           visibility: true,  flex: 10, filter: false,
           validation: {},
           message: '',
           constructor: null,
           wrapped: false,
           form_visible: true,
+          label: 'Género',
+          state: 'initial',
+        },
+        {
+          name: 'role',        type: 'combo',
+          visibility: true,  flex: 5, filter: false,
+          validation: {},
+          message: '',
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
           label: 'Rol',
-          state: 'initial'
+          state: 'initial',
+          renderer: function(value){
+            switch (value) {
+              case 'admin':
+                  return 'Administrador'
+              case 'editor':
+                  return 'Editor'
+              case 'user':
+                  return 'Usuario'
+              case 'profesor':
+                  return 'Profesor'
+              default:
+                  return 'Alumno';
+            }
+          }
         },
         {
           name: 'active',        type: 'boolean',
@@ -129,7 +146,8 @@ const Users = function(sb) {
           wrapped: false,
           form_visible: true,
           label: 'Activo',
-          state: 'initial'
+          state: 'initial',
+          
         },
         {
           name: 'password',        type: 'password',
@@ -144,7 +162,7 @@ const Users = function(sb) {
         },
         {
           name: 'photo', type: 'image',
-          visibility: true,  flex: 5, filter: false,
+          visibility: false,  flex: 0, filter: false,
           tooltip: '', validation: {}, message: '',
           messages: {},
           constructor: null,

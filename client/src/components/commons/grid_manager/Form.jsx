@@ -116,31 +116,22 @@ class FormGroup extends Component {
           switch (el_config.type) {
             case "hidden":
               return <SimpleInputHidden key={key} {...p} />
-              break;
             case "text":
               return <SimpleInputText key={key} {...p} />
-              break;
             case "combo":
               return <DropdownSelection key={key} {...p} />
-              break;
             case "textarea":
               return <SimpleTextArea key={key} {...p} />
-              break;
             case "password":
               return <SimpleInputPassword key={key} {...p} />
-              break;
             case "boolean":
               return <CheckboxSimple key={key} {...p} />
-              break;
             case "image":
               return <SimpleAvatar key={key} {...p} />;
-              break
             case "date":
               return <SimpleInputText key={key} {...p} />
-              break
             default:
               return ''; //No es un campo del formulario
-              break;
           }
         });
         form_view = <Segment attached><Form onSubmit={this.handleSubmit}>

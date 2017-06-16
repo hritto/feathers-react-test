@@ -51,6 +51,13 @@ const Model = (data) => {
 
   };
 
+   const resetFieldsState = () => {
+    _.each(appState.config.fields, function(f, i){
+      appState = R.set(R.lensPath(['config', 'fields', i ,'state']), 'initial', appState);
+    });
+  };
+  
+
   const dispatchChanged = () => {
     on.changed.dispatch({
       model: appState
@@ -70,7 +77,8 @@ const Model = (data) => {
     append: append,
     getVoidRecord: getVoidRecord,
     setRecord: setRecord,
-    setFieldState: setFieldState
+    setFieldState: setFieldState,
+    resetFieldsState: resetFieldsState
   };
 };
 

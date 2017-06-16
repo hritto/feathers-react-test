@@ -6,22 +6,20 @@ const button = (typ, props) => {
   let icon = "";
   let options = {
     action: typ,
-    id: props.id
+    id: props.record._id
   };
 
   switch (typ) {
   case 'update':
-    return <Button key={'btn_'+typ} icon='edit' size='tiny' onClick={props.controller.itemClick.bind(this, options)} />
-    break;
+    return <Button key={'btn_'+typ} icon='edit' size='tiny' onClick={props.props.controller.itemClick.bind(this, options)} />
   case 'delete':
-    return <Button key={'btn_'+typ} icon='delete' size='tiny' onClick={props.controller.itemClick.bind(this, options)} />
-    break;
+    return <Button key={'btn_'+typ} icon='delete' size='tiny' onClick={props.props.controller.itemClick.bind(this, options)} />
   }
 };
 
 
 const ButtonIcon = (props) => {
-  let btns = props.model.buttons.map(function(elem){
+  let btns = ['update','delete'].map(function(elem){
     return button(elem, props);
   })
   return (

@@ -12945,6 +12945,12 @@ var Model = function Model(data) {
     appState = _ramda2.default.set(_ramda2.default.lensPath(['config', 'fields', index, 'state']), value, appState);
   };
 
+  var resetFieldsState = function resetFieldsState() {
+    _.each(appState.config.fields, function (f, i) {
+      appState = _ramda2.default.set(_ramda2.default.lensPath(['config', 'fields', i, 'state']), 'initial', appState);
+    });
+  };
+
   var dispatchChanged = function dispatchChanged() {
     on.changed.dispatch({
       model: appState
@@ -12962,7 +12968,8 @@ var Model = function Model(data) {
     append: append,
     getVoidRecord: getVoidRecord,
     setRecord: setRecord,
-    setFieldState: setFieldState
+    setFieldState: setFieldState,
+    resetFieldsState: resetFieldsState
   };
 };
 
@@ -23086,79 +23093,130 @@ var _ramda2 = _interopRequireDefault(_ramda);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _renderHeader = function _renderHeader(record, config) {
+var _renderHeader = function _renderHeader(record, config, props) {
   var columns = _ramda2.default.keys(record[0]),
       display = '',
       width = '',
-      column_name = '',
       conf = null,
       header = _ramda2.default.map(function (column) {
     display = '';
     conf = _ramda2.default.find(_ramda2.default.propEq('name', column))(config) || {};
-    //Si tiene un nombre que no es el nombre por defecto
-    column_name = conf.name;
 
     if (!conf.visibility) {
       display = 'none';
     }
     width = conf.flex + '%';
+
     return _react2.default.createElement(
-      'th',
-      { style: { display: display, width: width }, key: 'th_' + column_name },
-      column_name
+      _semanticUiReact.Table.HeaderCell,
+      { style: { display: display, width: width }, key: 'th_' + conf.label },
+      conf.label
     );
   }, columns);
+  // El extra para los botones
+  header.push(_react2.default.createElement(_semanticUiReact.Table.HeaderCell, { style: { width: '1%' }, key: 'th_btns' }));
   return _react2.default.createElement(
     _semanticUiReact.Table.Header,
     null,
     _react2.default.createElement(
-      'tr',
+      _semanticUiReact.Table.Row,
       { key: 'theader_row' },
       header
     )
   );
 };
 
-var _row = function _row(record, config) {
+var getCellContent = function getCellContent(config, content) {
+  switch (config.type) {
+    case 'boolean':
+      if (content) {
+        return _react2.default.createElement(_semanticUiReact.Icon, { name: 'check', color: 'green', size: 'small' });
+      }
+      return _react2.default.createElement(_semanticUiReact.Icon, { name: 'remove', color: 'red', size: 'small' });
+    case 'image':
+      return _react2.default.createElement(_semanticUiReact.Image, { avatar: true, src: _helpers2.default.imageParser(_helpers2.default.imageParser(content)) });
+    default:
+      return content;
+  }
+};
+
+var _row = function _row(record, config, props) {
   var columns = _ramda2.default.keys(record),
       style = '',
       display = '',
       width = '',
       content = '',
-      text = '',
-      col_type = '',
       row_id = '',
       conf = null,
       cells = _ramda2.default.map(function (column) {
-    debugger;
+    display = '';
     conf = _ramda2.default.find(_ramda2.default.propEq('name', column))(config) || {};
-    col_type = conf.type;
-    text = record[column];
-    // El renderer es una funciÃ³n para formatear los valores de los campos cuando es necesario
-    content = text;
+    if (conf.type !== 'hidden') {
+      // El renderer es una función para formatear los valores de los campos cuando es necesario
+      content = getCellContent(conf, record[column]);
+    }
+
     if (!conf.visibility) {
       display = 'none';
     }
+    if (conf.name === 'gender') {
+      if (record[column] === 'male') {
+        content = _react2.default.createElement(_semanticUiReact.Icon, { name: 'male', size: 'large' });
+      } else {
+        content = _react2.default.createElement(_semanticUiReact.Icon, { name: 'female', size: 'large' });
+      }
+    }
+
+    if (conf.renderer && typeof conf.renderer === 'function') {
+      content = conf.renderer(record[column]);
+    }
+
+    // Celda especial
+    if (conf.name === 'name') {
+      content = _react2.default.createElement(
+        _semanticUiReact.Header,
+        { as: 'h4', image: true },
+        _react2.default.createElement(_semanticUiReact.Image, { avatar: true, src: _helpers2.default.imageParser(_helpers2.default.imageParser(record.photo)) }),
+        _react2.default.createElement(
+          _semanticUiReact.Header.Content,
+          null,
+          record.surname,
+          _react2.default.createElement(
+            _semanticUiReact.Header.Subheader,
+            null,
+            record.name
+          )
+        )
+      );
+    }
+
     width = conf.flex + '%';
     row_id = 'cell-' + conf['name'] + record['_id'];
 
     return _react2.default.createElement(
-      'td',
+      _semanticUiReact.Table.Cell,
       { style: { display: display, width: width }, key: row_id },
       content
     );
   }, columns);
 
+  // Ver si lleva botones
+  cells.push(_react2.default.createElement(
+    _semanticUiReact.Table.Cell,
+    { style: { width: '1%' }, key: 'buttons_' + record._id },
+    _react2.default.createElement(_ButtonIcon2.default, { props: props, record: record, id: 'buttons_' + record._id })
+  ));
+
   return _react2.default.createElement(
-    'tr',
+    _semanticUiReact.Table.Row,
     { key: 'row_' + record._id },
     cells
   );
 };
 
-var _renderBody = function _renderBody(records, config) {
+var _renderBody = function _renderBody(records, config, props) {
   var rows = _ramda2.default.map(function (record) {
-    return _row(record, config);
+    return _row(record, config, props);
   }, records);
   return _react2.default.createElement(
     'tbody',
@@ -23174,14 +23232,14 @@ var TableLayout = function TableLayout(props) {
   var config = props.model.config;
 
   if (records.length) {
-    var head = _renderHeader(records, config.fields);
-    var body = _renderBody(records, config.fields);
+    var head = _renderHeader(records, config.fields, props);
+    var body = _renderBody(records, config.fields, props);
     return _react2.default.createElement(
       'div',
       { id: "table_" + props.title },
       _react2.default.createElement(
         _semanticUiReact.Table,
-        { celled: true },
+        { celled: true, selectable: true },
         head,
         body
       )
@@ -38501,21 +38559,19 @@ var button = function button(typ, props) {
   var icon = "";
   var options = {
     action: typ,
-    id: props.id
+    id: props.record._id
   };
 
   switch (typ) {
     case 'update':
-      return _react2.default.createElement(_semanticUiReact.Button, { key: 'btn_' + typ, icon: 'edit', size: 'tiny', onClick: props.controller.itemClick.bind(undefined, options) });
-      break;
+      return _react2.default.createElement(_semanticUiReact.Button, { key: 'btn_' + typ, icon: 'edit', size: 'tiny', onClick: props.props.controller.itemClick.bind(undefined, options) });
     case 'delete':
-      return _react2.default.createElement(_semanticUiReact.Button, { key: 'btn_' + typ, icon: 'delete', size: 'tiny', onClick: props.controller.itemClick.bind(undefined, options) });
-      break;
+      return _react2.default.createElement(_semanticUiReact.Button, { key: 'btn_' + typ, icon: 'delete', size: 'tiny', onClick: props.props.controller.itemClick.bind(undefined, options) });
   }
 };
 
 var ButtonIcon = function ButtonIcon(props) {
-  var btns = props.model.buttons.map(function (elem) {
+  var btns = ['update', 'delete'].map(function (elem) {
     return button(elem, props);
   });
   return _react2.default.createElement(
@@ -38881,9 +38937,9 @@ var FormGroup = function (_Component) {
       // Callback de la creación de imágenes en el servidor
       uploadService.on('created', function (file) {
         //Cambiar la foto del usuario por la recién creada
-        self.setState({ photo: file.id });
+        self.setState({ photo: file.id }
         //Agregar la nueva imagen a la lista (local/temporal)
-        self.props.controller.addNewAvatar({
+        );self.props.controller.addNewAvatar({
           "url": _helpers2.default.imageParser(file.id),
           "original_name": "unknown.png",
           "mediatype": "avatar",
@@ -38947,31 +39003,22 @@ var FormGroup = function (_Component) {
             switch (el_config.type) {
               case "hidden":
                 return _react2.default.createElement(_HiddenSimple2.default, _extends({ key: key }, p));
-                break;
               case "text":
                 return _react2.default.createElement(_TextSimple2.default, _extends({ key: key }, p));
-                break;
               case "combo":
                 return _react2.default.createElement(_DropDown2.default, _extends({ key: key }, p));
-                break;
               case "textarea":
                 return _react2.default.createElement(_TextAreaSimple2.default, _extends({ key: key }, p));
-                break;
               case "password":
                 return _react2.default.createElement(_PasswordSimple2.default, _extends({ key: key }, p));
-                break;
               case "boolean":
                 return _react2.default.createElement(_CheckboxSimple2.default, _extends({ key: key }, p));
-                break;
               case "image":
                 return _react2.default.createElement(_SimpleAvatar2.default, _extends({ key: key }, p));
-                break;
               case "date":
                 return _react2.default.createElement(_TextSimple2.default, _extends({ key: key }, p));
-                break;
               default:
                 return ''; //No es un campo del formulario
-                break;
             }
           });
           form_view = _react2.default.createElement(
@@ -40342,7 +40389,10 @@ var UsersController = function UsersController() {
         return resolve();
       }).then(function () {
         setSelectedRecord(opts, model.getVoidRecord(), false);
-        model.set('state', opts.action, true);
+        return media.find({ query: { mediatype: "avatar", "$limit": 100 } }).then(function (results) {
+          model.set('avatars', results.data, false);
+          model.set('state', opts.action, true);
+        });
       });
     } else {
       setSelectedRecord(opts, model.getVoidRecord(), false);
@@ -40398,10 +40448,12 @@ var UsersController = function UsersController() {
   };
 
   var closeModal = function closeModal() {
+    model.resetFieldsState();
     model.set('state', 'initial', true);
   };
 
   var handleCancel = function handleCancel() {
+    model.resetFieldsState();
     model.set('state', 'initial', true);
   };
 
@@ -40438,6 +40490,9 @@ var UsersController = function UsersController() {
   };
 
   var doUpdate = function doUpdate(data) {
+    if (data.active_tab) {
+      delete data.active_tab;
+    }
     return Promise.all([users.update(data._id, data, {})]).then(function (results) {
       if (results && results.length) {
         var index = _ramda2.default.findIndex(_ramda2.default.propEq('_id', results[0]._id))(model.get('records')); //=> 1
@@ -40469,6 +40524,9 @@ var UsersController = function UsersController() {
 
   var doCreate = function doCreate(data) {
     delete data._id;
+    if (data.active_tab) {
+      delete data.active_tab;
+    }
     Promise.all([users.create(data)]).then(function (results) {
       return users.find().then(function (results) {
         model.set('records', results.data, true);
@@ -40570,7 +40628,7 @@ var Users = function Users(sb) {
           return new Promise(function (resolve, reject) {
             resolve({
               name: 'role',
-              data: [{ key: 'admin', value: 'admin', text: 'Administrador' }, { key: 'user', value: 'user', text: 'Usuario' }]
+              data: [{ key: 'admin', value: 'admin', text: 'Administrador' }, { key: 'editor', value: 'editor', text: 'Editor' }, { key: 'profesor', value: 'profesor', text: 'Profesor' }, { key: 'user', value: 'user', text: 'Usuario' }, { key: 'student', value: 'student', text: 'Alumno' }]
             });
           });
         }
@@ -40591,7 +40649,7 @@ var Users = function Users(sb) {
         state: 'initial'
       }, {
         name: 'name', type: 'text',
-        visibility: true, flex: 30, filter: true,
+        visibility: true, flex: 40, filter: true,
         validation: { required: true },
         message: 'Por favor, ingrese un valor.',
         constructor: null,
@@ -40601,7 +40659,7 @@ var Users = function Users(sb) {
         state: 'initial'
       }, {
         name: 'surname', type: 'text',
-        visibility: true, flex: 30, filter: true,
+        visibility: false, flex: 0, filter: true,
         validation: { required: true },
         message: 'Por favor, ingrese un valor.',
         constructor: null,
@@ -40611,7 +40669,7 @@ var Users = function Users(sb) {
         state: 'initial'
       }, {
         name: 'email', type: 'text',
-        visibility: true, flex: 20, filter: true,
+        visibility: true, flex: 30, filter: true,
         validation: { required: true, email: true },
         message: 'Por favor, ingrese un valor válido.',
         constructor: null,
@@ -40621,7 +40679,7 @@ var Users = function Users(sb) {
         state: 'initial'
       }, {
         name: 'gender', type: 'combo',
-        visibility: false, flex: 0, filter: false,
+        visibility: true, flex: 10, filter: false,
         validation: {},
         message: '',
         constructor: null,
@@ -40631,14 +40689,28 @@ var Users = function Users(sb) {
         state: 'initial'
       }, {
         name: 'role', type: 'combo',
-        visibility: true, flex: 10, filter: false,
+        visibility: true, flex: 5, filter: false,
         validation: {},
         message: '',
         constructor: null,
         wrapped: false,
         form_visible: true,
         label: 'Rol',
-        state: 'initial'
+        state: 'initial',
+        renderer: function renderer(value) {
+          switch (value) {
+            case 'admin':
+              return 'Administrador';
+            case 'editor':
+              return 'Editor';
+            case 'user':
+              return 'Usuario';
+            case 'profesor':
+              return 'Profesor';
+            default:
+              return 'Alumno';
+          }
+        }
       }, {
         name: 'active', type: 'boolean',
         visibility: true, flex: 5, filter: false,
@@ -40649,6 +40721,7 @@ var Users = function Users(sb) {
         form_visible: true,
         label: 'Activo',
         state: 'initial'
+
       }, {
         name: 'password', type: 'password',
         visibility: false, flex: 0, filter: false,
@@ -40661,7 +40734,7 @@ var Users = function Users(sb) {
         state: 'initial'
       }, {
         name: 'photo', type: 'image',
-        visibility: true, flex: 5, filter: false,
+        visibility: false, flex: 0, filter: false,
         tooltip: '', validation: {}, message: '',
         messages: {},
         constructor: null,

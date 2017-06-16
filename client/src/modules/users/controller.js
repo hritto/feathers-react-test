@@ -55,7 +55,10 @@ const UsersController = function() {
         return resolve();
       }).then(function(){
         setSelectedRecord(opts, model.getVoidRecord(), false);
-        model.set('state', opts.action, true);
+        return media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
+          model.set('avatars', results.data, false);
+          model.set('state', opts.action, true);
+        });
       });
     } else {
       setSelectedRecord(opts, model.getVoidRecord(), false);
@@ -111,10 +114,12 @@ const UsersController = function() {
   };
 
   const closeModal = () => {
+    model.resetFieldsState();
     model.set('state', 'initial', true);
   };
 
   const handleCancel = () => {
+    model.resetFieldsState();
     model.set('state', 'initial', true);
   };
 
@@ -151,6 +156,9 @@ const UsersController = function() {
   };
 
   const doUpdate = (data) => {
+    if(data.active_tab){
+      delete data.active_tab;
+    }
     return Promise.all([
       users.update(data._id, data, {}),
     ]).then(results => {
@@ -187,6 +195,9 @@ const UsersController = function() {
 
   const doCreate = (data) => {
     delete data._id;
+    if(data.active_tab){
+      delete data.active_tab;
+    }
     Promise.all([
       users.create(data),
     ]).then(results => {
