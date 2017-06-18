@@ -62,18 +62,38 @@ const _row = (record, config, props) => {
       if(!conf.visibility){
         display = 'none';
       }
-      
+      if(conf.name === 'gender') {
+        if(record[column] === 'male') {
+          content =  (<Icon name='male' size='large' />);
+        } else {
+          content = (<Icon name='female' size='large' />);
+        }
+      }
+
       if (conf.renderer && typeof conf.renderer === 'function') {
         content = conf.renderer(record[column]);
       }
-      
+
+      // Celda especial
+      if(conf.name === 'name') {
+        content = (
+        <Header as='h4' image>
+          <Image avatar src={Helpers.imageParser(Helpers.imageParser(record.photo))} />
+          <Header.Content>
+            {record.surname}
+            <Header.Subheader>{record.name}</Header.Subheader>
+          </Header.Content>
+        </Header>
+        )
+      }      
+
       width = conf.flex + '%';
       row_id = 'cell-' + conf['name'] + record['_id'];
 
       return <Table.Cell style={{display: display, width: width}} key={row_id}>{content}</Table.Cell>;
     }, columns);
 
-  // Ver si lleva botones
+  // Botones 
   cells.push(<Table.Cell style={{width: '1%'}} key={'buttons_'+record._id}>
     <ButtonIcon props={props} record={record} id={'buttons_'+record._id} />
   </Table.Cell>)
@@ -91,7 +111,7 @@ const _renderBody = (records, config, props) => {
 };
 
 
-const TableLayout = (props) => {
+const UserTable = (props) => {
   const records = props.model.records || [];
   let no_data = '';
   //let columns = R.keys(records[0]);
@@ -114,4 +134,4 @@ const TableLayout = (props) => {
   }
 };
 
-export default TableLayout
+export default UserTable

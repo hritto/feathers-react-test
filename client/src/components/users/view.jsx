@@ -1,7 +1,6 @@
 import React from 'react'
 import { Container, Header, Icon, Button } from 'semantic-ui-react'
-//import UserList from '../../components/commons/UserList.js';
-import TableLayout from '../commons/grid_manager/Table.jsx';
+import UsersTable from './UsersTable.jsx';
 import RibbonHeader from '../commons/header.jsx';
 import ModalView from '../commons/Modal.jsx';
 
@@ -10,7 +9,7 @@ const UsersView = (props) => (
     <RibbonHeader {...props} />
     <Container fluid className="padding-10">
       <ButtonCreate {...props} />
-      <TableLayout {...props} />
+      <UsersTable {...props} />
       <ModalView {...props} />
     </Container>
   </div>
