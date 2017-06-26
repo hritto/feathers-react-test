@@ -8,10 +8,6 @@ const ActivitiesView = (props) => (
     <RibbonHeader {...props} />
     <Container fluid className="padding-10">
       <TableLayout {...props} />
-      <TableLayout {...props} />
-      <TableLayout {...props} />
-      <TableLayout {...props} />
-      <TableLayout {...props} />
     </Container>
   </div>
 )

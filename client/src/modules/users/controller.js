@@ -2,21 +2,24 @@ const Promise = require("bluebird");
 import ResponsiveHelper from '../common/responsive_helpers.js';
 import Validators from '../common/validators.js';
 import R from 'ramda'
+import feathersServices from '../common/feathers_client';
+
 
 const UsersController = function() {
   let options = null;
   let model = null;
   let sb = null;
+/*
   const feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
   const users = feathersClient.service('/users');
   const media = feathersClient.service('/media');
-
+*/
   const initialize = (opts, mdl) => {
     options = opts;
     model = mdl;
     sb = opts.sb;
     ResponsiveHelper();
-    return users.find().then(results => {
+    return feathersServices.users.find().then(results => {
       model.set('records', results.data, true);
     });
   };
@@ -55,7 +58,7 @@ const UsersController = function() {
         return resolve();
       }).then(function(){
         setSelectedRecord(opts, model.getVoidRecord(), false);
-        return media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
+        return feathersServices.media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
           model.set('avatars', results.data, false);
           model.set('state', opts.action, true);
         });
@@ -96,9 +99,9 @@ const UsersController = function() {
   };
 
   const getRemoteRecord = (opts) => {
-    return users.find({ query: { _id: opts.id } }).then(results => {
+    return feathersServices.users.find({ query: { _id: opts.id } }).then(results => {
       setSelectedRecord(opts, results.data[0], true);
-      return media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
+      return feathersServices.media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
         model.set('avatars', results.data, false);
         model.set('state', opts.action, true);
       });
@@ -160,7 +163,7 @@ const UsersController = function() {
       delete data.active_tab;
     }
     return Promise.all([
-      users.update(data._id, data, {}),
+      feathersServices.users.update(data._id, data, {}),
     ]).then(results => {
         if(results && results.length){
           let index = R.findIndex(R.propEq('_id', results[0]._id))(model.get('records')); //=> 1
@@ -181,7 +184,7 @@ const UsersController = function() {
     Promise.all([
       users.remove(data._id, { query: { _id: data._id }})
     ]).then(results => {
-        return users.find().then(results => {
+        return feathersServices.users.find().then(results => {
           model.set('records', results.data, true);
           resetState();
         });
@@ -199,9 +202,9 @@ const UsersController = function() {
       delete data.active_tab;
     }
     Promise.all([
-      users.create(data),
+      feathersServices.users.create(data),
     ]).then(results => {
-        return users.find().then(results => {
+        return feathersServices.users.find().then(results => {
           model.set('records', results.data, true);
           resetState();
         });

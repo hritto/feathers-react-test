@@ -1,7 +1,7 @@
 import React from 'react'
 import { Icon, Label, Menu, Table, Image, Header } from 'semantic-ui-react'
-import ButtonIcon from '../ButtonIcon.jsx';
-import Helpers from '../helpers.js';
+import ButtonIcon from '../commons/ButtonIcon.jsx';
+import Helpers from '../commons/helpers.js';
 import R from 'ramda';
 
 const _renderHeader = (record, config, props) => {

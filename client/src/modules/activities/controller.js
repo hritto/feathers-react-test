@@ -1,5 +1,6 @@
 const Promise = require("bluebird");
 import ResponsiveHelper from '../common/responsive_helpers.js';
+import feathersServices from '../common/feathers_client';
 
 const ActivitiesController = function() {
   let options = null;
@@ -12,26 +13,40 @@ const ActivitiesController = function() {
     model = mdl;
     sb = opts.sb;
     ResponsiveHelper();
-      /*
-    const feathersClient = feathers()
-        .configure(feathers.rest(serverUrl).fetch(fetch))
-    const activity = feathersClient.service('/activity');
-    return activity.find().then(results => {
+    return feathersServices.activities.find().then(results => {
       model.set('records', results.data, true);
-
-      Promise.all([
-        users.create({ email: '2jane.doe@gmail.com', password: '11111', role: 'admin' }),
-        users.create({ email: '2john.doe@gmail.com', password: '22222', role: 'user' }),
-        users.create({ email: '2judy.doe@gmail.com', password: '33333', role: 'user' })
+    });
+    /*
+    //Seed
+    var act_data = {
+      name: 'Actividad Test',
+      activity_type:'click',
+      level: 1,
+      published: true,
+      code_id: '6IZHe1gFlVfWvBbn' 
+    };
+    Promise.all([
+        feathersServices.activities.create(act_data),
       ]).then(results => {
           console.log('created Jane Doe item\n', results[0]);
-          console.log('created John Doe item\n', results[1]);
-          console.log('created Judy Doe item\n', results[2]);
-          return users.find().then(results => console.log('find all items\n', results));
+          return feathersServices.activities.find().then(results => console.log('find all items\n', results));
       }).catch(err => console.log('Error occurred:', err));
-
-    });
     */
+  };
+
+  const itemClick = (opts) => {
+    if(opts.action === 'update'){
+      updClick(opts);
+    }
+
+    if(opts.action === 'create'){
+      addClick(opts);
+    }
+
+    if(opts.action === 'delete'){
+      setSelectedRecord(opts, getLocalRecord(opts), false);
+      model.set('state', opts.action, true);
+    }
   };
 
   const destroy = () => {
@@ -40,6 +55,7 @@ const ActivitiesController = function() {
 
   return {
     initialize: initialize,
+    itemClick: itemClick,
     destroy: destroy
   };
 };
