@@ -21,6 +21,8 @@ const Activities = function(sb) {
     records: [],
     avatars: [],
     selected_record: null,
+    activity_code: null,
+    tab: 'form', // form, layout, preview
     config: {
       combo_constructors: [{
         activity_type: function () {

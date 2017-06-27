@@ -50,7 +50,7 @@
     "react-dropzone": "^3.13.2",
     "react-dropzone-component": "^2.0.0",
     "scaleapp": "^0.4.4",
-    "semantic-ui-react": "^0.68.5",
+    "semantic-ui-react": "^0.70.0",
     "serve-favicon": "^2.4.3",
     "signals": "^1.0.0",
     "socket.io-client": "^2.0.1",
@@ -67,7 +67,6 @@
     "react": "^15.5.4",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
-    "semantic-ui": "^2.2.10",
     "style-loader": "^0.18.2",
     "webpack": "^2.6.1"
   }

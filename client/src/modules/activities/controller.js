@@ -49,6 +49,120 @@ const ActivitiesController = function() {
     }
   };
 
+  const addClick = (opts) => {
+    /*
+    let combo_constructors = model.get(['config','combo_constructors']);
+    let selected_record = {};
+    //ver si hay que cargar combos/datos
+    if (combo_constructors && combo_constructors.length){
+      //Cargar los datos de los combos
+      return new Promise(function(resolve, reject){
+        _.map(combo_constructors, function (fn, i, obj) {
+          let func = Object.keys(fn)[0];
+          //EL inicializados de los combos siempre es un promise
+          return fn[func]().then(function(val){
+            if(val && val.data){
+              model.set(['config','combo_values', val.name], val.data, false);
+            }
+          });
+        });
+        return resolve();
+      }).then(function(){
+        setSelectedRecord(opts, model.getVoidRecord(), false);
+        return feathersServices.media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
+          model.set('avatars', results.data, false);
+          model.set('state', opts.action, true);
+        });
+      });
+    } else {
+      setSelectedRecord(opts, model.getVoidRecord(), false);
+      model.set('state', opts.action, true);
+    }
+    */
+  };
+
+  const updClick = (opts) => {
+    let combo_constructors = model.get(['config','combo_constructors']);
+    let selected_record = {};
+
+    if(!opts.id){
+      closeModal();
+      return;
+    }
+    //ver si hay que cargar combos/datos
+    if (combo_constructors && combo_constructors.length){
+      //Cargar los datos de los combos
+      return new Promise(function(resolve, reject){
+        _.map(combo_constructors, function (fn, i, obj) {
+          let func = Object.keys(fn)[0];
+          return fn[func]().then(function(val){
+            if(val && val.data){
+              model.set(['config','combo_values', val.name], val.data, false);
+            }
+          });
+        });
+        return resolve();
+      }).then(function(){
+        getRemoteRecord(opts);
+      });
+    } else {
+      getRemoteRecord(opts);
+    }
+  };
+
+  const getRemoteRecord = (opts) => {
+    return feathersServices.activities.find({ query: { _id: opts.id } }).then(results => {
+      setSelectedRecord(opts, results.data[0], true);
+      return feathersServices.activityCode.find({ query: { _id: results.data[0].id } }).then(code => {
+        const obj = JSON.parse(code.data[0].code);
+        
+        model.set('activity_code', obj, false);
+        model.set('state', opts.action, true);
+      });
+    });
+  };
+
+  const getLocalRecord = (opts) => {
+    return R.find(R.propEq('_id', opts.id))(model.get('records'));
+  };
+
+  const setSelectedRecord = (opts, record, dispatch) => {
+    model.set('selected_record', record, false);
+  };
+
+  const closeModal = () => {
+    model.resetFieldsState();
+    model.set('state', 'initial', true);
+  };
+
+  const handleCancel = () => {
+    model.resetFieldsState();
+    model.set('state', 'initial', true);
+  };
+
+  const handleSubmit = (data) => {
+    if( validateFields(data) ){
+      if(model.get('state') === 'update'){
+        doUpdate(data);
+      }
+      /*
+      if(model.get('state') === 'create'){
+        doCreate(data);
+      }
+      if(model.get('state') === 'delete'){
+        doDelete(data);
+      }
+      */
+    } else {
+    //TODO: mensaje de error de formulario
+    model.set('state', model.get('state'), true);
+    }
+  };
+
+  const tabClick = (view) => {
+    model.set('tab', view, true);
+  }
+
   const destroy = () => {
     model.destroy();
   };
@@ -56,6 +170,10 @@ const ActivitiesController = function() {
   return {
     initialize: initialize,
     itemClick: itemClick,
+    closeModal: closeModal,
+    handleCancel: handleCancel,
+    handleSubmit: handleSubmit,
+    tabClick: tabClick,
     destroy: destroy
   };
 };
