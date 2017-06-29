@@ -3,14 +3,15 @@ import { Form, Input, Label } from 'semantic-ui-react'
 import R from 'ramda'
 
 const SimpleInputText = (props) => {
+  let lens = props.field;
   return (
     <Form.Field>
-      <label>{props.field}</label>
-      <Input key={'_' + props.field}
+      <label>{props.title}</label>
+      <Input key={'_' + props.title}
         type='text'
-        name={R.join('.', props.field_map)}
+        name={props.name}
         onChange={props.change}
-        value={R.view(R.lensPath(props.field_map), props.state)}
+        value={R.view(R.lensPath(props.field), props.state) || ''}
       />
     </Form.Field>
   )
