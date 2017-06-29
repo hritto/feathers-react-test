@@ -38956,11 +38956,20 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
 var _semanticUiReact = __webpack_require__(23);
+<<<<<<< HEAD
+=======
+
+var _FormPanel = __webpack_require__(1220);
+
+var _FormPanel2 = _interopRequireDefault(_FormPanel);
+>>>>>>> 3dbd85b5b7b03f2b30fa0993c282a941c4e1da3c
 
 var _header = __webpack_require__(193);
 
@@ -38972,21 +38981,116 @@ var _ramda2 = _interopRequireDefault(_ramda);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var ClickForm = function ClickForm(props) {
-    var mapIndexed = _ramda2.default.addIndex(_ramda2.default.map);
-    var panels = mapIndexed(function (code, i) {
-        return {
-            title: 'Escena ' + i + " - " + code.instruction.text,
-            content: code.instruction.text
-        };
-    }, props.model.activity_code.code);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-    return _react2.default.createElement(
-        _semanticUiReact.Segment,
-        { attached: true },
-        _react2.default.createElement(_semanticUiReact.Accordion, { panels: panels, styled: true, fluid: true })
-    );
-};
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ClickForm = function (_Component) {
+    _inherits(ClickForm, _Component);
+
+    function ClickForm(props) {
+        _classCallCheck(this, ClickForm);
+
+        var _this = _possibleConstructorReturn(this, (ClickForm.__proto__ || Object.getPrototypeOf(ClickForm)).call(this, props));
+
+        _this.state = _ramda2.default.merge(props.model.activity_code, {});
+        _this.handleChange = _this.handleChange.bind(_this);
+        _this.handleSubmit = _this.handleSubmit.bind(_this);
+        _this.handleCancel = _this.handleCancel.bind(_this);
+        _this.myDropzone = null;
+        _this._getPanelContent = _this._getPanelContent.bind(_this);
+        _this._renderForm = _this._renderForm.bind(_this);
+        _this._renderLayoutForm = _this._renderLayoutForm.bind(_this);
+
+        //this.uploadedFile = this.uploadedFile.bind(this);
+        return _this;
+    }
+
+    _createClass(ClickForm, [{
+        key: 'handleChange',
+        value: function handleChange(event, result) {
+            var pr = event.target.name;
+            var val = event.target.value;
+            var lensP = _ramda2.default.split('.', pr);
+            debugger;
+            this.setState(function (state) {
+                var lens = _ramda2.default.lensPath(lensP);
+                return _ramda2.default.set(lens, val, state);
+            });
+        }
+    }, {
+        key: 'handleSubmit',
+        value: function handleSubmit(event) {
+            this.props.controller.handleSubmit(this.state);
+            event.preventDefault();
+        }
+    }, {
+        key: 'handleCancel',
+        value: function handleCancel(event) {
+            this.props.controller.handleCancel(this.state);
+            event.preventDefault();
+        }
+    }, {
+        key: '_getPanelContent',
+        value: function _getPanelContent(code, i) {
+            var p = {
+                props: this.props,
+                change: this.handleChange,
+                state: this.state,
+                index: i,
+                code: code
+            };
+            return (0, _FormPanel2.default)(p);
+        }
+    }, {
+        key: '_renderForm',
+        value: function _renderForm() {
+            var self = this;
+            var mapIndexed = _ramda2.default.addIndex(_ramda2.default.map);
+            var panels = mapIndexed(function (code, i) {
+                return self._getPanelContent(code, i);
+            }, this.props.model.activity_code.code);
+
+            return _react2.default.createElement(
+                _semanticUiReact.Segment,
+                { attached: true },
+                _react2.default.createElement(
+                    _semanticUiReact.Form,
+                    { onSubmit: this.handleSubmit },
+                    _react2.default.createElement(_semanticUiReact.Accordion, { panels: panels, styled: true, fluid: true }),
+                    _react2.default.createElement(_semanticUiReact.Button, { content: 'Guardar', primary: true }),
+                    _react2.default.createElement(_semanticUiReact.Button, { content: 'Cancelar', onClick: this.handleCancel, secondary: true })
+                )
+            );
+        }
+    }, {
+        key: '_renderLayoutForm',
+        value: function _renderLayoutForm() {
+            return _react2.default.createElement(
+                _semanticUiReact.Segment,
+                { attached: true },
+                _react2.default.createElement(_semanticUiReact.Button, { content: 'Guardar', primary: true }),
+                _react2.default.createElement(_semanticUiReact.Button, { content: 'Cancelar', onClick: this.handleCancel, secondary: true })
+            );
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            if (this.props.model.tab === 'form') {
+                return this._renderForm();
+            }
+            if (this.props.model.tab === 'layout') {
+                return this._renderLayoutForm();
+            }
+        }
+    }]);
+
+    return ClickForm;
+}(_react.Component);
+
+;
 
 exports.default = ClickForm;
 
@@ -39129,9 +39233,9 @@ var FormGroup = function (_Component) {
       // Callback de la creación de imágenes en el servidor
       uploadService.on('created', function (file) {
         //Cambiar la foto del usuario por la recién creada
-        self.setState({ photo: file.id }
+        self.setState({ photo: file.id });
         //Agregar la nueva imagen a la lista (local/temporal)
-        );self.props.controller.addNewAvatar({
+        self.props.controller.addNewAvatar({
           "url": _helpers2.default.imageParser(file.id),
           "original_name": "unknown.png",
           "mediatype": "avatar",
@@ -39835,6 +39939,7 @@ var _ramda2 = _interopRequireDefault(_ramda);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var SimpleInputText = function SimpleInputText(props) {
+  debugger;
   var config = props.props.model.config;
   var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
   if (el_config.state === 'error') {
@@ -100944,6 +101049,330 @@ module.exports = function() {
 module.exports = __webpack_amd_options__;
 
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 1215 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(23);
+
+var _ramda = __webpack_require__(29);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var CheckboxSimple = function CheckboxSimple(props) {
+  var check = function check(e, result) {
+    props.change(e, result);
+  };
+  var config = props.props.model.config;
+  var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  var checkd = props.state[props.campo] === 1 ? true : false;
+  var label = '';
+  if (el_config.state === 'error') {
+    label = _react2.default.createElement(
+      _semanticUiReact.Label,
+      { basic: true, color: 'red', pointing: 'left' },
+      'Please enter a value'
+    );
+  }
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(_semanticUiReact.Checkbox, {
+      label: el_config.label,
+      name: props.campo,
+      key: '_' + props.campo,
+      onChange: check.bind(undefined),
+      checked: checkd }),
+    label
+  );
+};
+
+exports.default = CheckboxSimple;
+
+/***/ }),
+/* 1216 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(23);
+
+var _ramda = __webpack_require__(29);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DropdownSelection = function DropdownSelection(props) {
+  var config = props.props.model.config;
+  var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  if (el_config.state === 'error') {
+    return _react2.default.createElement(
+      _semanticUiReact.Form.Field,
+      null,
+      _react2.default.createElement(
+        'label',
+        null,
+        el_config.label
+      ),
+      _react2.default.createElement(
+        _semanticUiReact.Label,
+        { basic: true, color: 'red', pointing: 'below' },
+        el_config.message
+      ),
+      _react2.default.createElement(_semanticUiReact.Dropdown, { error: true, placeholder: 'Seleccionar...',
+        fluid: true, selection: true,
+        options: props.props.model.config.combo_values[props.campo],
+        onChange: props.change,
+        name: props.campo,
+        value: props.state[props.campo] })
+    );
+  }
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(
+      'label',
+      null,
+      el_config.label
+    ),
+    _react2.default.createElement(_semanticUiReact.Dropdown, { placeholder: 'Seleccionar...',
+      fluid: true, selection: true,
+      options: props.props.model.config.combo_values[props.campo],
+      onChange: props.change,
+      name: props.campo,
+      value: props.state[props.campo] })
+  );
+};
+
+exports.default = DropdownSelection;
+
+/***/ }),
+/* 1217 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+        value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(23);
+
+var _ramda = __webpack_require__(29);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SimpleInputHidden = function SimpleInputHidden(props) {
+        return _react2.default.createElement(_semanticUiReact.Input, { key: '_' + props.campo,
+                type: 'hidden',
+                name: props.campo,
+                value: props.state[props.campo] });
+};
+
+exports.default = SimpleInputHidden;
+
+/***/ }),
+/* 1218 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(23);
+
+var _ramda = __webpack_require__(29);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SimpleInputPassword = function SimpleInputPassword(props) {
+  var config = props.props.model.config;
+  var el_config = _ramda2.default.find(_ramda2.default.propEq('name', props.campo))(config.fields);
+  if (el_config.state === 'error') {
+    return _react2.default.createElement(
+      _semanticUiReact.Form.Field,
+      null,
+      _react2.default.createElement(
+        'label',
+        null,
+        el_config.label
+      ),
+      _react2.default.createElement(
+        _semanticUiReact.Label,
+        { basic: true, color: 'red', pointing: 'below' },
+        el_config.message
+      ),
+      _react2.default.createElement(_semanticUiReact.Input, { error: true, key: '_' + props.campo,
+        type: 'password',
+        name: props.campo,
+        onChange: props.change,
+        value: props.state[props.campo] })
+    );
+  }
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(
+      'label',
+      null,
+      el_config.label
+    ),
+    _react2.default.createElement(_semanticUiReact.Input, { key: '_' + props.campo,
+      type: 'password',
+      name: props.campo,
+      onChange: props.change,
+      value: props.state[props.campo] })
+  );
+};
+
+exports.default = SimpleInputPassword;
+
+/***/ }),
+/* 1219 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(23);
+
+var _ramda = __webpack_require__(29);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SimpleInputText = function SimpleInputText(props) {
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(
+      'label',
+      null,
+      props.field
+    ),
+    _react2.default.createElement(_semanticUiReact.Input, { key: '_' + props.field,
+      type: 'text',
+      name: _ramda2.default.join('.', props.field_map),
+      onChange: props.change,
+      value: _ramda2.default.view(_ramda2.default.lensPath(props.field_map), props.state)
+    })
+  );
+};
+
+exports.default = SimpleInputText;
+
+/***/ }),
+/* 1220 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(23);
+
+var _TextSimple = __webpack_require__(1219);
+
+var _TextSimple2 = _interopRequireDefault(_TextSimple);
+
+var _PasswordSimple = __webpack_require__(1218);
+
+var _PasswordSimple2 = _interopRequireDefault(_PasswordSimple);
+
+var _HiddenSimple = __webpack_require__(1217);
+
+var _HiddenSimple2 = _interopRequireDefault(_HiddenSimple);
+
+var _CheckboxSimple = __webpack_require__(1215);
+
+var _CheckboxSimple2 = _interopRequireDefault(_CheckboxSimple);
+
+var _DropDown = __webpack_require__(1216);
+
+var _DropDown2 = _interopRequireDefault(_DropDown);
+
+var _ramda = __webpack_require__(29);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var FormPanel = function FormPanel(props) {
+  return {
+    title: 'Escena ' + props.index + " - " + props.code.instruction.text,
+    content: formClickTemplate(props)
+  };
+};
+
+var formClickTemplate = function formClickTemplate(props) {
+  // Agregar las props específicas
+  props['field_map'] = ['code', props.index, 'instruction', 'text'];
+  props['field'] = 'instruction';
+  return (
+    // Título / Instruccion
+    _react2.default.createElement(_TextSimple2.default, _extends({ key: 'instruction_' + props.index }, props))
+  );
+};
+
+exports.default = FormPanel;
 
 /***/ })
 /******/ ]);
