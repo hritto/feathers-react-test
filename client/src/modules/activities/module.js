@@ -8,7 +8,7 @@ if (module.hot) {
   module.hot.accept();
 }
 
-const Activities = function(sb) {
+const Activities = function (sb) {
   'use strict';
 
   //Estado ---> Model
@@ -16,7 +16,8 @@ const Activities = function(sb) {
     title: "Actividades",
     icon: "game",
     route: "activities",
-    permission: "activity",state: "initial", //initial, update, create, delete
+    permission: "activity",
+    state: "initial", //initial, update, create, delete
     buttons: ['update', 'create', 'delete'],
     records: [],
     avatars: [],
@@ -29,26 +30,60 @@ const Activities = function(sb) {
           return new Promise(function (resolve, reject) {
             resolve({
               name: 'activity_type',
-              data: [
-                { key: 'click', value: 'click', text: 'Hacer click' },
-                { key: 'drag', value: 'drag', text: 'Arrastrar y soltar' },
-                { key: 'memory', value: 'memory', text: 'Memoria' },
-                { key: 'paint', value: 'paint', text: 'Dibujo libre' },
-                { key: 'intro', value: 'intro', text: 'Escena introductoria' }
+              data: [{
+                  key: 'click',
+                  value: 'click',
+                  text: 'Hacer click'
+                },
+                {
+                  key: 'drag',
+                  value: 'drag',
+                  text: 'Arrastrar y soltar'
+                },
+                {
+                  key: 'memory',
+                  value: 'memory',
+                  text: 'Memoria'
+                },
+                {
+                  key: 'paint',
+                  value: 'paint',
+                  text: 'Dibujo libre'
+                },
+                {
+                  key: 'intro',
+                  value: 'intro',
+                  text: 'Escena introductoria'
+                }
               ]
             });
           });
         }
-      },{
+      }, {
         level: function () {
           return new Promise(function (resolve, reject) {
             resolve({
               name: 'level',
-              data: [
-                { key: '0', value: 0, text: 'Nivel Inicial' },
-                { key: '1', value: 1, text: 'Nivel Básico' },
-                { key: '2', value: 2, text: 'Nivel Medio' },
-                { key: '3', value: 3, text: 'Nivel Alto' },
+              data: [{
+                  key: '0',
+                  value: 0,
+                  text: 'Nivel Inicial'
+                },
+                {
+                  key: '1',
+                  value: 1,
+                  text: 'Nivel Básico'
+                },
+                {
+                  key: '2',
+                  value: 2,
+                  text: 'Nivel Medio'
+                },
+                {
+                  key: '3',
+                  value: 3,
+                  text: 'Nivel Alto'
+                },
               ]
             });
           });
@@ -58,10 +93,12 @@ const Activities = function(sb) {
       state: 'initial',
       form_columns: 2,
       filter: true,
-      fields: [
-        {
-          name: '_id',          type: 'hidden',
-          visibility: false, flex: 0, filter: false,
+      fields: [{
+          name: '_id',
+          type: 'hidden',
+          visibility: false,
+          flex: 0,
+          filter: false,
           message: '',
           validation: {},
           constructor: null,
@@ -71,9 +108,14 @@ const Activities = function(sb) {
           state: 'initial'
         },
         {
-          name: 'name',        type: 'text',
-          visibility: true,  flex: 40, filter: true,
-          validation: {required: true},
+          name: 'name',
+          type: 'text',
+          visibility: true,
+          flex: 40,
+          filter: true,
+          validation: {
+            required: true
+          },
           message: 'Por favor, ingrese un valor.',
           constructor: null,
           wrapped: false,
@@ -82,8 +124,11 @@ const Activities = function(sb) {
           state: 'initial'
         },
         {
-          name: 'activity_type',        type: 'combo',
-          visibility: true,  flex: 10, filter: false,
+          name: 'activity_type',
+          type: 'combo',
+          visibility: true,
+          flex: 10,
+          filter: false,
           validation: {},
           message: '',
           constructor: null,
@@ -93,8 +138,11 @@ const Activities = function(sb) {
           state: 'initial',
         },
         {
-          name: 'level',        type: 'combo',
-          visibility: true,  flex: 10, filter: false,
+          name: 'level',
+          type: 'combo',
+          visibility: true,
+          flex: 10,
+          filter: false,
           validation: {},
           message: '',
           constructor: null,
@@ -104,8 +152,11 @@ const Activities = function(sb) {
           state: 'initial',
         },
         {
-          name: 'published',        type: 'boolean',
-          visibility: true,  flex: 5, filter: false,
+          name: 'published',
+          type: 'boolean',
+          visibility: true,
+          flex: 5,
+          filter: false,
           validation: {},
           message: '',
           constructor: null,
@@ -113,10 +164,13 @@ const Activities = function(sb) {
           form_visible: true,
           label: 'Publicada',
           state: 'initial',
-          
-        },{
-          name: 'code',        type: 'json',
-          visibility: false,  flex: 0, filter: false,
+
+        }, {
+          name: 'code',
+          type: 'json',
+          visibility: false,
+          flex: 0,
+          filter: false,
           validation: {},
           message: '',
           constructor: null,
@@ -124,7 +178,8 @@ const Activities = function(sb) {
           form_visible: true,
           label: 'Código',
           state: 'initial',
-        }],
+        }
+      ],
     }
   };
 
@@ -145,7 +200,9 @@ const Activities = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    ReactDOM.render( <ActivitiesView {...props} />,
+    ReactDOM.render( < ActivitiesView { ...props
+      }
+      />,
       document.getElementById(options.el)
     );
   };
