@@ -3,7 +3,6 @@ import { Form, Input, Label } from 'semantic-ui-react'
 import R from 'ramda'
 
 const SimpleInputText = (props) => {
-  let lens = props.field;
   return (
     <Form.Field>
       <label>{props.title}</label>

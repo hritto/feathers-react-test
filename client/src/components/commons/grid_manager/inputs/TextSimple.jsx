@@ -3,7 +3,6 @@ import { Form, Input, Label } from 'semantic-ui-react'
 import R from 'ramda'
 
 const SimpleInputText = (props) => {
-  debugger;
   let config = props.props.model.config;
   let el_config = R.find(R.propEq('name', props.campo))(config.fields);
   if (el_config.state === 'error') {

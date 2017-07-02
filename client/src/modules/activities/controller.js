@@ -2,7 +2,7 @@ const Promise = require("bluebird");
 import ResponsiveHelper from '../common/responsive_helpers.js';
 import feathersServices from '../common/feathers_client';
 
-const ActivitiesController = function() {
+const ActivitiesController = function () {
   let options = null;
   let model = null;
   let sb = null;
@@ -35,15 +35,15 @@ const ActivitiesController = function() {
   };
 
   const itemClick = (opts) => {
-    if(opts.action === 'update'){
+    if (opts.action === 'update') {
       updClick(opts);
     }
 
-    if(opts.action === 'create'){
+    if (opts.action === 'create') {
       addClick(opts);
     }
 
-    if(opts.action === 'delete'){
+    if (opts.action === 'delete') {
       setSelectedRecord(opts, getLocalRecord(opts), false);
       model.set('state', opts.action, true);
     }
@@ -82,27 +82,27 @@ const ActivitiesController = function() {
   };
 
   const updClick = (opts) => {
-    let combo_constructors = model.get(['config','combo_constructors']);
+    let combo_constructors = model.get(['config', 'combo_constructors']);
     let selected_record = {};
 
-    if(!opts.id){
+    if (!opts.id) {
       closeModal();
       return;
     }
     //ver si hay que cargar combos/datos
-    if (combo_constructors && combo_constructors.length){
+    if (combo_constructors && combo_constructors.length) {
       //Cargar los datos de los combos
-      return new Promise(function(resolve, reject){
+      return new Promise(function (resolve, reject) {
         _.map(combo_constructors, function (fn, i, obj) {
           let func = Object.keys(fn)[0];
-          return fn[func]().then(function(val){
-            if(val && val.data){
-              model.set(['config','combo_values', val.name], val.data, false);
+          return fn[func]().then(function (val) {
+            if (val && val.data) {
+              model.set(['config', 'combo_values', val.name], val.data, false);
             }
           });
         });
         return resolve();
-      }).then(function(){
+      }).then(function () {
         getRemoteRecord(opts);
       });
     } else {
@@ -115,7 +115,7 @@ const ActivitiesController = function() {
       setSelectedRecord(opts, results.data[0], true);
       return feathersServices.activityCode.find({ query: { _id: results.data[0].id } }).then(code => {
         const obj = JSON.parse(code.data[0].code);
-        
+
         model.set('activity_code', obj, false);
         model.set('state', opts.action, true);
       });
@@ -141,8 +141,8 @@ const ActivitiesController = function() {
   };
 
   const handleSubmit = (data) => {
-    if( validateFields(data) ){
-      if(model.get('state') === 'update'){
+    if (validateFields(data)) {
+      if (model.get('state') === 'update') {
         doUpdate(data);
       }
       /*
@@ -154,8 +154,8 @@ const ActivitiesController = function() {
       }
       */
     } else {
-    //TODO: mensaje de error de formulario
-    model.set('state', model.get('state'), true);
+      //TODO: mensaje de error de formulario
+      model.set('state', model.get('state'), true);
     }
   };
 

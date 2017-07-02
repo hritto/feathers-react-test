@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Container, Header, Icon, Segment, Accordion, Form, Button, Menu, Label, Divider } from 'semantic-ui-react';
+import { Container, Header, Icon, Segment, Accordion, Form, Button, Menu, Label, Divider, Card, Image, Popup } from 'semantic-ui-react';
 import SimpleInputText from '../inputs/TextSimple.jsx';
 import SimpleInputPassword from '../inputs/PasswordSimple.jsx';
 import SimpleInputHidden from '../inputs/HiddenSimple.jsx';
@@ -8,14 +8,19 @@ import CheckboxSimple from '../inputs/CheckboxSimple.jsx';
 import DropdownSelection from '../inputs/DropDown.jsx';
 import Instruction from '../elements/Instruction.jsx';
 import ColorPicker from '../inputs/ColorPicker.jsx';
-
+import LabeledInputText from '../inputs/TextSimpleLabeled.jsx';
+import CheckboxLabeled from '../inputs/CheckboxLabeled.jsx';
+import Helpers from './helpers.js';
+import MediaComponent from '../inputs/MediaComponent.jsx'
 
 import R from 'ramda';
 
 let p = [];
+let main_props = null;
 
 const FormPanel = (props) => {
   p = [];
+  main_props = props;
   //Renderizar solo la escena abierta
   if (props.state.active_index === props.index) {
     return {
@@ -46,8 +51,6 @@ const iterate = (obj, stack, props) => {
 }
 
 const formClickTemplate = (props) => {
-  let elements = [];
-
   /*
   "instruction": {
     "text": "Hacemos algo en equipo. Empiezan con A.",
@@ -66,10 +69,6 @@ const formClickTemplate = (props) => {
   */
   
   /*
-  "timer": { // En realidad se usa solo para la escena 0, pero hay que aprovecharlo para poner Un contador de tiempo
-    "time": 500,
-    "visible": false
-  },
   //ELEMENTS //Depende del type
   "resolution": {},
   */
@@ -113,6 +112,64 @@ const formClickTemplate = (props) => {
   */
   //{iterate(props.state.code[props.index], 'code.' + props.index, props)}
 
+  const newElementClick = (opts) => {
+    debugger;
+  };
+
+  const deleteElementClick = (opts) => {
+    debugger;
+  };  
+
+  const getActivityElements = (elements_array, scene_index) => {
+    let el_arr = [];
+    R.mapObjIndexed(function (element, key) {
+        el_arr.push(_getElementContent(element, key, scene_index));
+    }, elements_array);
+    return <Card.Group key={'main_elements_'+scene_index}>{el_arr}</Card.Group>
+  };
+
+  const getMediaImageUrl = (img) => {
+    return props.state.media.images[img];
+  };
+
+  const _getElementContent = (el, el_key, scene_index) => {
+    let image = '';
+    let meta = <Card.Meta>Tipo: Respuesta - Clickable</Card.Meta>;
+    if(el.image){
+      image = <Image key={'image'+el.image} floated='right' size='mini' src={Helpers.uploadedImage(getMediaImageUrl(el.image))} />
+    }
+    if(el.type === 'question_model'){
+      meta = <Card.Meta key={el.type+_.uniqueId()} >Tipo: Pregunta/Modelo</Card.Meta>;
+    }
+    return (<Card key={'element_'+el.id}>
+      <Card.Content key={'content_'+_.uniqueId()}>
+        {image}
+        <Card.Header key={'header_'+_.uniqueId()}>
+          {el.id}
+        </Card.Header>
+        {meta}
+        <Card.Description>
+         <Popup
+          trigger={ <Button circular icon='remove circle' floated='right' onClick={deleteElementClick.bind(this, {action: 'delete', element: el.id})} />}
+          content='Borrar elemento.'
+          on='hover'
+        />
+        </Card.Description>
+      </Card.Content>
+      <Card.Content extra  key={'extra_content_'+_.uniqueId()}>
+        <MediaComponent {...props} 
+          name={R.join('.', ['code', scene_index, 'elements', el_key])} 
+          title = 'Mostrar la instrucción al iniciar' 
+          field = {['code', scene_index, 'elements', el_key]} 
+          options = {{image: el.image,
+            sound: el.sound,
+            text: el.text
+          }}/>
+      </Card.Content>
+    </Card>)
+  };
+
+  const elements = getActivityElements(props.state.code[props.index].elements, props.index);
 
   return (
     <div>
@@ -142,8 +199,8 @@ const formClickTemplate = (props) => {
         options = {[{ key: 'click', value: '1', text: 'Click' }]}
         />
       </Form.Group>
-      
-      <Form.Group widths='equals'>
+      <Divider section />
+      <Form.Group widths='equal'>
         <Form.Field>
           <label>Botones de navegación</label>
         </Form.Field>
@@ -178,6 +235,32 @@ const formClickTemplate = (props) => {
             field = {['code', props.index, 'buttons_visible','btn_info']}/>
         </Form.Field>
       </Form.Group>
+      <Divider section />
+      <Form.Field>
+        <label>Contador de tiempo</label>
+      </Form.Field>
+      <Form.Group widths='equal'>
+        <Form.Field>
+          <LabeledInputText key={'timer' + _.uniqueId()} {...props}
+            name={R.join('.', ['code', props.index, 'timer', 'time'])} 
+            title = 'Tiempo'
+            field = {['code', props.index, 'timer', 'time']} 
+            label = 'ms.'
+            label_position = 'right' />
+        </Form.Field>
+        <Form.Field>
+          <CheckboxLabeled {...props} 
+            name={R.join('.', ['code', props.index, 'timer','visible'])} 
+            title = 'Visible' 
+              field = {['code', props.index, 'timer','visible']}/>
+        </Form.Field>
+      </Form.Group>
+      <Divider section />
+      <Form.Field>
+        <label>Elementos de la actividad</label>
+      </Form.Field>
+       <Button content='Crear nuevo elemento' icon='add circle' labelPosition='left' onClick={newElementClick.bind(this, {action: 'create'})} />
+      {elements}
     </div>
   );
 };

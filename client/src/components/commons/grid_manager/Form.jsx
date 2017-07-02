@@ -9,6 +9,7 @@ import SimpleTextArea from './inputs/TextAreaSimple.jsx';
 import AvatarSelector from '../AvatarSelector.jsx';
 import SimpleAvatar from './inputs/SimpleAvatar.jsx';
 import DropzoneComponent from 'react-dropzone-component';
+import uploadService from '../../../modules/common/feathers_client_io.js'
 import R from 'ramda';
 import Helpers from '../helpers.js';
 import Promise from 'bluebird';
@@ -17,7 +18,7 @@ import Promise from 'bluebird';
 class FormGroup extends Component {
   constructor(props) {
     super(props);
-    this.state = R.merge(props.model.selected_record, {active_tab: 'datos'});
+    this.state = R.merge(props.model.selected_record, { active_tab: 'datos' });
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
@@ -29,18 +30,18 @@ class FormGroup extends Component {
   }
 
   avatarSelected(opts) {
-    this.setState({photo: opts.url});
+    this.setState({ photo: opts.url });
   }
 
   handleChange(event, result) {
     let pr = event.target.name;
     let val = event.target.value
-    if(!pr && !val && result){ //Special fields: radiogroup, dropdown...
+    if (!pr && !val && result) { //Special fields: radiogroup, dropdown...
       pr = result.name;
       val = result.value
     }
     //Caso especial para checkboxes
-    if(result && result.type === "checkbox"){
+    if (result && result.type === "checkbox") {
       pr = result.name;
       val = result.checked ? 1 : 0;
     }
@@ -57,23 +58,18 @@ class FormGroup extends Component {
 
   componentDidMount() {
     let self = this;
-    const socket = io('http://localhost:3030');
-    const app = feathers()
-    .configure(feathers.hooks())
-    .configure(feathers.socketio(socket));
-    const uploadService = app.service('uploads');
 
     // Callback de la creación de imágenes en el servidor
-    uploadService.on('created', function(file){
-        //Cambiar la foto del usuario por la recién creada
-        self.setState({photo: file.id})
-        //Agregar la nueva imagen a la lista (local/temporal)
-        self.props.controller.addNewAvatar({
-          "url":Helpers.imageParser(file.id),
-          "original_name":"unknown.png",
-          "mediatype":"avatar",
-          "_id":_.uniqueId('temp')
-        });
+    uploadService.removeListener('created').on('created', function (file) {
+      //Cambiar la foto del usuario por la recién creada
+      self.setState({ photo: file.id })
+      //Agregar la nueva imagen a la lista (local/temporal)
+      self.props.controller.addNewAvatar({
+        "url": Helpers.imageParser(file.id),
+        "original_name": "unknown.png",
+        "mediatype": "avatar",
+        "_id": _.uniqueId('temp')
+      });
     });
   }
 
@@ -95,15 +91,15 @@ class FormGroup extends Component {
     let photo = '';
     let form_view = '';
 
-    if(this.props.model.state === 'delete'){
+    if (this.props.model.state === 'delete') {
       frase = '¿Está seguro de borrar al usuario: ' + this.props.model.selected_record.name + " " + this.props.model.selected_record.surname + "?"
       fields = <p>{frase}</p>
       form_view = <Segment attached><Form onSubmit={this.handleSubmit}>
-          {fields}
-          <Button content='Enviar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
+        {fields}
+        <Button content='Enviar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
       </Form></Segment>
     } else {
-      if(this.state.active_tab === 'datos'){
+      if (this.state.active_tab === 'datos') {
         fields = _.map(this.state, function (value, key, state) {
           let el_config = R.find(R.propEq('name', key))(config.fields) || {};
           let p = {
@@ -135,18 +131,18 @@ class FormGroup extends Component {
           }
         });
         form_view = <Segment attached><Form onSubmit={this.handleSubmit}>
-            {fields}
-            <Button content='Guardar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
+          {fields}
+          <Button content='Guardar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
         </Form></Segment>
       }
 
-      if(this.state.active_tab === 'fotos'){
+      if (this.state.active_tab === 'fotos') {
         let self = this;
         let myDropzone = null;
         const componentConfig = {
-            iconFiletypes: ['.jpg', '.png', '.gif'],
-            showFiletypeIcon: true,
-            postUrl: '/uploads',
+          iconFiletypes: ['.jpg', '.png', '.gif'],
+          showFiletypeIcon: true,
+          postUrl: '/uploads',
 
         };
         const djsConfig = {
@@ -155,19 +151,19 @@ class FormGroup extends Component {
           acceptedFiles: ".png,.jpg,.gif,.jpeg",
           dictDefaultMessage: 'O arrastra aquí la foto que deseas usar...',
           params: {
-              user_id: self.state._id,
-              mediatype: 'avatar'
+            user_id: self.state._id,
+            mediatype: 'avatar'
           }
         }
         const eventHandlers = {
-          init: function(dz){
-              dz.on('uploadprogress', function(file, progress){
-                  console.log('progresss', progress);
-              });
-              self.myDropzone = dz;
+          init: function (dz) {
+            dz.on('uploadprogress', function (file, progress) {
+              console.log('progresss', progress);
+            });
+            self.myDropzone = dz;
           },
-          complete: function(file) {
-            return Promise.delay(2000).then(function(){
+          complete: function (file) {
+            return Promise.delay(2000).then(function () {
               self.myDropzone.removeFile(file);
             });
           }
@@ -177,15 +173,15 @@ class FormGroup extends Component {
             <AvatarSelector {...this.props} avatarSelected={this.avatarSelected} sel={this.state.photo} />
             <Segment>
               <DropzoneComponent config={componentConfig}
-                                 eventHandlers={eventHandlers}
-                                 djsConfig={djsConfig} />
+                eventHandlers={eventHandlers}
+                djsConfig={djsConfig} />
             </Segment>
           </Segment>
         );
       }
     }
 
-    if(this.props.model.state === 'delete'){
+    if (this.props.model.state === 'delete') {
       return (
         <div>
           {form_view}
