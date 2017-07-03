@@ -161,7 +161,11 @@ const ActivitiesController = function () {
 
   const tabClick = (view) => {
     model.set('tab', view, true);
-  }
+  };
+
+  const updateActivityCode = (data) => {
+    model.set('activity_code', data, false);
+  };
 
   const destroy = () => {
     model.destroy();
@@ -174,6 +178,7 @@ const ActivitiesController = function () {
     handleCancel: handleCancel,
     handleSubmit: handleSubmit,
     tabClick: tabClick,
+    updateActivityCode: updateActivityCode,
     destroy: destroy
   };
 };

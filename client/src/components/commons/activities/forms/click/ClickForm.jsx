@@ -30,7 +30,7 @@ class ClickForm extends Component {
         this._setAddMedia = this._setAddMedia.bind(this);
         this._addMediaState = this._addMediaState.bind(this);
         this._setErrors = this._setErrors.bind(this);
-        //this._getMediaForm = this._getMediaForm.bind(this);
+
     }
 
     _setErrors(opts) {

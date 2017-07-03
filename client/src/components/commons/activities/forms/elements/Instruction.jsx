@@ -6,9 +6,9 @@ const IntructionComponent = (props) => {
   return (
     <div>
       <SimpleInputText key={'instruction' + _.uniqueId()} {...props}
-        name={R.join('.', ['code', props.index, 'instruction', 'text'])} 
-        title = 'Instrucción'
-        field = {['code', props.index, 'instruction', 'text']} />
+        name={R.join('.', ['code', props.index, 'instruction', 'text'])}
+        title='Instrucción'
+        field={['code', props.index, 'instruction', 'text']} />
       <div>Audio:TODO</div>
     </div>
   )
