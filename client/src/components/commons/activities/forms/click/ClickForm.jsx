@@ -17,21 +17,27 @@ class ClickForm extends Component {
             error_messages: []
         });
         this.handleChange = this.handleChange.bind(this);
-        this.handleCheck = this.handleCheck.bind(this);
-        this.handleSelect = this.handleSelect.bind(this);
-        this.changeColor = this.changeColor.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
+        this.handleDeleteElement = this.handleDeleteElement.bind(this);
+        this.handleCreateElement = this.handleCreateElement.bind(this);
         this.myDropzone = null;
         this._getPanelContent = this._getPanelContent.bind(this);
-        this._renderForm = this._renderForm.bind(this);
+        this._renderFieldsForm = this._renderFieldsForm.bind(this);
         this._renderLayoutForm = this._renderLayoutForm.bind(this);
         this._setActiveIndex = this._setActiveIndex.bind(this);
         this._setAddMedia = this._setAddMedia.bind(this);
         this._addMediaState = this._addMediaState.bind(this);
         this._setErrors = this._setErrors.bind(this);
-
+        this._updateModel = this._updateModel.bind(this);
     }
+
+    _updateModel() {
+        this.props.controller.updateActivityCode({
+            code: this.state.code,
+            media: this.state.media
+        });
+    };
 
     _setErrors(opts) {
         let errors = [];
@@ -53,53 +59,41 @@ class ClickForm extends Component {
             val = null;
         }
         this.setState((state) => {
-            const lens = R.lensProp('active_index');
-            return R.set(lens, val, state);
+            return R.set(R.lensProp('active_index'), val, state);
         });
         window.dispatchEvent(new Event('resize'));
     };
 
-    handleChange(event, result) {
-        let pr = event.target.name;
-        let val = event.target.value
-        let lensP = R.split('.', pr);
+    handleChange(lens, value) {
         this.setState((state) => {
-            const lens = R.lensPath(lensP);
-            return R.set(lens, val, state);
+            return R.set(R.lensPath(lens), value, state);
+        }, function () {
+            this._updateModel();
         });
     }
 
-    changeColor(lens, color) {
-        let val = color;
-        let lensP = lens;
+    handleDeleteElement(element_id, i) {
         this.setState((state) => {
-            const lens = R.lensPath(lensP);
-            return R.set(lens, val, state);
+            const st = R.clone(state);
+            delete st.code[i].elements[element_id];
+            return st;
+        }, function () {
+            this._updateModel();
         });
     }
 
-    handleCheck(event, result) {
-        let pr = result.name;
-        let val = result.checked
-        let lensP = R.split('.', pr);
+    handleCreateElement(element, i, name) {
         this.setState((state) => {
-            const lens = R.lensPath(lensP);
-            return R.set(lens, val, state);
-        });
-    }
-
-    handleSelect(event, result) {
-        let pr = result.name;
-        let val = result.value
-        let lensP = R.split('.', pr);
-        this.setState((state) => {
-            const lens = R.lensPath(lensP);
-            return R.set(lens, val, state);
+            const st = R.clone(state);
+            st.code[i].elements[name] = element;
+            return st;
+        }, function () {
+            this._updateModel();
         });
     }
 
     handleSubmit(event) {
-        this.props.controller.handleSubmit(this.state);
+        this._updateModel();
         event.preventDefault();
     }
 
@@ -107,15 +101,15 @@ class ClickForm extends Component {
         this.props.controller.handleCancel(this.state);
         event.preventDefault();
     }
+
     _getPanelContent(code, i) {
         let p = {
             props: this.props,
             change: this.handleChange,
-            check: this.handleCheck,
-            select: this.handleSelect,
-            color: this.changeColor,
             state: this.state,
             index: i,
+            handleDeleteElement: this.handleDeleteElement,
+            handleCreateElement: this.handleCreateElement,
             media: this._setAddMedia
         };
         return FormPanel(p);
@@ -178,13 +172,14 @@ class ClickForm extends Component {
                 media_description: '',
                 error_messages: []
             };
+        }, function () {
+            this._updateModel();
+            console.log(this.state)
         });
-
-        console.log(this.state)
     }
 
 
-    _renderForm() {
+    _renderFieldsForm() {
         const self = this;
         const mapIndexed = R.addIndex(R.map);
         let media_form = ''
@@ -219,7 +214,7 @@ class ClickForm extends Component {
 
     render() {
         if (this.props.model.tab === 'form') {
-            return this._renderForm();
+            return this._renderFieldsForm();
         }
         if (this.props.model.tab === 'layout') {
             return this._renderLayoutForm();

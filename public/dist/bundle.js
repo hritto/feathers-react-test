@@ -17542,6 +17542,11 @@ var _ramda2 = _interopRequireDefault(_ramda);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var SimpleInputText = function SimpleInputText(props) {
+  var handleChange = function handleChange(lens, evt) {
+    var value = evt.target.value;
+    props.change(lens, evt.target.value);
+  };
+
   return _react2.default.createElement(
     _semanticUiReact.Form.Field,
     null,
@@ -17553,7 +17558,7 @@ var SimpleInputText = function SimpleInputText(props) {
     _react2.default.createElement(_semanticUiReact.Input, { key: '_' + props.title,
       type: 'text',
       name: props.name,
-      onChange: props.change,
+      onChange: handleChange.bind(undefined, props.field),
       value: _ramda2.default.view(_ramda2.default.lensPath(props.field), props.state) || ''
     })
   );
@@ -42753,24 +42758,31 @@ var ClickForm = function (_Component) {
             error_messages: []
         });
         _this.handleChange = _this.handleChange.bind(_this);
-        _this.handleCheck = _this.handleCheck.bind(_this);
-        _this.handleSelect = _this.handleSelect.bind(_this);
-        _this.changeColor = _this.changeColor.bind(_this);
         _this.handleSubmit = _this.handleSubmit.bind(_this);
         _this.handleCancel = _this.handleCancel.bind(_this);
+        _this.handleDeleteElement = _this.handleDeleteElement.bind(_this);
+        _this.handleCreateElement = _this.handleCreateElement.bind(_this);
         _this.myDropzone = null;
         _this._getPanelContent = _this._getPanelContent.bind(_this);
-        _this._renderForm = _this._renderForm.bind(_this);
+        _this._renderFieldsForm = _this._renderFieldsForm.bind(_this);
         _this._renderLayoutForm = _this._renderLayoutForm.bind(_this);
         _this._setActiveIndex = _this._setActiveIndex.bind(_this);
         _this._setAddMedia = _this._setAddMedia.bind(_this);
         _this._addMediaState = _this._addMediaState.bind(_this);
         _this._setErrors = _this._setErrors.bind(_this);
-
+        _this._updateModel = _this._updateModel.bind(_this);
         return _this;
     }
 
     _createClass(ClickForm, [{
+        key: '_updateModel',
+        value: function _updateModel() {
+            this.props.controller.updateActivityCode({
+                code: this.state.code,
+                media: this.state.media
+            });
+        }
+    }, {
         key: '_setErrors',
         value: function _setErrors(opts) {
             var errors = [];
@@ -42792,58 +42804,45 @@ var ClickForm = function (_Component) {
                 val = null;
             }
             this.setState(function (state) {
-                var lens = _ramda2.default.lensProp('active_index');
-                return _ramda2.default.set(lens, val, state);
+                return _ramda2.default.set(_ramda2.default.lensProp('active_index'), val, state);
             });
             window.dispatchEvent(new Event('resize'));
         }
     }, {
         key: 'handleChange',
-        value: function handleChange(event, result) {
-            var pr = event.target.name;
-            var val = event.target.value;
-            var lensP = _ramda2.default.split('.', pr);
+        value: function handleChange(lens, value) {
             this.setState(function (state) {
-                var lens = _ramda2.default.lensPath(lensP);
-                return _ramda2.default.set(lens, val, state);
+                return _ramda2.default.set(_ramda2.default.lensPath(lens), value, state);
+            }, function () {
+                this._updateModel();
             });
         }
     }, {
-        key: 'changeColor',
-        value: function changeColor(lens, color) {
-            var val = color;
-            var lensP = lens;
+        key: 'handleDeleteElement',
+        value: function handleDeleteElement(element_id, i) {
             this.setState(function (state) {
-                var lens = _ramda2.default.lensPath(lensP);
-                return _ramda2.default.set(lens, val, state);
+                var st = _ramda2.default.clone(state);
+                delete st.code[i].elements[element_id];
+                return st;
+            }, function () {
+                this._updateModel();
             });
         }
     }, {
-        key: 'handleCheck',
-        value: function handleCheck(event, result) {
-            var pr = result.name;
-            var val = result.checked;
-            var lensP = _ramda2.default.split('.', pr);
+        key: 'handleCreateElement',
+        value: function handleCreateElement(element, i, name) {
             this.setState(function (state) {
-                var lens = _ramda2.default.lensPath(lensP);
-                return _ramda2.default.set(lens, val, state);
-            });
-        }
-    }, {
-        key: 'handleSelect',
-        value: function handleSelect(event, result) {
-            var pr = result.name;
-            var val = result.value;
-            var lensP = _ramda2.default.split('.', pr);
-            this.setState(function (state) {
-                var lens = _ramda2.default.lensPath(lensP);
-                return _ramda2.default.set(lens, val, state);
+                var st = _ramda2.default.clone(state);
+                st.code[i].elements[name] = element;
+                return st;
+            }, function () {
+                this._updateModel();
             });
         }
     }, {
         key: 'handleSubmit',
         value: function handleSubmit(event) {
-            this.props.controller.handleSubmit(this.state);
+            this._updateModel();
             event.preventDefault();
         }
     }, {
@@ -42858,11 +42857,10 @@ var ClickForm = function (_Component) {
             var p = {
                 props: this.props,
                 change: this.handleChange,
-                check: this.handleCheck,
-                select: this.handleSelect,
-                color: this.changeColor,
                 state: this.state,
                 index: i,
+                handleDeleteElement: this.handleDeleteElement,
+                handleCreateElement: this.handleCreateElement,
                 media: this._setAddMedia
             };
             return (0, _FormPanel2.default)(p);
@@ -42928,13 +42926,14 @@ var ClickForm = function (_Component) {
                     media_description: '',
                     error_messages: []
                 };
+            }, function () {
+                this._updateModel();
+                console.log(this.state);
             });
-
-            console.log(this.state);
         }
     }, {
-        key: '_renderForm',
-        value: function _renderForm() {
+        key: '_renderFieldsForm',
+        value: function _renderFieldsForm() {
             var self = this;
             var mapIndexed = _ramda2.default.addIndex(_ramda2.default.map);
             var media_form = '';
@@ -42975,7 +42974,7 @@ var ClickForm = function (_Component) {
         key: 'render',
         value: function render() {
             if (this.props.model.tab === 'form') {
-                return this._renderForm();
+                return this._renderFieldsForm();
             }
             if (this.props.model.tab === 'layout') {
                 return this._renderLayoutForm();
@@ -43061,19 +43060,37 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var p = [];
 var main_props = null;
+var index = null;
+var element_default = {
+  "id": null,
+  "pos": {
+    "x": 0,
+    "y": 0
+  },
+  "size": {
+    "w": 100,
+    "h": 100
+  },
+  "image": null,
+  "sound": null,
+  "text": null,
+  "type": "clickable"
+};
 
 var FormPanel = function FormPanel(props) {
   p = [];
   main_props = props;
+  index = parseInt(props.index, 10);
+
   //Renderizar solo la escena abierta
-  if (props.state.active_index === props.index) {
+  if (parseInt(props.state.active_index, 10) === index) {
     return {
-      title: 'Escena ' + props.index,
+      title: 'Escena ' + index,
       content: formClickTemplate(props)
     };
   }
   return {
-    title: 'Escena ' + props.index,
+    title: 'Escena ' + index,
     content: ''
   };
 };
@@ -43084,41 +43101,63 @@ var formClickTemplate = function formClickTemplate(props) {
     "text": "Hacemos algo en equipo. Empiezan con A.",
     "sound": "titulo0"
   }
-  
-  Configuracion general de la escena
-  "size": {
-    "w": 1000,
-    "h": 560
-  },
-  hidden default--->menu_url": "../../index.html", //Dónde se va al hacer click en volver
-  hidden default--->debug": false, //Este flag indica si estamos en modo debug. Si es true, el radio de render es 1 (no se ajusta)
-  hidden default--->main_el": "main", //El contenedor de la actividad
-  hidden default--->scene_el": "container", //Contenedor de la escena
-  */
-
-  /*
   //ELEMENTS //Depende del type
   "resolution": {},
   */
-  //{iterate(props.state.code[props.index], 'code.' + props.index, props)}
 
   var newElementClick = function newElementClick(opts) {
-    debugger;
+    var element = _ramda2.default.clone(element_default);
+    var name = 'answer_' + (_ramda2.default.keys(props.state.code[opts.index].elements).length + 1);
+    element.id = name;
+    props.handleCreateElement(element, opts.index, name);
+  };
+
+  var newModelElementClick = function newModelElementClick(opts) {
+    var element = _ramda2.default.clone(element_default);
+    var name = 'question';
+    element.id = name;
+    element.type = 'question_model';
+    element.size = {
+      "w": 920,
+      "h": 80
+    };
+    element.pos = {
+      "x": 1,
+      "y": 1
+    };
+    props.handleCreateElement(element, opts.index, name);
   };
 
   var deleteElementClick = function deleteElementClick(opts) {
-    debugger;
+    props.handleDeleteElement(opts.element, opts.index);
   };
 
   var getActivityElements = function getActivityElements(elements_array, scene_index) {
     var el_arr = [];
+    var has_model = false;
+    var btn = '';
     _ramda2.default.mapObjIndexed(function (element, key) {
-      el_arr.push(_getElementContent(element, key, scene_index));
+      if (element.type === 'question_model') {
+        has_model = true;
+      } else {
+        el_arr.push(_getElementContent(element, key, scene_index));
+      }
     }, elements_array);
+    if (has_model) {
+      var model_el = elements_array.question;
+      el_arr = _ramda2.default.prepend(_getElementContent(model_el, model_el.id, scene_index), el_arr);
+    } else {
+      btn = _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear Modelo/Pregunta', icon: 'add circle', labelPosition: 'left', onClick: newModelElementClick.bind(undefined, { index: props.index }) });
+    }
     return _react2.default.createElement(
-      _semanticUiReact.Card.Group,
-      { key: 'main_elements_' + scene_index },
-      el_arr
+      'div',
+      null,
+      btn,
+      _react2.default.createElement(
+        _semanticUiReact.Card.Group,
+        { key: 'main_elements_' + scene_index },
+        el_arr
+      )
     );
   };
 
@@ -43128,6 +43167,7 @@ var formClickTemplate = function formClickTemplate(props) {
 
   var _getElementContent = function _getElementContent(el, el_key, scene_index) {
     var image = '';
+    var fluid = false;
     var meta = _react2.default.createElement(
       _semanticUiReact.Card.Meta,
       null,
@@ -43137,6 +43177,7 @@ var formClickTemplate = function formClickTemplate(props) {
       image = _react2.default.createElement(_semanticUiReact.Image, { key: 'image' + el.image, floated: 'right', size: 'mini', src: _helpers2.default.uploadedImage(getMediaImageUrl(el.image)) });
     }
     if (el.type === 'question_model') {
+      fluid = true;
       meta = _react2.default.createElement(
         _semanticUiReact.Card.Meta,
         { key: el.type + _.uniqueId() },
@@ -43145,7 +43186,7 @@ var formClickTemplate = function formClickTemplate(props) {
     }
     return _react2.default.createElement(
       _semanticUiReact.Card,
-      { key: 'element_' + el.id },
+      { key: 'element_' + el.id, fluid: fluid },
       _react2.default.createElement(
         _semanticUiReact.Card.Content,
         { key: 'content_' + _.uniqueId() },
@@ -43160,7 +43201,7 @@ var formClickTemplate = function formClickTemplate(props) {
           _semanticUiReact.Card.Description,
           null,
           _react2.default.createElement(_semanticUiReact.Popup, {
-            trigger: _react2.default.createElement(_semanticUiReact.Button, { circular: true, icon: 'remove circle', floated: 'right', onClick: deleteElementClick.bind(undefined, { action: 'delete', element: el.id }) }),
+            trigger: _react2.default.createElement(_semanticUiReact.Button, { circular: true, icon: 'remove circle', floated: 'right', onClick: deleteElementClick.bind(undefined, { element: el.id, index: props.index }) }),
             content: 'Borrar elemento.',
             on: 'hover'
           })
@@ -43170,28 +43211,49 @@ var formClickTemplate = function formClickTemplate(props) {
         _semanticUiReact.Card.Content,
         { extra: true, key: 'extra_content_' + _.uniqueId() },
         _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
-          name: _ramda2.default.join('.', ['code', scene_index, 'elements', el_key]),
-          title: 'Mostrar la instrucci\xF3n al iniciar',
+          name: 'elements' + el_key,
+          title: 'A\xF1adir medios',
           field: ['code', scene_index, 'elements', el_key],
           options: {
             image: el.image,
             sound: el.sound,
-            text: el.text
+            text: el.text,
+            enabled: {
+              image: true,
+              sound: true,
+              text: false
+            }
           } }))
       )
     );
   };
-
-  var elements = getActivityElements(props.state.code[props.index].elements, props.index);
+  var elements = getActivityElements(props.state.code[index].elements, index);
 
   return _react2.default.createElement(
     'div',
     null,
-    _react2.default.createElement(_Instruction2.default, props),
+    _react2.default.createElement(_TextSimple2.default, _extends({ key: 'instruction' + _.uniqueId() }, props, {
+      name: 'instruction_text' + _.uniqueId(),
+      title: 'Instrucci\xF3n',
+      field: ['code', index, 'instruction', 'text'] })),
+    _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
+      name: 'audio_instruction',
+      title: 'A\xF1adir medios',
+      field: ['code', index, 'instruction'],
+      options: {
+        image: null,
+        sound: props.state.code[props.index].instruction.sound,
+        text: null,
+        enabled: {
+          image: false,
+          sound: true,
+          text: false
+        }
+      } })),
     _react2.default.createElement(_TextSimple2.default, _extends({ key: 'main_back' + _.uniqueId() }, props, {
-      name: _ramda2.default.join('.', ['code', props.index, 'main_back']),
+      name: 'main_back' + _.uniqueId(),
       title: 'Imagen de Fondo de la actividad :TODO',
-      field: ['code', props.index, 'main_back'] })),
+      field: ['code', index, 'main_back'] })),
     _react2.default.createElement(
       _semanticUiReact.Form.Field,
       null,
@@ -43202,22 +43264,22 @@ var formClickTemplate = function formClickTemplate(props) {
       )
     ),
     _react2.default.createElement(_ColorPicker2.default, _extends({}, props, {
-      name: _ramda2.default.join('.', ['code', props.index, 'background_color']),
-      key: 'main_back' + _.uniqueId(),
-      field: ['code', props.index, 'background_color']
+      name: 'background_color' + _.uniqueId(),
+      key: 'background_color' + _.uniqueId(),
+      field: ['code', index, 'background_color']
     })),
     _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
     _react2.default.createElement(_CheckboxSimple2.default, _extends({}, props, {
-      name: _ramda2.default.join('.', ['code', props.index, 'show_instruction']),
+      name: 'show_instruction' + _.uniqueId(),
       title: 'Mostrar la instrucci\xF3n al iniciar',
-      field: ['code', props.index, 'show_instruction'] })),
+      field: ['code', index, 'show_instruction'] })),
     _react2.default.createElement(
       _semanticUiReact.Form.Group,
       null,
       _react2.default.createElement(_DropDown2.default, _extends({}, props, {
-        name: _ramda2.default.join('.', ['code', props.index, 'type']),
+        name: 'type' + _.uniqueId(),
         title: 'Tipo de actividad',
-        field: ['code', props.index, 'type'],
+        field: ['code', index, 'type'],
         options: [{ key: 'click', value: '1', text: 'Click' }]
       }))
     ),
@@ -43238,41 +43300,41 @@ var formClickTemplate = function formClickTemplate(props) {
         _semanticUiReact.Form.Field,
         null,
         _react2.default.createElement(_CheckboxSimple2.default, _extends({}, props, {
-          name: _ramda2.default.join('.', ['code', props.index, 'buttons_visible', 'btn_home']),
+          name: 'btn_home' + _.uniqueId(),
           title: 'Volver a la home',
-          field: ['code', props.index, 'buttons_visible', 'btn_home'] }))
+          field: ['code', index, 'buttons_visible', 'btn_home'] }))
       ),
       _react2.default.createElement(
         _semanticUiReact.Form.Field,
         null,
         _react2.default.createElement(_CheckboxSimple2.default, _extends({}, props, {
-          name: _ramda2.default.join('.', ['code', props.index, 'buttons_visible', 'btn_redo']),
+          name: 'btn_redo' + _.uniqueId(),
           title: 'Rehacer la actividad',
-          field: ['code', props.index, 'buttons_visible', 'btn_redo'] }))
+          field: ['code', index, 'buttons_visible', 'btn_redo'] }))
       ),
       _react2.default.createElement(
         _semanticUiReact.Form.Field,
         null,
         _react2.default.createElement(_CheckboxSimple2.default, _extends({}, props, {
-          name: _ramda2.default.join('.', ['code', props.index, 'buttons_visible', 'btn_back']),
+          name: 'btn_back' + _.uniqueId(),
           title: 'Volver Atr\xE1s',
-          field: ['code', props.index, 'buttons_visible', 'btn_back'] }))
+          field: ['code', index, 'buttons_visible', 'btn_back'] }))
       ),
       _react2.default.createElement(
         _semanticUiReact.Form.Field,
         null,
         _react2.default.createElement(_CheckboxSimple2.default, _extends({}, props, {
-          name: _ramda2.default.join('.', ['code', props.index, 'buttons_visible', 'btn_next']),
+          name: 'btn_next' + _.uniqueId(),
           title: 'Pasar de pantalla',
-          field: ['code', props.index, 'buttons_visible', 'btn_next'] }))
+          field: ['code', index, 'buttons_visible', 'btn_next'] }))
       ),
       _react2.default.createElement(
         _semanticUiReact.Form.Field,
         null,
         _react2.default.createElement(_CheckboxSimple2.default, _extends({}, props, {
-          name: _ramda2.default.join('.', ['code', props.index, 'buttons_visible', 'btn_info']),
+          name: 'btn_info' + _.uniqueId(),
           title: 'Informaci\xF3n',
-          field: ['code', props.index, 'buttons_visible', 'btn_info'] }))
+          field: ['code', index, 'buttons_visible', 'btn_info'] }))
       )
     ),
     _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
@@ -43292,9 +43354,9 @@ var formClickTemplate = function formClickTemplate(props) {
         _semanticUiReact.Form.Field,
         null,
         _react2.default.createElement(_TextSimpleLabeled2.default, _extends({ key: 'timer' + _.uniqueId() }, props, {
-          name: _ramda2.default.join('.', ['code', props.index, 'timer', 'time']),
+          name: 'time' + _.uniqueId(),
           title: 'Tiempo',
-          field: ['code', props.index, 'timer', 'time'],
+          field: ['code', index, 'timer', 'time'],
           label: 'ms.',
           label_position: 'right' }))
       ),
@@ -43302,9 +43364,9 @@ var formClickTemplate = function formClickTemplate(props) {
         _semanticUiReact.Form.Field,
         null,
         _react2.default.createElement(_CheckboxLabeled2.default, _extends({}, props, {
-          name: _ramda2.default.join('.', ['code', props.index, 'timer', 'visible']),
+          name: 'time_visible' + _.uniqueId(),
           title: 'Visible',
-          field: ['code', props.index, 'timer', 'visible'] }))
+          field: ['code', index, 'timer', 'visible'] }))
       )
     ),
     _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
@@ -43317,7 +43379,7 @@ var formClickTemplate = function formClickTemplate(props) {
         'Elementos de la actividad'
       )
     ),
-    _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear nuevo elemento', icon: 'add circle', labelPosition: 'left', onClick: newElementClick.bind(undefined, { action: 'create' }) }),
+    _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear nuevo elemento', icon: 'add circle', labelPosition: 'left', onClick: newElementClick.bind(undefined, { index: props.index }) }),
     elements
   );
 };
@@ -43378,21 +43440,35 @@ var _TextSimple = __webpack_require__(200);
 
 var _TextSimple2 = _interopRequireDefault(_TextSimple);
 
+var _MediaComponent = __webpack_require__(593);
+
+var _MediaComponent2 = _interopRequireDefault(_MediaComponent);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var IntructionComponent = function IntructionComponent(props) {
+  debugger;
   return _react2.default.createElement(
     'div',
     null,
     _react2.default.createElement(_TextSimple2.default, _extends({ key: 'instruction' + _.uniqueId() }, props, {
-      name: _ramda2.default.join('.', ['code', props.index, 'instruction', 'text']),
+      name: 'instruction_text' + _.uniqueId(),
       title: 'Instrucci\xF3n',
       field: ['code', props.index, 'instruction', 'text'] })),
-    _react2.default.createElement(
-      'div',
-      null,
-      'Audio:TODO'
-    )
+    _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
+      name: 'audio_instruction',
+      title: 'A\xF1adir medios',
+      field: ['code', props.index, 'instruction', 'sound'],
+      options: {
+        image: null,
+        sound: props.state[props.index].instruction.sound,
+        text: null,
+        enabled: {
+          image: false,
+          sound: true,
+          text: false
+        }
+      } }))
   );
 };
 
@@ -43423,7 +43499,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var CheckboxLabeled = function CheckboxLabeled(props) {
   var check = function check(e, result) {
-    props.check(e, result);
+    props.change(props.field, result.checked);
   };
 
   var lens = props.field;
@@ -43473,7 +43549,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var CheckboxSimple = function CheckboxSimple(props) {
   var check = function check(e, result) {
-    props.check(e, result);
+    props.change(props.field, result.checked);
   };
 
   var lens = props.field;
@@ -43565,7 +43641,7 @@ var ColorPicker = function (_Component) {
     key: 'handleChange',
     value: function handleChange(color) {
       this.setState({ color: color.hex });
-      this.props.color(this.state.lens, color.hex);
+      this.props.change(this.state.lens, color.hex);
     }
   }, {
     key: 'render',
@@ -43648,7 +43724,9 @@ var _ramda2 = _interopRequireDefault(_ramda);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var DropdownSelection = function DropdownSelection(props) {
-  var lens = props.field;
+  var handleChange = function handleChange(evt, result) {
+    props.change(props.field, result.value);
+  };
   return _react2.default.createElement(
     _semanticUiReact.Form.Field,
     null,
@@ -43660,7 +43738,7 @@ var DropdownSelection = function DropdownSelection(props) {
     _react2.default.createElement(_semanticUiReact.Dropdown, { placeholder: 'Seleccionar...',
       fluid: true, selection: true,
       options: props.options,
-      onChange: props.select,
+      onChange: handleChange.bind(undefined),
       name: props.name,
       value: _ramda2.default.view(_ramda2.default.lensPath(props.field), props.state) })
   );
@@ -43701,34 +43779,24 @@ var MediaComponent = function MediaComponent(props) {
         sound: props.options.sound,
         text: props.options.text
     };
+    var class_image = props.options.enabled.image ? 'normal' : 'btn_invisible';
+    var class_sound = props.options.enabled.sound ? 'normal' : 'btn_invisible';
+    var class_text = props.options.enabled.text ? 'normal' : 'btn_invisible';
     if (_ramda2.default.type(props.options.image) === 'Object') {
         config.image = props.options.image.image;
     }
-    /*
-    name={R.join('.', ['code', scene_index, 'elements', el_key])} 
-    title = 'Mostrar la instrucción al iniciar' 
-    field = {['code', scene_index, 'elements', el_key]} 
-    options = {{image: el.image,
-    sound: el.sound,
-    text: el.text
-    }}
-    */
-    //console.log(props.options)
-    //console.log(props.name)
-    //console.log(R.view(R.lensPath(props.field), props.state))
     var addMedia = function addMedia(opts) {
         props.media(opts);
     };
-
     return _react2.default.createElement(
         'div',
         { className: 'ui two buttons', key: 'extra_div_' + _.uniqueId() },
         _react2.default.createElement(
             _semanticUiReact.Button.Group,
             null,
-            _react2.default.createElement(_semanticUiReact.Button, { icon: 'image', color: 'green', onClick: addMedia.bind(undefined, { action: 'image', lens: props.field, media_name: config.image, media_description: '' }) }),
-            _react2.default.createElement(_semanticUiReact.Button, { icon: 'music', color: 'blue', onClick: addMedia.bind(undefined, { action: 'audio', lens: props.field, media_name: config.sound, media_description: '' }) }),
-            _react2.default.createElement(_semanticUiReact.Button, { icon: 'file text outline', color: 'orange', onClick: addMedia.bind(undefined, { action: 'text', lens: props.field, media_name: config.text, media_description: '' }) })
+            _react2.default.createElement(_semanticUiReact.Button, { icon: 'image', className: class_image, disabled: !props.options.enabled.image, color: 'green', onClick: addMedia.bind(undefined, { action: 'image', lens: props.field, media_name: config.image, media_description: '' }) }),
+            _react2.default.createElement(_semanticUiReact.Button, { icon: 'music', className: class_sound, disabled: !props.options.enabled.sound, color: 'blue', onClick: addMedia.bind(undefined, { action: 'audio', lens: props.field, media_name: config.sound, media_description: '' }) }),
+            _react2.default.createElement(_semanticUiReact.Button, { icon: 'file text outline', className: class_text, disabled: !props.options.enabled.text, color: 'orange', onClick: addMedia.bind(undefined, { action: 'text', lens: props.field, media_name: config.text, media_description: '' }) })
         )
     );
 };
@@ -43858,10 +43926,9 @@ var MediaUpload = function MediaUpload(props) {
                 myDropzone.removeFile(file);
             });
         }
-    };
 
-    // Callback de la creación de imágenes en el servidor
-    _feathers_client_io2.default.removeListener('created').on('created', function (file) {
+        // Callback de la creación de imágenes en el servidor
+    };_feathers_client_io2.default.removeListener('created').on('created', function (file) {
         //Notificar al form que se ha subido la nueva imagen
         //y agregarla al estado del formulario
         props.addMedia({
@@ -44011,6 +44078,10 @@ var _ramda2 = _interopRequireDefault(_ramda);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var SimpleTextArea = function SimpleTextArea(props) {
+  var handleChange = function handleChange(lens, evt) {
+    var value = evt.target.value;
+    props.change(lens, evt.target.value);
+  };
 
   return _react2.default.createElement(
     _semanticUiReact.Form.Field,
@@ -44023,7 +44094,7 @@ var SimpleTextArea = function SimpleTextArea(props) {
     _react2.default.createElement(_semanticUiReact.TextArea, { placeholder: 'Escribir la descripci\xF3n...', key: '_' + props.name,
       type: 'text',
       name: props.name,
-      onChange: props.change,
+      onChange: handleChange.bind(undefined, props.field),
       value: _ramda2.default.view(_ramda2.default.lensPath(props.field), props.state) || ''
     })
   );
@@ -44055,6 +44126,11 @@ var _ramda2 = _interopRequireDefault(_ramda);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var LabeledInputText = function LabeledInputText(props) {
+  var handleChange = function handleChange(lens, evt) {
+    var value = evt.target.value;
+    props.change(lens, evt.target.value);
+  };
+
   return _react2.default.createElement(
     _semanticUiReact.Form.Field,
     null,
@@ -44068,7 +44144,7 @@ var LabeledInputText = function LabeledInputText(props) {
       labelPosition: props.label_position,
       type: 'text',
       name: props.name,
-      onChange: props.change,
+      onChange: handleChange.bind(undefined, props.field),
       value: _ramda2.default.view(_ramda2.default.lensPath(props.field), props.state) || ''
     })
   );
@@ -44216,9 +44292,9 @@ var FormGroup = function (_Component) {
       // Callback de la creación de imágenes en el servidor
       _feathers_client_io2.default.removeListener('created').on('created', function (file) {
         //Cambiar la foto del usuario por la recién creada
-        self.setState({ photo: file.id });
+        self.setState({ photo: file.id }
         //Agregar la nueva imagen a la lista (local/temporal)
-        self.props.controller.addNewAvatar({
+        );self.props.controller.addNewAvatar({
           "url": _helpers2.default.imageParser(file.id),
           "original_name": "unknown.png",
           "mediatype": "avatar",
@@ -45523,9 +45599,17 @@ var ActivitiesController = function ActivitiesController() {
   };
 
   var getRemoteRecord = function getRemoteRecord(opts) {
-    return _feathers_client2.default.activities.find({ query: { _id: opts.id } }).then(function (results) {
+    return _feathers_client2.default.activities.find({
+      query: {
+        _id: opts.id
+      }
+    }).then(function (results) {
       setSelectedRecord(opts, results.data[0], true);
-      return _feathers_client2.default.activityCode.find({ query: { _id: results.data[0].id } }).then(function (code) {
+      return _feathers_client2.default.activityCode.find({
+        query: {
+          _id: results.data[0].id
+        }
+      }).then(function (code) {
         var obj = JSON.parse(code.data[0].code);
 
         model.set('activity_code', obj, false);

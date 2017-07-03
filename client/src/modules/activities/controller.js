@@ -111,9 +111,17 @@ const ActivitiesController = function () {
   };
 
   const getRemoteRecord = (opts) => {
-    return feathersServices.activities.find({ query: { _id: opts.id } }).then(results => {
+    return feathersServices.activities.find({
+      query: {
+        _id: opts.id
+      }
+    }).then(results => {
       setSelectedRecord(opts, results.data[0], true);
-      return feathersServices.activityCode.find({ query: { _id: results.data[0].id } }).then(code => {
+      return feathersServices.activityCode.find({
+        query: {
+          _id: results.data[0].id
+        }
+      }).then(code => {
         const obj = JSON.parse(code.data[0].code);
 
         model.set('activity_code', obj, false);
