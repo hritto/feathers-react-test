@@ -3,6 +3,7 @@ import { Container, Header, Icon, Segment, Accordion, Form, Button, Menu } from 
 import FormPanel from './FormPanel.jsx';
 import RibbonHeader from '../../../header.jsx';
 import MediaModalView from '../../../MediaModal.jsx'
+import LayoutHelpers from '../../../positioning_helper.js';
 import R from 'ramda';
 
 class ClickForm extends Component {
@@ -72,13 +73,25 @@ class ClickForm extends Component {
         });
     }
 
+    calculateLayout() {
+
+        return new Promise(function (resolve, reject) {
+            //LayoutHelpers
+        }).then(function () {
+            return resolve();
+        });
+    }
+
     handleDeleteElement(element_id, i) {
         this.setState((state) => {
             const st = R.clone(state);
             delete st.code[i].elements[element_id];
             return st;
         }, function () {
-            this._updateModel();
+            // Recalcular el layour
+            calculateLayout().then(function () {
+                this._updateModel();
+            });
         });
     }
 

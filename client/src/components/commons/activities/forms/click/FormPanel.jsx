@@ -10,8 +10,7 @@ import ColorPicker from '../inputs/ColorPicker.jsx';
 import LabeledInputText from '../inputs/TextSimpleLabeled.jsx';
 import CheckboxLabeled from '../inputs/CheckboxLabeled.jsx';
 import Helpers from './helpers.js';
-import MediaComponent from '../inputs/MediaComponent.jsx'
-
+import MediaComponent from '../inputs/MediaComponent.jsx';
 import R from 'ramda';
 
 let p = [];
@@ -65,6 +64,7 @@ const formClickTemplate = (props) => {
   4: DIBUJO LIBRE
   //ELEMENTS //Depende del type
 
+  MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!!
 
   TODO:
   MANEJAR LOS ELEMENTOS DEPENDIENDO DEL TIPO DE ACTIVIDAD
@@ -138,15 +138,15 @@ const formClickTemplate = (props) => {
 
   const _getSoundName = (name) => {
     let str = '';
-    if (name.length > 30){
-      str = name.substring(0, 20) + "..." + name.substring(name.length-4);
+    if (name.length > 30) {
+      str = name.substring(0, 20) + "..." + name.substring(name.length - 4);
       return str;
     }
     return name;
   };
 
   const _getElementText = (text) => {
-    if (text.length > 30){
+    if (text.length > 30) {
       return text.substring(0, 30) + "...";
     }
     return text;
@@ -183,9 +183,9 @@ const formClickTemplate = (props) => {
         </Card.Header>
         {meta}
         <Card.Description>
-            {image}
-            {sound}
-            {text}
+          {image}
+          {sound}
+          {text}
         </Card.Description>
       </Card.Content>
       <Card.Content extra key={'extra_content_' + _.uniqueId()}>
@@ -259,7 +259,7 @@ const formClickTemplate = (props) => {
             { key: 'dnd', value: 2, text: 'Arrastrar y soltar' },
             { key: 'memory', value: 3, text: 'Memory' },
             { key: 'paint', value: 4, text: 'Paint' }
-            ]} />
+          ]} />
       </Form.Group>
       <Divider section />
       <Form.Group widths='equal'>
