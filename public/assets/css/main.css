@@ -87,3 +87,7 @@ h2.ribbon_header {
 .btn_invisible {
   display: none !important;
 }
+
+.element_media {
+  min-height: 40px;
+}

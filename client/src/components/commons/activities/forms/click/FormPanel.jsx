@@ -6,7 +6,6 @@ import SimpleInputPassword from '../inputs/PasswordSimple.jsx';
 import SimpleInputHidden from '../inputs/HiddenSimple.jsx';
 import CheckboxSimple from '../inputs/CheckboxSimple.jsx';
 import DropdownSelection from '../inputs/DropDown.jsx';
-import Instruction from '../elements/Instruction.jsx';
 import ColorPicker from '../inputs/ColorPicker.jsx';
 import LabeledInputText from '../inputs/TextSimpleLabeled.jsx';
 import CheckboxLabeled from '../inputs/CheckboxLabeled.jsx';
@@ -58,10 +57,28 @@ const formClickTemplate = (props) => {
     "text": "Hacemos algo en equipo. Empiezan con A.",
     "sound": "titulo0"
   }
+  TIPOS DE ACTIVIDAD:
+  0: ESTÁTICA CON O SIN timer
+  1: Click
+  2: DRAG AN Drop
+  3: MEMORY
+  4: DIBUJO LIBRE
   //ELEMENTS //Depende del type
+
+
+  TODO:
+  MANEJAR LOS ELEMENTOS DEPENDIENDO DEL TIPO DE ACTIVIDAD
+  MADIACOMPONENT PARA LA IMAGEN DE FONDO DE LA ACTIVIDAD
+  DISEÑAR LA CONFIGURACIÓN DE CAMPOS PARA ACTIVIDADES (VALIDACIÓN, VALORES POR DEFECTO, ASPECTO, ETC...).
+  MEDIACOMPONENT:
+    SI TIENE UN MEDIO SELECCIONADO, MOSTRAR EL NOMBRE
+    IMAGEN: AGREGAR EL TIPO DE IMAGEN -> combo: IMAGEN/ANIMACION
+    AGREGAR UN BUSCADOR DE MEDIOS, QUE PRESENTA LOS RESULTADOS EN UNA TABLA PAGINADA
+    ESTUDIAR LA CONVERSIÓN DE MP3 A OGG NODE ffmpeg?
   "resolution": {},
   */
 
+  // Crear una neuva respuesta
   const newElementClick = (opts) => {
     let element = R.clone(element_default);
     const name = 'answer_' + (R.keys(props.state.code[opts.index].elements).length + 1);
@@ -69,6 +86,7 @@ const formClickTemplate = (props) => {
     props.handleCreateElement(element, opts.index, name);
   };
 
+  // Crear un nuevo modelo
   const newModelElementClick = (opts) => {
     let element = R.clone(element_default);
     const name = 'question';
@@ -85,6 +103,7 @@ const formClickTemplate = (props) => {
     props.handleCreateElement(element, opts.index, name);
   };
 
+  //Borrar elemento (respuesta o modelo)
   const deleteElementClick = (opts) => {
     props.handleDeleteElement(opts.element, opts.index);
   };
@@ -117,12 +136,36 @@ const formClickTemplate = (props) => {
     return props.state.media.images[img];
   };
 
+  const _getSoundName = (name) => {
+    let str = '';
+    if (name.length > 30){
+      str = name.substring(0, 20) + "..." + name.substring(name.length-4);
+      return str;
+    }
+    return name;
+  };
+
+  const _getElementText = (text) => {
+    if (text.length > 30){
+      return text.substring(0, 30) + "...";
+    }
+    return text;
+  };
+
   const _getElementContent = (el, el_key, scene_index) => {
     let image = '';
+    let sound = '';
+    let text = '';
     let fluid = false;
     let meta = <Card.Meta>Tipo: Respuesta - Clickable</Card.Meta>;
     if (el.image) {
-      image = <Image key={'image' + el.image} floated='right' size='mini' src={Helpers.uploadedImage(getMediaImageUrl(el.image))} />
+      image = <div className='element_media'><Icon name='image' />: <Image key={'image' + el.image} size='mini' src={Helpers.uploadedImage(getMediaImageUrl(el.image))} /></div>
+    }
+    if (el.sound) {
+      sound = <div className='element_media'><Icon name='music' />: {_getSoundName(el.sound)}</div>
+    }
+    if (el.text) {
+      text = <div className='element_media'><Icon name='file text outline' />: {_getElementText(el.text)}</div>
     }
     if (el.type === 'question_model') {
       fluid = true;
@@ -130,17 +173,19 @@ const formClickTemplate = (props) => {
     }
     return (<Card key={'element_' + el.id} fluid={fluid}>
       <Card.Content key={'content_' + _.uniqueId()}>
-        {image}
+        <Popup
+          trigger={<Button circular icon='remove circle' floated='right' onClick={deleteElementClick.bind(this, { element: el.id, index: props.index })} />}
+          content='Borrar elemento.'
+          on='hover'
+        />
         <Card.Header key={'header_' + _.uniqueId()}>
           {el.id}
         </Card.Header>
         {meta}
         <Card.Description>
-          <Popup
-            trigger={<Button circular icon='remove circle' floated='right' onClick={deleteElementClick.bind(this, { element: el.id, index: props.index })} />}
-            content='Borrar elemento.'
-            on='hover'
-          />
+            {image}
+            {sound}
+            {text}
         </Card.Description>
       </Card.Content>
       <Card.Content extra key={'extra_content_' + _.uniqueId()}>
@@ -161,15 +206,20 @@ const formClickTemplate = (props) => {
       </Card.Content>
     </Card>)
   };
-  const elements = getActivityElements(props.state.code[index].elements, index);
-
 
   return (
     <div>
+      <CheckboxLabeled {...props}
+        name={'show_instruction' + _.uniqueId()}
+        title='Mostrar la instrucción al iniciar'
+        field={['code', index, 'show_instruction']} />
       <SimpleInputText key={'instruction' + _.uniqueId()} {...props}
         name={'instruction_text' + _.uniqueId()}
         title='Instrucción'
         field={['code', index, 'instruction', 'text']} />
+      <Form.Field>
+        <label>Audio: {props.state.code[props.index].instruction.sound}</label>
+      </Form.Field>
       <MediaComponent {...props}
         name={'audio_instruction'}
         title='Añadir medios'
@@ -184,6 +234,7 @@ const formClickTemplate = (props) => {
             text: false,
           }
         }} />
+      <Divider section />
       <SimpleInputText key={'main_back' + _.uniqueId()} {...props}
         name={'main_back' + _.uniqueId()}
         title='Imagen de Fondo de la actividad :TODO'
@@ -197,17 +248,18 @@ const formClickTemplate = (props) => {
         field={['code', index, 'background_color']}
       />
       <Divider section />
-      <CheckboxSimple {...props}
-        name={'show_instruction' + _.uniqueId()}
-        title='Mostrar la instrucción al iniciar'
-        field={['code', index, 'show_instruction']} />
       <Form.Group>
         <DropdownSelection {...props}
           name={'type' + _.uniqueId()}
-          title='Tipo de actividad'
+          title='Tipo de pantalla'
           field={['code', index, 'type']}
-          options={[{ key: 'click', value: '1', text: 'Click' }]}
-        />
+          options={[
+            { key: 'static', value: 0, text: 'Estática/Introducción' },
+            { key: 'click', value: 1, text: 'Click' },
+            { key: 'dnd', value: 2, text: 'Arrastrar y soltar' },
+            { key: 'memory', value: 3, text: 'Memory' },
+            { key: 'paint', value: 4, text: 'Paint' }
+            ]} />
       </Form.Group>
       <Divider section />
       <Form.Group widths='equal'>
@@ -270,10 +322,9 @@ const formClickTemplate = (props) => {
         <label>Elementos de la actividad</label>
       </Form.Field>
       <Button content='Crear nuevo elemento' icon='add circle' labelPosition='left' onClick={newElementClick.bind(this, { index: props.index })} />
-      {elements}
+      {getActivityElements(props.state.code[index].elements, index)}
     </div>
   );
 };
 
 export default FormPanel;
-
