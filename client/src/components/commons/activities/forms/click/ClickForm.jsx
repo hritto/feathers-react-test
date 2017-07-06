@@ -18,6 +18,7 @@ class ClickForm extends Component {
             error_messages: []
         });
         this.handleChange = this.handleChange.bind(this);
+        this.handleResolution = this.handleResolution.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
         this.handleDeleteElement = this.handleDeleteElement.bind(this);
@@ -73,6 +74,14 @@ class ClickForm extends Component {
         });
     }
 
+    handleResolution(name, value, index) {
+      this.setState((state) => {
+          return R.set(R.lensPath(['code', index, 'resolution', name]), value, state);
+      }, function () {
+          this._updateModel();
+      });
+    }
+
     calculateLayout() {
 
         return new Promise(function (resolve, reject) {
@@ -119,6 +128,7 @@ class ClickForm extends Component {
         let p = {
             props: this.props,
             change: this.handleChange,
+            resolution: this.handleResolution,
             state: this.state,
             index: i,
             handleDeleteElement: this.handleDeleteElement,
@@ -165,7 +175,7 @@ class ClickForm extends Component {
         if (opts.file.mediatype === 'image') {
             mediaLens = ['media', 'images', opts.file.id]; // = opts.file.id;
         }
-        lens.push(opts.file.mediatype); // image, sound, text 
+        lens.push(opts.file.mediatype); // image, sound, text
         //Cambiar la imagen del elemento
         this.setState((state) => {
             const lensP = R.lensPath(lens);

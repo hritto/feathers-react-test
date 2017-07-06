@@ -9,6 +9,7 @@ import DropdownSelection from '../inputs/DropDown.jsx';
 import ColorPicker from '../inputs/ColorPicker.jsx';
 import LabeledInputText from '../inputs/TextSimpleLabeled.jsx';
 import CheckboxLabeled from '../inputs/CheckboxLabeled.jsx';
+import CheckboxResolution from '../inputs/CheckboxResolution.jsx';
 import Helpers from './helpers.js';
 import MediaComponent from '../inputs/MediaComponent.jsx';
 import R from 'ramda';
@@ -64,18 +65,17 @@ const formClickTemplate = (props) => {
   4: DIBUJO LIBRE
   //ELEMENTS //Depende del type
 
-  MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!!
-
   TODO: MANEJAR LOS ELEMENTOS DEPENDIENDO DEL TIPO DE ACTIVIDAD
-  TODO: MADIACOMPONENT PARA LA IMAGEN DE FONDO DE LA ACTIVIDAD
-  TODO: MANEJAR LA CONFIGURACION DE LAYOUT
+  TODO: MADIACOMPONENT PARA LA IMAGEN DE FONDO DE LA ACTIVIDAD _>revisar
+  TODO: MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!!
+
   DISEÑAR LA CONFIGURACIÓN DE CAMPOS PARA ACTIVIDADES (VALIDACIÓN, VALORES POR DEFECTO, ASPECTO, ETC...).
   MEDIACOMPONENT:
     TODO: SI TIENE UN MEDIO SELECCIONADO, MOSTRAR EL NOMBRE
     TODO: IMAGEN: AGREGAR EL TIPO DE IMAGEN -> combo: IMAGEN/ANIMACION
     TODO: AGREGAR UN BUSCADOR DE MEDIOS, QUE PRESENTA LOS RESULTADOS EN UNA TABLA PAGINADA
     ESTUDIAR LA CONVERSIÓN DE MP3 A OGG NODE ffmpeg?
-  "resolution": {},
+
   */
 
   // Crear una neuva respuesta
@@ -156,6 +156,7 @@ const formClickTemplate = (props) => {
     let image = '';
     let sound = '';
     let text = '';
+    let check = '';
     let fluid = false;
     let meta = <Card.Meta>Tipo: Respuesta - Clickable</Card.Meta>;
     if (el.image) {
@@ -170,7 +171,13 @@ const formClickTemplate = (props) => {
     if (el.type === 'question_model') {
       fluid = true;
       meta = <Card.Meta key={el.type + _.uniqueId()} >Tipo: Pregunta/Modelo</Card.Meta>;
+    } else {
+      check = <CheckboxResolution {...props}
+        name={el_key}
+        title='Correcta' />
     }
+
+
     return (<Card key={'element_' + el.id} fluid={fluid}>
       <Card.Content key={'content_' + _.uniqueId()}>
         <Popup
@@ -186,6 +193,7 @@ const formClickTemplate = (props) => {
           {image}
           {sound}
           {text}
+          {check}
         </Card.Description>
       </Card.Content>
       <Card.Content extra key={'extra_content_' + _.uniqueId()}>
@@ -218,7 +226,7 @@ const formClickTemplate = (props) => {
         title='Instrucción'
         field={['code', index, 'instruction', 'text']} />
       <Form.Field>
-        <label>Audio: {props.state.code[props.index].instruction.sound}</label>
+        <label>Audio: {props.state.code[props.index].instruction.sound || "Ninguno..." }</label>
       </Form.Field>
       <MediaComponent {...props}
         name={'audio_instruction'}
@@ -234,11 +242,25 @@ const formClickTemplate = (props) => {
             text: false,
           }
         }} />
+      <Form.Field>
       <Divider section />
-      <SimpleInputText key={'main_back' + _.uniqueId()} {...props}
+        <label>Imagen: {props.state.code[props.index].main_back || "Ninguna..." }</label>
+      </Form.Field>
+      <MediaComponent {...props}
         name={'main_back' + _.uniqueId()}
-        title='Imagen de Fondo de la actividad :TODO'
-        field={['code', index, 'main_back']} />
+        title='Imagen de Fondo de la actividad'
+        field={['code', index, 'main_back']}
+        options={{
+          image: props.state.code[props.index].main_back,
+          sound: null,
+          text: null,
+          enabled: {
+            image: true,
+            sound: false,
+            text: false,
+          }
+        }} />
+      <Divider section />
       <Form.Field>
         <label>Color de fondo de la actividad</label>
       </Form.Field>
