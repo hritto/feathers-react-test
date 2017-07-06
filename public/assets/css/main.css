@@ -91,3 +91,7 @@ h2.ribbon_header {
 .element_media {
   min-height: 40px;
 }
+
+#main_layout {
+  height: 100%;
+}

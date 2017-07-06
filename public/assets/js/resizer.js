@@ -49,8 +49,8 @@ VivitBooks.Resizer = (function () {
 
     return new Promise(function (resolve, reject) {
       //Iniciar la canfiguración
-      config.bounds.w = x;
-      config.bounds.h = y;
+      config.bounds.w = Math.min(x, 1200);
+      config.bounds.h = Math.min(x, 550);
       ratio_y = config.bounds.h / (options.size.h + 50);
       ratio_x = config.bounds.w / (options.size.w + 50);
       if (options.debug) {
