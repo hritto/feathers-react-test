@@ -16,19 +16,9 @@ const LayoutClickPreview = (opts, common_conf, s_index) => {
   var scene = null;
   var scenes = [];
   var current_scene = s_index; //Contador de pantallas
-  var current_resolution = null;
   var scenes_objs = [];
   var scene_config = null;
   var resizer = null; //El módulo que se encarga de calcular tamaños y posiciones
-  var instruction = null;
-  var menu = null;
-  var ok_index = _.sample([0, 1, 2, 3]);
-  var ko_index = _.sample([0, 1, 2, 3]);
-  if (ko_index === 3) {
-    ko_index = 0;
-    ok_index = 0;
-  }
-
 
   var initialize = function () {
     setLoader();
@@ -39,7 +29,6 @@ const LayoutClickPreview = (opts, common_conf, s_index) => {
     scene_config = config.code[current_scene];
     scene_config.debug = true;
     layout = new Layout(scene_config, common_config);
-    debugger;
     resizer.init(scene_config).then(function () {
       layout.init(resizer).then(function () {
         loadMedia(config);
@@ -81,14 +70,15 @@ const LayoutClickPreview = (opts, common_conf, s_index) => {
       renderProgress(p.progress);
     } else {
       setMedia(media);
-      initActivity();
+      setTimeout(function () {
+        initActivity();
+      }, 1000);
     }
   };
 
 
   var loadMedia = function (opts) {
     var asset_dirs = "uploads/media/";
-    debugger;
     media = new Media(opts);
     media.loadMedia(
       asset_dirs,
@@ -114,6 +104,9 @@ const LayoutClickPreview = (opts, common_conf, s_index) => {
     if (sc_config.type === 1) {
       scene = new scene_1;
     }
+    if (sc_config.type === 0) {
+      scene = new scene_0;
+    }
     //Quitar el loader
     $(".loader_div > div").remove();
     $(".loader_div").css("opacity", 0);
@@ -122,30 +115,9 @@ const LayoutClickPreview = (opts, common_conf, s_index) => {
       $(".loader_div").remove();
     });
 
-    scene.initialize(sc_config, media, current_resolution, resizer, layout).then(function () {
+    scene.initialize(sc_config, media, null, resizer, layout).then(function () {
       //Se ha terminado de renderizar la escena,
     });
-  };
-
-  var endActivity = function () {
-    scene = null;
-    current_scene++;
-    //Si se han acabado las pantallas
-    if (current_scene === scenes.length) {
-      endAllActivities();
-    } else {
-      initActivity();
-    }
-  };
-
-  var endAllActivities = function () {
-    console.log("terminadas todas");
-    //Redirigir donde indica la configuración
-    window.location = scenes[0].menu_url;
-  };
-
-  var getMenu = function () {
-    return menu;
   };
 
   var destroy = function (done) {
@@ -156,10 +128,7 @@ const LayoutClickPreview = (opts, common_conf, s_index) => {
     init: initialize,
     destroy: destroy,
     initActivity: initActivity,
-    endActivity: endActivity,
-    endAllActivities: endAllActivities,
     getMedia: getMedia,
-    getMenu: getMenu
   };
 };
 

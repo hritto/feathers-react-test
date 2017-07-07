@@ -1,4 +1,4 @@
-.loader_div {
+x.loader_div {
   z-index: 1000;
   position: fixed !important;
   position: absolute;
@@ -48,6 +48,8 @@
   -moz-border-radius: 20px;
   border-radius: 20px;
   margin-bottom: 0;
+  margin-top: 10px;
+  border: 1px solid #ccc;
 }
 
 #screenBlocker {
@@ -408,12 +410,10 @@
 }
 
 #drag-elements>div:hover {
-  -ms-transform: scale(1.2, 1.2);
-  /* IE 9 */
+  /* -ms-transform: scale(1.2, 1.2);
   -moz-transform: scale(1.2, 1.2);
   -webkit-transform: scale(1.2, 1.2);
-  /* Safari */
-  transform: scale(1.2, 1.2);
+  transform: scale(1.2, 1.2);*/
 }
 
 .drop-target {

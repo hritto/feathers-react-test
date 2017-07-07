@@ -8,7 +8,6 @@ import LayoutClickPreview from '../../layout_click/app.js';
 
 class LayoutClickForm extends Component {
   constructor(props) {
-    debugger;
     super(props);
     this.state = R.merge(props.state, {
       layout_active_index: props.state.active_index
@@ -18,6 +17,8 @@ class LayoutClickForm extends Component {
     this.handleCancel = this.handleCancel.bind(this);
     this._updateModel = this._updateModel.bind(this);
     this._calculateLayout = this._calculateLayout.bind(this);
+    this.formView = this.formView.bind(this);
+    this.app = null;
   }
 
   _updateModel() {
@@ -55,11 +56,23 @@ class LayoutClickForm extends Component {
   }
 
   componentDidMount() {
-    debugger;
     //Renderizar solo la escena abierta
     // Lanzar el módulo de render
-    const app = new LayoutClickPreview(this.props.props.model.activity_code, common_config, this.state.layout_active_index);
-    app.init();
+    const config = {
+      code: this.state.code,
+      media: this.state.media
+    };
+    if (!this.app) {
+      this.app = new LayoutClickPreview(config, common_config, this.state.layout_active_index);
+      this.app.init();
+    }
+  }
+
+  formView(target) {
+    //////////////////////////////
+    // GUARDAR LOS DATOS
+    /////////////////////////////
+    this.props.props.controller.tabClick('form');
   }
 
   _setLayoutActiveIndex(e, i) {
@@ -72,12 +85,13 @@ class LayoutClickForm extends Component {
     });
     window.dispatchEvent(new Event('resize'));
   };
-
+  // onClick={props.controller.tabClick.bind(this, 'form')} 
   render() {
     return <Segment id='main_layout'>
+      <Button type="button" floated='right' color='blue' key={'button_back'} content='Volver' icon='arrow circle left' size='mini' labelPosition='right' onClick={this.formView.bind(this, { target: 'form' })} />
       <div id="loader_div" className="loader_div">
         <div>
-          <input type="text" value="0" className="dial" data-angleOffset="90" data-linecap="round" />
+          <input type="text" defaultValue="0" className="dial" data-angleOffset="90" data-linecap="round" />
         </div>
       </div>
       <div id="main">
