@@ -106,18 +106,17 @@ const media = (options) => {
     setTotal(media_hash);
     // Notificar progreso de carga
     publishProgress(callback);
-
-    promiseLoadImage('no_image', 'uploads/media/', options).then(function () {
+    return loadImages(asset_dirs, media_hash.images, options);
+    /*promiseLoadImage('no_image', 'uploads/media/', options).then(function () {
       return loadImages(asset_dirs, media_hash.images, options);
-    });
+    });*/
   };
 
   var imageOnLoad = function (image, key, url) {
     loaded = loaded + 1;
-
     // Notificar del progreso
     publishProgress(callback);
-
+    console.log(key);
     // Guardar el tamaño de las imagenes
     var size = {
       w: image.width,
@@ -133,7 +132,6 @@ const media = (options) => {
     return new Promise(function (resolve, reject) {
       var image = new Image();
       image.onload = function (e) {
-        console.log("cargado: " + url);
         image.onload = null;
         resolve({
           image: image,
@@ -142,7 +140,6 @@ const media = (options) => {
         });
       };
       image.onerror = function () {
-        console.log("ERROR: " + url);
         resolve({
           image: getImage('no_image'),
           key: key,

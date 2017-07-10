@@ -1,22 +1,17 @@
 const Layout = (options, common_options, main_app) => {
 
-  var animation_timer = null;
-  var media = null;
   var config = options;
   var resizer = null;
   var $main_el = null;
   var $scene_el = null;
   var ratio = null;
-  var menu = null;
   var common_config = common_options;
   var app = main_app;
 
   var initialize = function (resizer_obj) {
-
     resizer = resizer_obj;
     $main_el = $('#' + config.main_el);
     $scene_el = $('#' + config.scene_el);
-
     return initializeWindow().then(function () {
       return Promise.resolve();
     });
@@ -46,7 +41,6 @@ const Layout = (options, common_options, main_app) => {
       'left': inner.pos.x
     });
   };
-
 
   var destroy = function (done) {
 

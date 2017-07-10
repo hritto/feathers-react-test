@@ -1,4 +1,5 @@
 const Promise = require("bluebird");
+const interact = require("interactjs");
 
 const Scene_1 = () => {
   'use strict';
@@ -8,54 +9,27 @@ const Scene_1 = () => {
   var scene_el = null;
   var data = null;
   var scene = null;
-  var end_drag = false;
-
-  var self = this;
   var el = null;
-  var end = false;
   var scene_el = '#container';
   var media;
   var intro;
   var containers_arr = [];
   var resolution = null;
   var lib = null; //la librería de audio
-  //Contador de errores
-  var error_counter = 0;
-  var res_config = null;
   var containers = [];
   var resizer = null;
-  var drop_containers_ids = [];
   var layout = null; //El objeto encargado del layout
-  var menu = null;
-  var intro_object = null;
-  var end_object = null;
-  var active_buttons = [];
-  var resolved_elements = [];
-  var multiple_answers = null; //Si hay más de una respuesta por pantalla
-  var animate_answers = null; //Si las respustas se animan (OK o KO)
-  var menu_signals = {
-    open: null,
-    close: null
-  };
-  var auto_play_sound = null;
 
   var initialize = function (options, med, res, resizer_obj, layout_obj) {
 
     config = options;
     media = med;
-    res_config = res;
     resizer = resizer_obj;
 
     resolution = res;
     layout = layout_obj;
-    multiple_answers = config.multiple_answers;
-    animate_answers = config.animate_answers;
 
-
-    return render().then(function () {
-      // Crear la escena
-      return Promise.resolve();
-    });
+    return render();
   };
 
   var get = function (id) {
@@ -78,18 +52,7 @@ const Scene_1 = () => {
         });
       }
 
-      //Ver si necesita botones visibles
-      _.each(config.buttons_visible, function (value, key) {
-        $('#' + key).css({
-          "display": value ? "block" : "none"
-        });
-        if (value) {
-          active_buttons.push(key);
-        }
-      });
-      //iniciar los eventos de los botones visibles
-      //menu.startButtonsEvents(active_buttons);
-      //Poner la clase correspondiente a la pantalla
+      ///Poner la clase correspondiente a la pantalla
       $('#container').removeClass();
       $('#container').addClass(config.clase);
       //Dibujar los contenedores
@@ -98,11 +61,56 @@ const Scene_1 = () => {
         return drawAnswers(config.elements);
       }).then(function () {
         return Promise.delay(100).then(function () {
+          interact('.resize-drag')
+            .draggable({
+              onmove: window.dragMoveListener
+            })
+            .resizable({
+              preserveAspectRatio: false,
+              edges: {
+                left: true,
+                right: true,
+                bottom: true,
+                top: true
+              }
+            })
+            .on('resizemove', function (event) {
+              var target = event.target,
+                x = (parseFloat(target.getAttribute('data-x')) || 0),
+                y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+              // update the element's style
+              target.style.width = event.rect.width + 'px';
+              target.style.height = event.rect.height + 'px';
+
+              console.log("element: " + target.id);
+              console.log("x: " + x);
+              console.log("y: " + y);
+              console.log("w: " + event.rect.width);
+              console.log("h: " + event.rect.height);
+            });
           resolve();
         })
       });
     });
   };
+
+  function dragMoveListener(event) {
+    var target = event.target,
+      // keep the dragged position in the data-x/data-y attributes
+      x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+      y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+    $('#' + target.id).css('left', x + 'px');
+    $('#' + target.id).css('top', y + 'px');
+
+    // update the position attributes
+    target.setAttribute('data-x', x);
+    target.setAttribute('data-y', y);
+  }
+
+  // this is used later in the resizing and gesture demos
+  window.dragMoveListener = dragMoveListener;
 
   var drawQuestion = function (els) {
     var container = document.getElementById('container');
@@ -122,7 +130,7 @@ const Scene_1 = () => {
 
   var drawQuestionElement = function (el, k, total, container, index) {
 
-    var elem = "<div id='" + k + "' class='drop-target drop-target" + index + "'></div>";
+    var elem = "<div id='" + k + "' class='resize-drag drop-target drop-target" + index + "' data-x='" + resizer.getPosition(el.pos).x + "' data-y='" + resizer.getPosition(el.pos).y + "'></div>";
     var txt = "<div class='q_text'>" + el.text + "</div>";
     var img = media.getImage(el.image.image);
     $(container).append(elem);
@@ -140,10 +148,11 @@ const Scene_1 = () => {
       "width": resizer.getSize(el.size).w + "px",
       "height": resizer.getSize(el.size).h + "px",
       "vertical-align": "middle",
+      "z-index": 12000
     });
 
     $('.q_text').css({
-      // modificado para contener solo una letra 
+      // modificado para contener solo una letra
       "width": "75%",
       "height": "auto",
       "text-align": "center",
@@ -158,6 +167,7 @@ const Scene_1 = () => {
 
 
   var drawAnswers = function (els) {
+debugger;
     var y = 0,
       min_h = 0,
       max_h = 0,
@@ -174,11 +184,16 @@ const Scene_1 = () => {
     });
 
     //Calcular el espacio q nos queda para el contenedor de arrastrables
-    drop_y = $("#question").position().top + $("#question").height();
-    max_h = resizer.getActivitySceneConfig().size.h - (drop_y - 20);
-    min_h = resizer.getSize(drags[0].size).h + 10;
-    compensa_h = (max_h - min_h) / 2;
-    y = drop_y + compensa_h;
+    if ($("#question") && $("#question").length) {
+      drop_y = $("#question").position().top + $("#question").height();
+      max_h = 550 - (drop_y - 20);
+      min_h = max_h;
+      compensa_h = (max_h - min_h) / 2;
+      y = drop_y + compensa_h;
+    } else {
+      min_h = resizer.getSimpleSize(500);
+      y = 10;
+    }
 
     //Posicionar el contenedor de elementos arrastrables en el sitio q nos queda
     $("#drag-elements").css({
@@ -199,7 +214,7 @@ const Scene_1 = () => {
 
   var drawAnswerElement = function (el, k, total, container, index, pos) {
     var elem_width = resizer.getSize(el.size).w;
-    var elem = "<div id='" + k + "'></div>";
+    var elem = "<div id='" + k + "' class='resize-drag' data-x='" + resizer.getSimpleSize(pos[index].x) + "' data-y='" + resizer.getSimpleSize(pos[index].y) + "'></div>";
     $(container).append(elem);
     $('#' + k).css({
       "width": elem_width,
@@ -214,10 +229,8 @@ const Scene_1 = () => {
 
   var destroy = function () {
     $('#container').empty();
-    resolution = null;
     return Promise.resolve();
   };
-
 
   return {
     initialize: initialize,

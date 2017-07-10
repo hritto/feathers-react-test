@@ -42,14 +42,27 @@ const FormPanel = (props) => {
   //Renderizar solo la escena abierta
   if (parseInt(props.state.active_index, 10) === index) {
     return {
-      title: 'Escena ' + index,
-      content: formClickTemplate(props),
+      key: `panel-${index}`,
+      title: (<div style={{ display: 'inline' }} key={'container_' + index} >
+        {'Escena ' + index}
+        <Button type="button" floated='right' color='blue' key={'button_' + index} content='Layout' icon='arrow circle right' size='mini' labelPosition='right' onClick={layoutView.bind(this, { index: index })} />
+      </div>),
+      content: formClickTemplate(props)
     }
   }
   return {
-    title: 'Escena ' + index,
+    key: `panel-${index}`,
+    title: (<div style={{ display: 'inline' }} key={'container_' + index} >
+      {'Escena ' + index}
+      <Button type="button" floated='right' color='blue' key={'button_' + index} content='Layout' disabled icon='arrow circle right' size='mini' labelPosition='right' />
+    </div>),
     content: '',
   }
+};
+
+const layoutView = (opts) => {
+  main_props.props.controller.tabClick('layout');
+  return false;
 };
 
 const formClickTemplate = (props) => {

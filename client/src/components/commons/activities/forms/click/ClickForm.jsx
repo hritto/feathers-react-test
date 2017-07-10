@@ -58,6 +58,9 @@ class ClickForm extends Component {
 
 
     _setActiveIndex(e, i) {
+        if (e.target.tagName === 'BUTTON') {
+            return false;
+        }
         let val = i;
         if (this.state.active_index === i) {
             val = null;
@@ -117,8 +120,10 @@ class ClickForm extends Component {
     }
 
     handleSubmit(event) {
+        debugger;
         this._updateModel();
         event.preventDefault();
+        return false;
     }
 
     handleCancel(event) {
@@ -240,9 +245,7 @@ class ClickForm extends Component {
             change: this.handleChange,
             state: this.state
         };
-        if (this.state.code[this.state.active_index].type === 1) {
-            layout = <LayoutClickForm {...p} />;
-        }
+        layout = <LayoutClickForm {...p} />;
         return (
             <Segment attached>
                 {layout}
