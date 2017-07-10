@@ -10,7 +10,7 @@ const DropdownSelection = (props) => {
     <Form.Field>
       <label>{props.title}</label>
       <Dropdown placeholder='Seleccionar...'
-        fluid selection
+        selection
         options={props.options}
         onChange={handleChange.bind(this)}
         name={props.name}

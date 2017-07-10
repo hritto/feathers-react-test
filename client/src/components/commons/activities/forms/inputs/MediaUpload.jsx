@@ -38,6 +38,10 @@ const closeModal = () => {
     });
 };
 
+const getMediaName = (props) => {
+  return props.state.media_name || 'Ninguno...';
+};
+
 const MediaUpload = (props) => {
     myProps = props;
     let iconFiletypes = ['.jpg', '.png', '.gif'];
@@ -116,6 +120,7 @@ const MediaUpload = (props) => {
             <Segment>
                 {message}
                 <Form onSubmit={handleSubmit}>
+                    <label>{'Medio actual:' + getMediaName(props)}</label>
                     <SimpleInputText key={'media_name'} {...props}
                         name={'media_name'}
                         title='Nombre'

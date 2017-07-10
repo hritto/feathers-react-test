@@ -19,6 +19,7 @@ const MediaComponent = (props) => {
     const addMedia = (opts) => {
         props.media(opts)
     };
+
     return (
         <div className='ui two buttons' key={'extra_div_' + _.uniqueId()}>
             <Button.Group>
@@ -31,4 +32,3 @@ const MediaComponent = (props) => {
 }
 
 export default MediaComponent;
-

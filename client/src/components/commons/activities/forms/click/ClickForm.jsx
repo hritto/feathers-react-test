@@ -3,6 +3,7 @@ import { Container, Header, Icon, Segment, Accordion, Form, Button, Menu } from 
 import FormPanel from './FormPanel.jsx';
 import RibbonHeader from '../../../header.jsx';
 import MediaModalView from '../../../MediaModal.jsx'
+import LayoutClickForm from './LayoutClick.jsx'
 import LayoutHelpers from '../../../positioning_helper.js';
 import R from 'ramda';
 
@@ -32,6 +33,7 @@ class ClickForm extends Component {
         this._addMediaState = this._addMediaState.bind(this);
         this._setErrors = this._setErrors.bind(this);
         this._updateModel = this._updateModel.bind(this);
+        this._calculateLayout = this._calculateLayout.bind(this);
     }
 
     _updateModel() {
@@ -75,14 +77,14 @@ class ClickForm extends Component {
     }
 
     handleResolution(name, value, index) {
-      this.setState((state) => {
-          return R.set(R.lensPath(['code', index, 'resolution', name]), value, state);
-      }, function () {
-          this._updateModel();
-      });
+        this.setState((state) => {
+            return R.set(R.lensPath(['code', index, 'resolution', name]), value, state);
+        }, function () {
+            this._updateModel();
+        });
     }
 
-    calculateLayout() {
+    _calculateLayout() {
 
         return new Promise(function (resolve, reject) {
             //LayoutHelpers
@@ -98,7 +100,7 @@ class ClickForm extends Component {
             return st;
         }, function () {
             // Recalcular el layour
-            calculateLayout().then(function () {
+            this._calculateLayout().then(function () {
                 this._updateModel();
             });
         });
@@ -133,11 +135,13 @@ class ClickForm extends Component {
             index: i,
             handleDeleteElement: this.handleDeleteElement,
             handleCreateElement: this.handleCreateElement,
-            media: this._setAddMedia
+            media: this._setAddMedia,
+            activity_type: code.type
         };
         return FormPanel(p);
     }
 
+    //Abrir la modal de carga/selección de medios
     _getMediaForm() {
         let p = {
             props: this.props,
@@ -155,8 +159,8 @@ class ClickForm extends Component {
             return {
                 addMedia: opts.action,
                 media_lens: opts.lens,
-                media_name: opts.name,
-                media_description: opts.description
+                media_name: opts.media_name,
+                media_description: opts.media_description
             };
         });
     }
@@ -209,6 +213,8 @@ class ClickForm extends Component {
         const panels = mapIndexed(function (code, i) {
             return self._getPanelContent(code, i);
         }, this.props.model.activity_code.code);
+
+        // Abrir la modal de carga/seleccion de medios
         if (this.state.addMedia) {
             media_form = this._getMediaForm();
         }
@@ -228,8 +234,18 @@ class ClickForm extends Component {
     }
 
     _renderLayoutForm() {
+        let layout = '';
+        let p = {
+            props: this.props,
+            change: this.handleChange,
+            state: this.state
+        };
+        if (this.state.code[this.state.active_index].type === 1) {
+            layout = <LayoutClickForm {...p} />;
+        }
         return (
             <Segment attached>
+                {layout}
                 <Button content='Guardar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
             </Segment>
         );

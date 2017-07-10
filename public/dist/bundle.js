@@ -25902,6 +25902,7 @@ var SimpleInputText = function SimpleInputText(props) {
   var handleChange = function handleChange(lens, evt) {
     var value = evt.target.value;
     props.change(lens, evt.target.value);
+    return true;
   };
 
   return _react2.default.createElement(
@@ -42729,6 +42730,10 @@ var _MediaModal = __webpack_require__(581);
 
 var _MediaModal2 = _interopRequireDefault(_MediaModal);
 
+var _LayoutClick = __webpack_require__(1305);
+
+var _LayoutClick2 = _interopRequireDefault(_LayoutClick);
+
 var _positioning_helper = __webpack_require__(607);
 
 var _positioning_helper2 = _interopRequireDefault(_positioning_helper);
@@ -42776,6 +42781,7 @@ var ClickForm = function (_Component) {
         _this._addMediaState = _this._addMediaState.bind(_this);
         _this._setErrors = _this._setErrors.bind(_this);
         _this._updateModel = _this._updateModel.bind(_this);
+        _this._calculateLayout = _this._calculateLayout.bind(_this);
         return _this;
     }
 
@@ -42832,8 +42838,8 @@ var ClickForm = function (_Component) {
             });
         }
     }, {
-        key: 'calculateLayout',
-        value: function calculateLayout() {
+        key: '_calculateLayout',
+        value: function _calculateLayout() {
 
             return new Promise(function (resolve, reject) {
                 //LayoutHelpers
@@ -42850,7 +42856,7 @@ var ClickForm = function (_Component) {
                 return st;
             }, function () {
                 // Recalcular el layour
-                calculateLayout().then(function () {
+                this._calculateLayout().then(function () {
                     this._updateModel();
                 });
             });
@@ -42889,10 +42895,14 @@ var ClickForm = function (_Component) {
                 index: i,
                 handleDeleteElement: this.handleDeleteElement,
                 handleCreateElement: this.handleCreateElement,
-                media: this._setAddMedia
+                media: this._setAddMedia,
+                activity_type: code.type
             };
             return (0, _FormPanel2.default)(p);
         }
+
+        //Abrir la modal de carga/selección de medios
+
     }, {
         key: '_getMediaForm',
         value: function _getMediaForm() {
@@ -42913,8 +42923,8 @@ var ClickForm = function (_Component) {
                 return {
                     addMedia: opts.action,
                     media_lens: opts.lens,
-                    media_name: opts.name,
-                    media_description: opts.description
+                    media_name: opts.media_name,
+                    media_description: opts.media_description
                 };
             });
         }
@@ -42968,6 +42978,8 @@ var ClickForm = function (_Component) {
             var panels = mapIndexed(function (code, i) {
                 return self._getPanelContent(code, i);
             }, this.props.model.activity_code.code);
+
+            // Abrir la modal de carga/seleccion de medios
             if (this.state.addMedia) {
                 media_form = this._getMediaForm();
             }
@@ -42991,9 +43003,19 @@ var ClickForm = function (_Component) {
     }, {
         key: '_renderLayoutForm',
         value: function _renderLayoutForm() {
+            var layout = '';
+            var p = {
+                props: this.props,
+                change: this.handleChange,
+                state: this.state
+            };
+            if (this.state.code[this.state.active_index].type === 1) {
+                layout = _react2.default.createElement(_LayoutClick2.default, p);
+            }
             return _react2.default.createElement(
                 _semanticUiReact.Segment,
                 { attached: true },
+                layout,
                 _react2.default.createElement(_semanticUiReact.Button, { content: 'Guardar', primary: true }),
                 _react2.default.createElement(_semanticUiReact.Button, { content: 'Cancelar', onClick: this.handleCancel, secondary: true })
             );
@@ -43072,6 +43094,10 @@ var _CheckboxResolution = __webpack_require__(589);
 
 var _CheckboxResolution2 = _interopRequireDefault(_CheckboxResolution);
 
+var _Elements = __webpack_require__(1307);
+
+var _Elements2 = _interopRequireDefault(_Elements);
+
 var _helpers = __webpack_require__(587);
 
 var _helpers2 = _interopRequireDefault(_helpers);
@@ -43125,10 +43151,6 @@ var FormPanel = function FormPanel(props) {
 
 var formClickTemplate = function formClickTemplate(props) {
   /*
-  "instruction": {
-    "text": "Hacemos algo en equipo. Empiezan con A.",
-    "sound": "titulo0"
-  }
   TIPOS DE ACTIVIDAD:
   0: ESTÁTICA CON O SIN timer
   1: Click
@@ -43137,11 +43159,9 @@ var formClickTemplate = function formClickTemplate(props) {
   4: DIBUJO LIBRE
   //ELEMENTS //Depende del type
    TODO: MANEJAR LOS ELEMENTOS DEPENDIENDO DEL TIPO DE ACTIVIDAD
-  TODO: MADIACOMPONENT PARA LA IMAGEN DE FONDO DE LA ACTIVIDAD _>revisar
   TODO: MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!!
    DISEÑAR LA CONFIGURACIÓN DE CAMPOS PARA ACTIVIDADES (VALIDACIÓN, VALORES POR DEFECTO, ASPECTO, ETC...).
   MEDIACOMPONENT:
-    TODO: SI TIENE UN MEDIO SELECCIONADO, MOSTRAR EL NOMBRE
     TODO: IMAGEN: AGREGAR EL TIPO DE IMAGEN -> combo: IMAGEN/ANIMACION
     TODO: AGREGAR UN BUSCADOR DE MEDIOS, QUE PRESENTA LOS RESULTADOS EN UNA TABLA PAGINADA
     ESTUDIAR LA CONVERSIÓN DE MP3 A OGG NODE ffmpeg?
@@ -43172,167 +43192,20 @@ var formClickTemplate = function formClickTemplate(props) {
     props.handleCreateElement(element, opts.index, name);
   };
 
-  //Borrar elemento (respuesta o modelo)
-  var deleteElementClick = function deleteElementClick(opts) {
-    props.handleDeleteElement(opts.element, opts.index);
-  };
-
-  var getActivityElements = function getActivityElements(elements_array, scene_index) {
-    var el_arr = [];
-    var has_model = false;
-    var btn = '';
-    _ramda2.default.mapObjIndexed(function (element, key) {
-      if (element.type === 'question_model') {
-        has_model = true;
-      } else {
-        el_arr.push(_getElementContent(element, key, scene_index));
-      }
-    }, elements_array);
-    if (has_model) {
-      var model_el = elements_array.question;
-      el_arr = _ramda2.default.prepend(_getElementContent(model_el, model_el.id, scene_index), el_arr);
-    } else {
-      btn = _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear Modelo/Pregunta', icon: 'add circle', labelPosition: 'left', onClick: newModelElementClick.bind(undefined, { index: props.index }) });
-    }
-    return _react2.default.createElement(
-      'div',
-      null,
-      btn,
-      _react2.default.createElement(
-        _semanticUiReact.Card.Group,
-        { key: 'main_elements_' + scene_index },
-        el_arr
-      )
-    );
-  };
-
-  var getMediaImageUrl = function getMediaImageUrl(img) {
-    return props.state.media.images[img];
-  };
-
-  var _getSoundName = function _getSoundName(name) {
-    var str = '';
-    if (name.length > 30) {
-      str = name.substring(0, 20) + "..." + name.substring(name.length - 4);
-      return str;
-    }
-    return name;
-  };
-
-  var _getElementText = function _getElementText(text) {
-    if (text.length > 30) {
-      return text.substring(0, 30) + "...";
-    }
-    return text;
-  };
-
-  var _getElementContent = function _getElementContent(el, el_key, scene_index) {
-    var image = '';
-    var sound = '';
-    var text = '';
-    var check = '';
-    var fluid = false;
-    var meta = _react2.default.createElement(
-      _semanticUiReact.Card.Meta,
-      null,
-      'Tipo: Respuesta - Clickable'
-    );
-    if (el.image) {
-      image = _react2.default.createElement(
-        'div',
-        { className: 'element_media' },
-        _react2.default.createElement(_semanticUiReact.Icon, { name: 'image' }),
-        ': ',
-        _react2.default.createElement(_semanticUiReact.Image, { key: 'image' + el.image, size: 'mini', src: _helpers2.default.uploadedImage(getMediaImageUrl(el.image)) })
-      );
-    }
-    if (el.sound) {
-      sound = _react2.default.createElement(
-        'div',
-        { className: 'element_media' },
-        _react2.default.createElement(_semanticUiReact.Icon, { name: 'music' }),
-        ': ',
-        _getSoundName(el.sound)
-      );
-    }
-    if (el.text) {
-      text = _react2.default.createElement(
-        'div',
-        { className: 'element_media' },
-        _react2.default.createElement(_semanticUiReact.Icon, { name: 'file text outline' }),
-        ': ',
-        _getElementText(el.text)
-      );
-    }
-    if (el.type === 'question_model') {
-      fluid = true;
-      meta = _react2.default.createElement(
-        _semanticUiReact.Card.Meta,
-        { key: el.type + _.uniqueId() },
-        'Tipo: Pregunta/Modelo'
-      );
-    } else {
-      check = _react2.default.createElement(_CheckboxResolution2.default, _extends({}, props, {
-        name: el_key,
-        title: 'Correcta' }));
-    }
-
-    return _react2.default.createElement(
-      _semanticUiReact.Card,
-      { key: 'element_' + el.id, fluid: fluid },
-      _react2.default.createElement(
-        _semanticUiReact.Card.Content,
-        { key: 'content_' + _.uniqueId() },
-        _react2.default.createElement(_semanticUiReact.Popup, {
-          trigger: _react2.default.createElement(_semanticUiReact.Button, { circular: true, icon: 'remove circle', floated: 'right', onClick: deleteElementClick.bind(undefined, { element: el.id, index: props.index }) }),
-          content: 'Borrar elemento.',
-          on: 'hover'
-        }),
-        _react2.default.createElement(
-          _semanticUiReact.Card.Header,
-          { key: 'header_' + _.uniqueId() },
-          el.id
-        ),
-        meta,
-        _react2.default.createElement(
-          _semanticUiReact.Card.Description,
-          null,
-          image,
-          sound,
-          text,
-          check
-        )
-      ),
-      _react2.default.createElement(
-        _semanticUiReact.Card.Content,
-        { extra: true, key: 'extra_content_' + _.uniqueId() },
-        _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
-          name: 'elements' + el_key,
-          title: 'A\xF1adir medios',
-          field: ['code', scene_index, 'elements', el_key],
-          options: {
-            image: el.image,
-            sound: el.sound,
-            text: el.text,
-            enabled: {
-              image: true,
-              sound: true,
-              text: false
-            }
-          } }))
-      )
-    );
-  };
+  var back_image = props.state.code[props.index].main_back;
+  if (_ramda2.default.type(back_image) === 'Object') {
+    back_image = back_image.image;
+  }
 
   return _react2.default.createElement(
     'div',
     null,
     _react2.default.createElement(_CheckboxLabeled2.default, _extends({}, props, {
-      name: 'show_instruction' + _.uniqueId(),
+      name: 'show_instruction',
       title: 'Mostrar la instrucci\xF3n al iniciar',
       field: ['code', index, 'show_instruction'] })),
-    _react2.default.createElement(_TextSimple2.default, _extends({ key: 'instruction' + _.uniqueId() }, props, {
-      name: 'instruction_text' + _.uniqueId(),
+    _react2.default.createElement(_TextSimple2.default, _extends({ key: 'instruction' }, props, {
+      name: 'instruction_text',
       title: 'Instrucci\xF3n',
       field: ['code', index, 'instruction', 'text'] })),
     _react2.default.createElement(
@@ -43367,7 +43240,7 @@ var formClickTemplate = function formClickTemplate(props) {
         'label',
         null,
         'Imagen: ',
-        props.state.code[props.index].main_back || "Ninguna..."
+        back_image || "Ninguna..."
       )
     ),
     _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
@@ -43395,8 +43268,8 @@ var formClickTemplate = function formClickTemplate(props) {
       )
     ),
     _react2.default.createElement(_ColorPicker2.default, _extends({}, props, {
-      name: 'background_color' + _.uniqueId(),
-      key: 'background_color' + _.uniqueId(),
+      name: 'background_color',
+      key: 'background_color',
       field: ['code', index, 'background_color']
     })),
     _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
@@ -43479,8 +43352,8 @@ var formClickTemplate = function formClickTemplate(props) {
       _react2.default.createElement(
         _semanticUiReact.Form.Field,
         null,
-        _react2.default.createElement(_TextSimpleLabeled2.default, _extends({ key: 'timer' + _.uniqueId() }, props, {
-          name: 'time' + _.uniqueId(),
+        _react2.default.createElement(_TextSimpleLabeled2.default, _extends({ key: 'timer' }, props, {
+          name: 'time',
           title: 'Tiempo',
           field: ['code', index, 'timer', 'time'],
           label: 'ms.',
@@ -43506,7 +43379,7 @@ var formClickTemplate = function formClickTemplate(props) {
       )
     ),
     _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear nuevo elemento', icon: 'add circle', labelPosition: 'left', onClick: newElementClick.bind(undefined, { index: props.index }) }),
-    getActivityElements(props.state.code[index].elements, index)
+    _react2.default.createElement(_Elements2.default, _extends({}, props, { elements: props.state.code[props.index].elements }))
   );
 };
 
@@ -43852,7 +43725,7 @@ var DropdownSelection = function DropdownSelection(props) {
       props.title
     ),
     _react2.default.createElement(_semanticUiReact.Dropdown, { placeholder: 'Seleccionar...',
-      fluid: true, selection: true,
+      selection: true,
       options: props.options,
       onChange: handleChange.bind(undefined),
       name: props.name,
@@ -43904,6 +43777,7 @@ var MediaComponent = function MediaComponent(props) {
     var addMedia = function addMedia(opts) {
         props.media(opts);
     };
+
     return _react2.default.createElement(
         'div',
         { className: 'ui two buttons', key: 'extra_div_' + _.uniqueId() },
@@ -43992,6 +43866,10 @@ var closeModal = function closeModal() {
         media_description: '',
         error_messages: []
     });
+};
+
+var getMediaName = function getMediaName(props) {
+    return props.state.media_name || 'Ninguno...';
 };
 
 var MediaUpload = function MediaUpload(props) {
@@ -44086,6 +43964,11 @@ var MediaUpload = function MediaUpload(props) {
             _react2.default.createElement(
                 _semanticUiReact.Form,
                 { onSubmit: handleSubmit },
+                _react2.default.createElement(
+                    'label',
+                    null,
+                    'Medio actual:' + getMediaName(props)
+                ),
                 _react2.default.createElement(_TextSimple2.default, _extends({ key: 'media_name' }, props, {
                     name: 'media_name',
                     title: 'Nombre',
@@ -111115,6 +110998,2306 @@ module.exports = function() {
 module.exports = __webpack_amd_options__;
 
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 1304 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var common_config = {
+  "menu_config": {
+    "slider": {
+      "size": {
+        "w": 275,
+        "h": 210
+      },
+      "pos": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "botonera": {
+      "buttons": {
+        "visible": {
+          "btn_home": false,
+          "btn_redo": false,
+          "btn_back": false,
+          "btn_next": false
+        },
+        "size": {
+          "w": 51,
+          "h": 54
+        },
+        "margin_bottom": 15
+      },
+      "size": {
+        "w": 51,
+        "h": 'auto'
+      },
+      "pos": {
+        "x": -1,
+        "y": 130
+      }
+    },
+    "size": {
+      "w": 275,
+      "h": 210
+    },
+    "pos": {
+      "x": 0,
+      "y": -10
+    },
+    "collapsed_width": 75,
+    "info_window": {
+      "size": {
+        // modificado para las adivinanzas
+        "w": 1000,
+        "h": 600
+      }
+    },
+    "info_bubble": {
+      "pos": {
+        "x": 310,
+        "y": 14
+      },
+      "size": {
+        "w": 560,
+        "h": "auto"
+      },
+      "padding": 40,
+      "border_size": 4,
+      "font_size": 24,
+      "line_height": 36,
+      "after": {
+        "pos": {
+          "x": -25,
+          "y": 24
+        },
+        "border_top_width": 15,
+        "border_right_width": 25,
+        "border_bottom_width": 15,
+        "border_left_width": 0
+      },
+      "before": {
+        "pos": {
+          "x": -32,
+          "y": 21
+        },
+        "border_top_width": 19,
+        "border_right_width": 29,
+        "border_bottom_width": 19,
+        "border_left_width": 0
+      }
+    },
+    "rita_menu": {
+      "size": {
+        "w": 275,
+        "h": 200
+      },
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
+      "speaker": {
+        "size": {
+          "w": 40,
+          "h": 40
+        },
+        "pos": {
+          "x": 0,
+          "y": 100
+        },
+        "right": 10
+      },
+      "arrow": {
+        "size": {
+          "w": 75,
+          "h": 75
+        },
+        "pos": {
+          "x": 0,
+          "y": 7
+        },
+        "right": 0
+      }
+    }
+  },
+  "alerts": { //Los carteles de bien o mal
+    "size": {
+      "w": 408,
+      "h": 434
+    },
+    "ok": [{
+      "image": "rita_1.png",
+      "size": {
+        "w": 330,
+        "h": 230
+      },
+      "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27],
+      "sound": "ok_1"
+    }, {
+      "image": "rita_2.png",
+      "size": {
+        "w": 330,
+        "h": 230
+      },
+      "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
+      "sound": "ok_4"
+    }, {
+      "image": "rita_3.png",
+      "size": {
+        "w": 330,
+        "h": 230
+      },
+      "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+      "sound": "ok_3"
+    }, {
+      "image": "rita_4.png",
+      "size": {
+        "w": 330,
+        "h": 230
+      },
+      "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34],
+      "sound": "ok_4"
+    }],
+    "ko": [{
+      "image": "mal_1.png",
+      "size": {
+        "w": 301,
+        "h": 230
+      },
+      "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+      "sound": "ko_1"
+    }, {
+      "image": "mal_2.png",
+      "size": {
+        "w": 301,
+        "h": 230
+      },
+      "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+      "sound": "ko_2"
+    }, {
+      "image": "mal_3.png",
+      "size": {
+        "w": 301,
+        "h": 230
+      },
+      "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35],
+      "sound": "ko_1"
+    }, {
+      "image": "mal_4.png",
+      "size": {
+        "w": 301,
+        "h": 230
+      },
+      "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26],
+      "sound": "ko_3"
+    }]
+  }
+};
+
+exports.default = common_config;
+
+/***/ }),
+/* 1305 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(16);
+
+var _positioning_helper = __webpack_require__(607);
+
+var _positioning_helper2 = _interopRequireDefault(_positioning_helper);
+
+var _common_config = __webpack_require__(1304);
+
+var _common_config2 = _interopRequireDefault(_common_config);
+
+var _app = __webpack_require__(1315);
+
+var _app2 = _interopRequireDefault(_app);
+
+var _ramda = __webpack_require__(18);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+var _app3 = __webpack_require__(1308);
+
+var _app4 = _interopRequireDefault(_app3);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var LayoutClickForm = function (_Component) {
+  _inherits(LayoutClickForm, _Component);
+
+  function LayoutClickForm(props) {
+    _classCallCheck(this, LayoutClickForm);
+
+    debugger;
+
+    var _this = _possibleConstructorReturn(this, (LayoutClickForm.__proto__ || Object.getPrototypeOf(LayoutClickForm)).call(this, props));
+
+    _this.state = _ramda2.default.merge(props.state, {
+      layout_active_index: props.state.active_index
+    });
+    _this.handleChange = _this.handleChange.bind(_this);
+    _this.handleSubmit = _this.handleSubmit.bind(_this);
+    _this.handleCancel = _this.handleCancel.bind(_this);
+    _this._updateModel = _this._updateModel.bind(_this);
+    _this._calculateLayout = _this._calculateLayout.bind(_this);
+    return _this;
+  }
+
+  _createClass(LayoutClickForm, [{
+    key: '_updateModel',
+    value: function _updateModel() {
+      this.props.controller.updateActivityCode({
+        code: this.state.code,
+        media: this.state.media
+      });
+    }
+  }, {
+    key: 'handleChange',
+    value: function handleChange(lens, value) {
+      this.setState(function (state) {
+        return _ramda2.default.set(_ramda2.default.lensPath(lens), value, state);
+      }, function () {
+        this._updateModel();
+      });
+    }
+  }, {
+    key: '_calculateLayout',
+    value: function _calculateLayout() {
+
+      return new Promise(function (resolve, reject) {
+        //LayoutHelpers
+      }).then(function () {
+        return resolve();
+      });
+    }
+  }, {
+    key: 'handleSubmit',
+    value: function handleSubmit(event) {
+      this._updateModel();
+      event.preventDefault();
+    }
+  }, {
+    key: 'handleCancel',
+    value: function handleCancel(event) {
+      this.props.controller.handleCancel(this.state);
+      event.preventDefault();
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      debugger;
+      //Renderizar solo la escena abierta
+      // Lanzar el módulo de render
+      var app = new _app4.default(this.props.props.model.activity_code, _common_config2.default, this.state.layout_active_index);
+      app.init();
+    }
+  }, {
+    key: '_setLayoutActiveIndex',
+    value: function _setLayoutActiveIndex(e, i) {
+      var val = i;
+      if (this.state.active_index === i) {
+        val = null;
+      }
+      this.setState(function (state) {
+        return _ramda2.default.set(_ramda2.default.lensProp('layout_active_index'), val, state);
+      });
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        _semanticUiReact.Segment,
+        { id: 'main_layout' },
+        _react2.default.createElement(
+          'div',
+          { id: 'loader_div', className: 'loader_div' },
+          _react2.default.createElement(
+            'div',
+            null,
+            _react2.default.createElement('input', { type: 'text', value: '0', className: 'dial', 'data-angleOffset': '90', 'data-linecap': 'round' })
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { id: 'main' },
+          _react2.default.createElement(
+            'div',
+            { className: 'btns' },
+            _react2.default.createElement('div', { id: 'btn_home', className: 'uihome' }),
+            _react2.default.createElement('div', { id: 'btn_back', className: 'uiback' }),
+            _react2.default.createElement('div', { id: 'btn_next', className: 'uinext' }),
+            _react2.default.createElement('div', { id: 'btn_redo', className: 'uiredo' })
+          ),
+          _react2.default.createElement(
+            'div',
+            { id: 'menu' },
+            _react2.default.createElement(
+              'div',
+              { className: 'slider' },
+              _react2.default.createElement(
+                'div',
+                { id: 'main_menu', className: 'rita_menu' },
+                _react2.default.createElement('div', { id: 'arrow', className: 'right' })
+              )
+            )
+          )
+        ),
+        _react2.default.createElement('div', { id: 'container' })
+      );
+    }
+  }]);
+
+  return LayoutClickForm;
+}(_react.Component);
+
+;
+
+exports.default = LayoutClickForm;
+
+/***/ }),
+/* 1306 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(16);
+
+var _helpers = __webpack_require__(587);
+
+var _helpers2 = _interopRequireDefault(_helpers);
+
+var _ramda = __webpack_require__(18);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+var _MediaComponent = __webpack_require__(593);
+
+var _MediaComponent2 = _interopRequireDefault(_MediaComponent);
+
+var _CheckboxResolution = __webpack_require__(589);
+
+var _CheckboxResolution2 = _interopRequireDefault(_CheckboxResolution);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var mProps = null;
+
+//Borrar elemento (respuesta o modelo)
+var deleteElementClick = function deleteElementClick(opts) {
+  debugger;
+  mProps.handleDeleteElement(opts.element, opts.index);
+};
+
+var getMediaImageUrl = function getMediaImageUrl(img) {
+  return mProps.state.media.images[img];
+};
+
+var _getSoundName = function _getSoundName(name) {
+  var str = '';
+  if (name.length > 30) {
+    str = name.substring(0, 20) + "..." + name.substring(name.length - 4);
+    return str;
+  }
+  return name;
+};
+
+var _getElementText = function _getElementText(text) {
+  if (text.length > 30) {
+    return text.substring(0, 30) + "...";
+  }
+  return text;
+};
+
+var Element = function Element(props) {
+  // el, el_key, scene_index
+  mProps = props;
+  var image = '';
+  var sound = '';
+  var text = '';
+  var check = '';
+  var fluid = false;
+  var scene_index = props.index;
+  var el = props.element;
+  var el_key = props.field;
+  var meta = '';
+  var el_type = '';
+
+  if (el.image) {
+    image = _react2.default.createElement(
+      'div',
+      { className: 'element_media' },
+      _react2.default.createElement(_semanticUiReact.Icon, { name: 'image' }),
+      ': ',
+      _react2.default.createElement(_semanticUiReact.Image, { key: 'image' + el.image, size: 'mini', src: _helpers2.default.uploadedImage(getMediaImageUrl(el.image)) })
+    );
+    el_type = 'imagen';
+  }
+  if (el.sound) {
+    sound = _react2.default.createElement(
+      'div',
+      { className: 'element_media' },
+      _react2.default.createElement(_semanticUiReact.Icon, { name: 'music' }),
+      ': ',
+      _getSoundName(el.sound)
+    );
+    el_type = 'audio';
+  }
+  if (el.text) {
+    text = _react2.default.createElement(
+      'div',
+      { className: 'element_media' },
+      _react2.default.createElement(_semanticUiReact.Icon, { name: 'file text outline' }),
+      ': ',
+      _getElementText(el.text)
+    );
+    el_type = 'text';
+  }
+  if (el.type === 'question_model') {
+    fluid = true;
+    meta = _react2.default.createElement(
+      _semanticUiReact.Card.Meta,
+      { key: el.type + _.uniqueId() },
+      'Tipo: Pregunta/Modelo'
+    );
+  } else {
+    //Tipos de actividades
+    if (props.activity_type === 0) {
+      // Click
+      meta = _react2.default.createElement(
+        _semanticUiReact.Card.Meta,
+        null,
+        'Tipo: ' + el_type
+      );
+    }
+    if (props.activity_type === 1) {
+      // Click
+      check = _react2.default.createElement(_CheckboxResolution2.default, _extends({}, props, { name: el_key, title: 'Correcta' }));
+      meta = _react2.default.createElement(
+        _semanticUiReact.Card.Meta,
+        null,
+        'Tipo: Respuesta - Clickable'
+      );
+    }
+    if (props.activity_type === 2) {
+      // DragNdrop
+      meta = _react2.default.createElement(
+        _semanticUiReact.Card.Meta,
+        null,
+        'Tipo: Respuesta - Arrastrable'
+      );
+    }
+  }
+
+  return _react2.default.createElement(
+    _semanticUiReact.Card,
+    { key: 'element_' + el.id, fluid: fluid },
+    _react2.default.createElement(
+      _semanticUiReact.Card.Content,
+      { key: 'content_' + _.uniqueId() },
+      _react2.default.createElement(_semanticUiReact.Popup, {
+        trigger: _react2.default.createElement(_semanticUiReact.Button, { circular: true, icon: 'remove circle', floated: 'right', onClick: deleteElementClick.bind(undefined, { element: el.id, index: props.index }) }),
+        content: 'Borrar elemento.',
+        on: 'hover'
+      }),
+      _react2.default.createElement(
+        _semanticUiReact.Card.Header,
+        { key: 'header_' + _.uniqueId() },
+        el.id
+      ),
+      meta,
+      _react2.default.createElement(
+        _semanticUiReact.Card.Description,
+        null,
+        image,
+        sound,
+        text,
+        check
+      )
+    ),
+    _react2.default.createElement(
+      _semanticUiReact.Card.Content,
+      { extra: true, key: 'extra_content_' + _.uniqueId() },
+      _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
+        name: 'elements' + el_key,
+        title: 'A\xF1adir medios',
+        field: ['code', scene_index, 'elements', el_key],
+        options: {
+          image: el.image,
+          sound: el.sound,
+          text: el.text,
+          enabled: {
+            image: true,
+            sound: true,
+            text: false
+          }
+        } }))
+    )
+  );
+};
+
+exports.default = Element;
+
+/***/ }),
+/* 1307 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(16);
+
+var _ramda = __webpack_require__(18);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+var _Element = __webpack_require__(1306);
+
+var _Element2 = _interopRequireDefault(_Element);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var mProps = null;
+var element_default = {
+  "id": null,
+  "pos": {
+    "x": 0,
+    "y": 0
+  },
+  "size": {
+    "w": 100,
+    "h": 100
+  },
+  "image": null,
+  "sound": null,
+  "text": null,
+  "type": "clickable"
+};
+
+// Crear un nuevo modelo
+var newModelElementClick = function newModelElementClick(opts) {
+  var element = _ramda2.default.clone(element_default);
+  var name = 'question';
+  element.id = name;
+  element.type = 'question_model';
+  element.size = {
+    "w": 920,
+    "h": 80
+  };
+  element.pos = {
+    "x": 1,
+    "y": 1
+  };
+  mProps.handleCreateElement(element, opts.index, name);
+};
+
+var Elements = function Elements(props) {
+  mProps = props;
+  var el_arr = [];
+  var has_model = false;
+  var btn = '';
+  var scene_index = props.index;
+  var elements_array = props.elements;
+
+  _ramda2.default.mapObjIndexed(function (element, key) {
+    if (element.type === 'question_model') {
+      has_model = true;
+    } else {
+      el_arr.push(_react2.default.createElement(_Element2.default, _extends({}, props, { element: element, field: key, key: key })));
+    }
+  }, elements_array);
+
+  // Añadir el modelo
+  if (has_model) {
+    var model_el = elements_array.question;
+    el_arr = _ramda2.default.prepend(_react2.default.createElement(_Element2.default, _extends({}, props, { element: model_el, field: model_el.id, key: model_el.id })), el_arr);
+  } else {
+    if (props.activity_type === 1 || props.activity_type === 2) {
+      btn = _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear Modelo/Pregunta', icon: 'add circle', labelPosition: 'left', onClick: newModelElementClick.bind(undefined, { index: props.index }) });
+    }
+  }
+
+  return _react2.default.createElement(
+    'div',
+    null,
+    btn,
+    _react2.default.createElement(
+      _semanticUiReact.Card.Group,
+      { key: 'main_elements_' + scene_index },
+      el_arr
+    )
+  );
+};
+
+exports.default = Elements;
+
+/***/ }),
+/* 1308 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _common_config = __webpack_require__(1304);
+
+var _common_config2 = _interopRequireDefault(_common_config);
+
+var _layout = __webpack_require__(1309);
+
+var _layout2 = _interopRequireDefault(_layout);
+
+var _media = __webpack_require__(1310);
+
+var _media2 = _interopRequireDefault(_media);
+
+var _scene_ = __webpack_require__(1311);
+
+var _scene_2 = _interopRequireDefault(_scene_);
+
+var _scene_3 = __webpack_require__(1312);
+
+var _scene_4 = _interopRequireDefault(_scene_3);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//Click
+var Promise = __webpack_require__(49);
+
+// APP
+//Estatica
+var LayoutClickPreview = function LayoutClickPreview(opts, common_conf, s_index) {
+  'use strict';
+
+  var config = opts;
+  var common_config = common_conf;
+  var layout = null;
+  var media = null;
+  var scene = null;
+  var scenes = [];
+  var current_scene = s_index; //Contador de pantallas
+  var current_resolution = null;
+  var scenes_objs = [];
+  var scene_config = null;
+  var resizer = null; //El módulo que se encarga de calcular tamaños y posiciones
+  var instruction = null;
+  var menu = null;
+  var ok_index = _.sample([0, 1, 2, 3]);
+  var ko_index = _.sample([0, 1, 2, 3]);
+  if (ko_index === 3) {
+    ko_index = 0;
+    ok_index = 0;
+  }
+
+  var initialize = function initialize() {
+    setLoader();
+    _.each(config.code, function (sc, i) {
+      scenes.push(sc);
+    });
+    resizer = VivitBooks.Resizer;
+    scene_config = config.code[current_scene];
+    scene_config.debug = true;
+    layout = new _layout2.default(scene_config, common_config);
+    debugger;
+    resizer.init(scene_config).then(function () {
+      layout.init(resizer).then(function () {
+        loadMedia(config);
+      });
+    });
+  };
+
+  var setLoader = function setLoader() {
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        x = w.innerWidth || e.clientWidth || g.clientWidth,
+        y = w.innerHeight || e.clientHeight || g.clientHeight;
+
+    $(".loader_div > div").css({
+      "top": y / 2 - 40,
+      "left": x / 2 - 40
+    });
+
+    $(".dial").knob({
+      "min": 0,
+      "max": 100,
+      "fgColor": "rgb(232, 94, 2)",
+      "skin": "tron",
+      "width": 80,
+      "height": 80
+    });
+  };
+
+  var loadAssets = function loadAssets(data) {
+    var p = data;
+    if (!data) {
+      p = {
+        progress: 0
+      };
+    }
+    if (data && data.loaded < data.total) {
+      renderProgress(p.progress);
+    } else {
+      setMedia(media);
+      initActivity();
+    }
+  };
+
+  var loadMedia = function loadMedia(opts) {
+    var asset_dirs = "uploads/media/";
+    debugger;
+    media = new _media2.default(opts);
+    media.loadMedia(asset_dirs, opts.media, loadAssets //Callback para cada medio que se carga
+    );
+  };
+
+  var renderProgress = function renderProgress(p) {
+    $('.dial').val(p).trigger('change');
+  };
+
+  var getMedia = function getMedia() {
+    return media;
+  };
+
+  var setMedia = function setMedia(m) {
+    media = m;
+  };
+
+  var initActivity = function initActivity() {
+    var sc_config = scenes[current_scene];
+    if (sc_config.type === 1) {
+      scene = new _scene_4.default();
+    }
+    //Quitar el loader
+    $(".loader_div > div").remove();
+    $(".loader_div").css("opacity", 0);
+    $(".loader_div").on('transitionend webkitTransitionEnd oTransitionEnd', function () {
+      // your event handler
+      $(".loader_div").remove();
+    });
+
+    scene.initialize(sc_config, media, current_resolution, resizer, layout).then(function () {
+      //Se ha terminado de renderizar la escena,
+    });
+  };
+
+  var endActivity = function endActivity() {
+    scene = null;
+    current_scene++;
+    //Si se han acabado las pantallas
+    if (current_scene === scenes.length) {
+      endAllActivities();
+    } else {
+      initActivity();
+    }
+  };
+
+  var endAllActivities = function endAllActivities() {
+    console.log("terminadas todas");
+    //Redirigir donde indica la configuración
+    window.location = scenes[0].menu_url;
+  };
+
+  var getMenu = function getMenu() {
+    return menu;
+  };
+
+  var destroy = function destroy(done) {};
+
+  return {
+    init: initialize,
+    destroy: destroy,
+    initActivity: initActivity,
+    endActivity: endActivity,
+    endAllActivities: endAllActivities,
+    getMedia: getMedia,
+    getMenu: getMenu
+  };
+};
+
+exports.default = LayoutClickPreview;
+
+/***/ }),
+/* 1309 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var Layout = function Layout(options, common_options, main_app) {
+
+  var animation_timer = null;
+  var media = null;
+  var config = options;
+  var resizer = null;
+  var $main_el = null;
+  var $scene_el = null;
+  var ratio = null;
+  var menu = null;
+  var common_config = common_options;
+  var app = main_app;
+
+  var initialize = function initialize(resizer_obj) {
+
+    resizer = resizer_obj;
+    $main_el = $('#' + config.main_el);
+    $scene_el = $('#' + config.scene_el);
+
+    return initializeWindow().then(function () {
+      return Promise.resolve();
+    });
+  };
+
+  var initializeWindow = function initializeWindow() {
+    return new Promise(function (resolve, reject) {
+      windowResize();
+      resolve();
+    });
+  };
+
+  var windowResize = function windowResize(e) {
+    //Set main position
+    var outer = resizer.getSceneConfig();
+    var inner = resizer.getActivitySceneConfig();
+    $main_el.css({
+      'width': outer.size.w,
+      'height': outer.size.h,
+      'top': outer.pos.y,
+      'left': outer.pos.x
+    });
+    $scene_el.css({
+      'width': inner.size.w,
+      'height': inner.size.h,
+      'top': inner.pos.y,
+      'left': inner.pos.x
+    });
+  };
+
+  var destroy = function destroy(done) {};
+
+  return {
+    init: initialize,
+    destroy: destroy
+  };
+};
+
+exports.default = Layout;
+
+/***/ }),
+/* 1310 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var Promise = __webpack_require__(49);
+
+var media = function media(options) {
+
+  // Array de los objetos imagenes
+  var images = {};
+
+  // Guardar los tamaños de las imagenes
+  var images_sizes = {};
+
+  // Array de los objetos sonido
+  var sounds = {};
+
+  // Objeto encargado de la gestion de sonido
+  var sound_object = null;
+
+  //Array de buffers de audio
+  var sound_buffer = [];
+  var audio_context = null;
+
+  // Archivos cargados
+  var loaded = 0;
+
+  // Total de mendios a cargar
+  var total = 0;
+
+  var getLoaded = function getLoaded() {
+    return loaded;
+  };
+  var setLoaded = function setLoaded(load) {
+    loaded = load;
+  };
+
+  var media_hash = {};
+  //La función de callback a llamar cada vez que se termina de cargar
+  //un assets (muestra el progreso)
+  var callback = null;
+
+  var setTotal = function setTotal(media_hash) {
+    total = Object.keys(media_hash.images).length;
+  };
+
+  var setSoundBuffer = function setSoundBuffer(buffer_arr) {
+    sound_buffer = buffer_arr;
+  };
+
+  var publishProgress = function publishProgress(callback) {
+    var data_p = {
+      total: total,
+      progress: getLoaded() * 100 / total,
+      loaded: getLoaded()
+    };
+    callback(data_p);
+  };
+
+  var allMedia = function allMedia(options) {
+    var media_hash;
+    var default_assets = {
+      images: {
+        'no_image': 'no_image.png'
+      },
+      sounds: {}
+    };
+    media_hash = _.merge(default_assets, options.assets);
+    _.each(media_hash.sounds, function (value, key) {
+      if (_.isString(value)) {
+        media_hash.sounds[key] = value;
+      } else {
+        if (value.mp3) {
+          media_hash.sounds[key].mp3 = value.mp3;
+        }
+        if (value.ogg) {
+          media_hash.sounds[key].ogg = value.ogg;
+        }
+      }
+    }, this);
+    return media_hash;
+  };
+
+  var isIOS7 = function isIOS7() {
+    var deviceAgent = navigator.userAgent.toLowerCase();
+    return (/(iphone|ipod|ipad).* os 7_/.test(deviceAgent)
+    );
+  };
+
+  var isAndroidOld = function isAndroidOld() {
+    var ua = navigator.userAgent;
+
+    if (ua.indexOf("Android") >= 0) {
+      var androidversion = parseFloat(ua.slice(ua.indexOf("Android") + 8));
+      return androidversion < 4.4;
+    }
+    return false;
+  };
+
+  var loadMedia = function loadMedia(asset_dirs, media_hash, callback_func) {
+    loaded = 0;
+    total = 0;
+    callback = callback_func;
+
+    media_hash = allMedia({
+      asset_dirs: asset_dirs,
+      assets: media_hash
+    });
+
+    // Calcular el total de medios a cargar
+    setTotal(media_hash);
+    // Notificar progreso de carga
+    publishProgress(callback);
+
+    promiseLoadImage('no_image', 'uploads/media/', options).then(function () {
+      return loadImages(asset_dirs, media_hash.images, options);
+    });
+  };
+
+  var imageOnLoad = function imageOnLoad(image, key, url) {
+    loaded = loaded + 1;
+
+    // Notificar del progreso
+    publishProgress(callback);
+
+    // Guardar el tamaño de las imagenes
+    var size = {
+      w: image.width,
+      h: image.height
+    };
+
+    images_sizes[key] = size;
+    images[key] = image;
+  };
+
+  var promiseLoadImage = function promiseLoadImage(key, url, options) {
+    return new Promise(function (resolve, reject) {
+      var image = new Image();
+      image.onload = function (e) {
+        console.log("cargado: " + url);
+        image.onload = null;
+        resolve({
+          image: image,
+          key: key,
+          url: url
+        });
+      };
+      image.onerror = function () {
+        console.log("ERROR: " + url);
+        resolve({
+          image: getImage('no_image'),
+          key: key,
+          url: url
+        });
+        image.onerror = null;
+      };
+      image.src = url;
+    });
+  };
+
+  var loadImages = function loadImages(asset_dirs, images_hash, options) {
+    var url;
+    return Promise.reduce(Object.keys(images_hash), function (index, key) {
+      url = asset_dirs + images_hash[key];
+      return promiseLoadImage(key, url, options).then(function (data) {
+        imageOnLoad(data.image, data.key, data.url);
+        return true;
+      });
+    }, 0);
+  };
+
+  var getImage = function getImage(key) {
+    return images[key];
+  };
+
+  var getImages = function getImages() {
+    return images;
+  };
+
+  var getImageSize = function getImageSize(key) {
+    return images_sizes[key];
+  };
+
+  var getSound = function getSound(key) {
+    return sounds[key];
+  };
+
+  var deleteImage = function deleteImage(e) {
+    var img = e.target;
+    img = null;
+  };
+
+  var promiseDestroy = function promiseDestroy() {
+    return new Promise(function (resolve, reject) {
+      // Liberando imagenes
+      var keys_arr = Object.keys(images),
+          i = 0,
+          index_key = null;
+
+      images = {};
+
+      // Liberando sonidos
+      //sound_object.destroy();
+      sounds = {};
+
+      setLoaded(0);
+      total = 0;
+      resolve();
+      console.log("DESTROYED MEDIA");
+    });
+  };
+
+  var getSoundLibrary = function getSoundLibrary() {
+    return sound_object;
+  };
+
+  var isFirefox = function isFirefox() {
+    //Hack sniffing
+    return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+  };
+
+  var is_android_Chrome = function is_android_Chrome() {
+    if (navigator.userAgent.match(/Android/i)) {
+      return true;
+    }
+    return false;
+  };
+
+  var getErrorData = function getErrorData(key, url, message) {
+    var text = "Fallo al decodificar sonido: " + url + ".";
+    text += "<br>" + message + ".";
+    text += "<br>Por favor, pulse el botón para seguir con las actividades.";
+    return {
+      key: key,
+      url: url,
+      error: "sound_error",
+      modal: {
+        text: text,
+        btn_txt: "Continuar"
+      }
+    };
+  };
+
+  return {
+    loadMedia: loadMedia,
+    getImage: getImage,
+    getImageSize: getImageSize,
+    getImages: getImages,
+    promiseDestroy: promiseDestroy,
+    getSoundLibrary: getSoundLibrary
+  };
+};
+
+exports.default = media;
+
+/***/ }),
+/* 1311 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var Scene_0 = function Scene_0() {
+
+  var config = null;
+  var el = null;
+  var scene_el = null;
+  var data = null;
+  var scene = null;
+  var end_drag = false;
+
+  var self = this;
+  var el = null;
+  var end = false;
+  var scene_el = '#container';
+  var media;
+  var intro;
+  var lib = null; //la librería de audio
+  var resizer = null;
+  var layout = null; //El objeto encargado del layout
+  var menu = null;
+  var intro_object = null;
+  var active_buttons = [];
+  var animations = [];
+  var menu_signals = {
+    open: null,
+    close: null
+  };
+
+  var initialize = function initialize(options, med, res, resizer_obj, layout_obj) {
+
+    config = options;
+    media = med;
+    resizer = resizer_obj;
+    lib = media.getSoundLibrary();
+    layout = layout_obj;
+    menu = AnayaInfantil.app.getMenu();
+
+    return promiseShowIntroScene().then(function () {
+      // Crear la escena
+      return render().then(function () {
+        //Se ha terminado de renderizar la escena
+        menu.setActivityType(config.type);
+        //Abrir el menu
+        if (config.show_instruction) {
+          menu.open();
+        }
+        menu_signals.close = menu.on.close.add(_.bind(initActivity));
+
+        return Promise.resolve();
+      });
+    });
+  };
+
+  var initActivity = function initActivity() {
+    return Promise.delay(1000).then(function () {
+      var sound = null;
+      _.each(animations, function (value) {
+        $(value).animateSprite('play', 'go');
+        $(value).animateSprite('restart');
+      });
+      if (hasSound(config)) {
+        sound = getSound(config);
+        lib.play(sound);
+      }
+
+      //Iniciar el timer
+      return Promise.delay(config.timer.time).then(function () {
+        return showEndActivity();
+      });
+    });
+  };
+
+  var promiseShowIntroScene = function promiseShowIntroScene() {
+    //CONFIGURACIÓN DE LA PANTALLA INICIAL (COMENZAR)
+    var init_options;
+    if (!menu.getAudioEnabled() && config.show_instruction && is_mobile() && config.init_config.show_intro) {
+      //La ventana inicial solo se muestra en dispositivos móviles
+      //Hay que mostrar la pantalla inicial
+      init_options = config.init_config;
+      intro_object = new AnayaInfantil.introWindow(media, lib, resizer);
+
+      return new Promise(function (resolve, reject) {
+        intro_object.init(init_options).then(function () {
+          //Ya se puede activar el audio
+          menu.setAudioEnabled(true);
+          intro_object.destroy();
+          intro_object = null;
+          return resolve();
+        });
+      });
+    } else {
+      return Promise.resolve();
+    }
+  };
+
+  // Funcion que renderiza la escena, despues de cargar las imagenes
+  var render = function render() {
+
+    //dibujar la escena
+    return new Promise(function (resolve, reject) {
+      //Dibujar el fondo, si tiene
+      if (config.main_back) {
+        var img = media.getImage(config.main_back);
+        $("#" + config.scene_el).css({
+          "background-image": "url(" + img.src + ")",
+          "background-size": "contain",
+          "background-position": "center center",
+          "background-repeat": "no-repeat"
+        });
+      }
+
+      //Ver si necesita botones visibles
+      _.each(config.buttons_visible, function (value, key) {
+        $('#' + key).css({
+          "display": value ? "block" : "none"
+        });
+        if (value) {
+          active_buttons.push(key);
+        }
+      });
+      //iniciar los eventos de los botones visibles
+      menu.startButtonsEvents(active_buttons);
+      //Poner la clase correspondiente a la pantalla
+      $('#container').removeClass();
+      $('#container').addClass(config.clase);
+
+      //Dibujar los elementos
+      return drawElements(config.elements).then(function () {
+        //Se ha terminado de renderizar la escena
+        return resolve();
+      });
+    });
+  };
+
+  var hasSound = function hasSound(opts) {
+    var has = false;
+    _.each(opts.elements, function (value) {
+      if (value.type === "audio") {
+        has = true;
+      }
+    });
+    return has;
+  };
+
+  var getSound = function getSound(opts) {
+    var sound = null;
+    _.each(opts.elements, function (value) {
+      if (value.type === "audio") {
+        sound = value.audio;
+      }
+    });
+    return sound;
+  };
+
+  var drawElements = function drawElements() {
+    return new Promise(function (resolve, reject) {
+      _.each(config.elements, function (value, key) {
+
+        if (value.type !== "audio") {
+          el = "<div id='" + key + "'></div>";
+          $(scene_el).append(el);
+          $('#' + key).css({
+            position: 'absolute',
+            top: resizer.getPosition(value.pos).y,
+            left: resizer.getPosition(value.pos).x
+          });
+        }
+        if (value.type === "animation") {
+          setupInitAnimation(value, key);
+          animations.push('#' + key);
+        }
+        if (value.type === "image") {
+          setupInitImage(value, key);
+        }
+      });
+
+      return resolve();
+    });
+  };
+
+  var setupInitAnimation = function setupInitAnimation(obj, k) {
+
+    $('#' + k).css({
+      "width": obj.size.w,
+      "height": obj.size.h,
+      'background-image': 'url("' + media.getImage(obj.image).src + '")',
+      'background-size': "auto " + obj.size.h + 'px',
+      "background-position-x": "0px",
+      "-webkit-transform-origin": "top left",
+      "transform-origin": "top left"
+    });
+
+    $('#' + k).css('transform', 'scale(' + resizer.getSimpleSize(1) + ', ' + resizer.getSimpleSize(1) + ')');
+
+    $('#' + k).animateSprite({
+      fps: 25,
+      autoplay: false,
+      animations: {
+        go: obj.frames
+      },
+      loop: false,
+      complete: function complete() {
+        // use complete only when you set animations with 'loop: false'
+        $('#' + k).animateSprite('stop');
+        $('#' + k).animateSprite('stop');
+      }
+    });
+  };
+
+  var setupInitImage = function setupInitImage(obj, k) {
+    $('#' + k).css({
+      "width": resizer.getSize(obj.size).w,
+      "height": resizer.getSize(obj.size).h,
+      'background-image': 'url("' + media.getImage(obj.image).src + '")',
+      'background-repeat': 'no-repeat',
+      'background-size': "contain"
+    });
+  };
+
+  var showEndActivity = function showEndActivity() {
+    // Marcar el fin de la actividad
+    end = true;
+    return destroy().then(function () {
+      return promiseShowEndScene().then(function () {
+        //Avisar a la aplicación que se ha acabado la actividad
+        AnayaInfantil.app.endActivity();
+      });
+    });
+  };
+
+  var promiseShowEndScene = function promiseShowEndScene() {
+    //CONFIGURACIÓN DE LA PANTALLA INICIAL (COMENZAR)
+    var end_options, end_object;
+    if (config.end_config && config.end_config.show_end) {
+      //Hay que mostrar la pantalla FINAL
+      end_options = config.end_config;
+      end_object = new AnayaInfantil.endWindow(media, lib, resizer);
+      return new Promise(function (resolve, reject) {
+        end_object.init(end_options).then(function () {
+          end_object.destroy();
+          end_object = null;
+          return resolve();
+        });
+      });
+    } else {
+      return Promise.resolve();
+    }
+  };
+
+  var is_mobile = function is_mobile() {
+    var agents = ['android', 'webos', 'iphone', 'ipad', 'blackberry'];
+    for (var i in agents) {
+      if (navigator.userAgent.toLowerCase().search(agents[i]) > 0) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  var destroy = function destroy() {
+    $('#container').empty();
+    return Promise.resolve();
+  };
+
+  return {
+    initialize: initialize,
+    render: render,
+    destroy: destroy
+  };
+};
+
+exports.default = Scene_0;
+
+/***/ }),
+/* 1312 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var Promise = __webpack_require__(49);
+
+var Scene_1 = function Scene_1() {
+  'use strict';
+
+  var config = null;
+  var el = null;
+  var scene_el = null;
+  var data = null;
+  var scene = null;
+  var end_drag = false;
+
+  var self = undefined;
+  var el = null;
+  var end = false;
+  var scene_el = '#container';
+  var media;
+  var intro;
+  var containers_arr = [];
+  var resolution = null;
+  var lib = null; //la librería de audio
+  //Contador de errores
+  var error_counter = 0;
+  var res_config = null;
+  var containers = [];
+  var resizer = null;
+  var drop_containers_ids = [];
+  var layout = null; //El objeto encargado del layout
+  var menu = null;
+  var intro_object = null;
+  var end_object = null;
+  var active_buttons = [];
+  var resolved_elements = [];
+  var multiple_answers = null; //Si hay más de una respuesta por pantalla
+  var animate_answers = null; //Si las respustas se animan (OK o KO)
+  var menu_signals = {
+    open: null,
+    close: null
+  };
+  var auto_play_sound = null;
+
+  var initialize = function initialize(options, med, res, resizer_obj, layout_obj) {
+
+    config = options;
+    media = med;
+    res_config = res;
+    resizer = resizer_obj;
+
+    resolution = res;
+    layout = layout_obj;
+    multiple_answers = config.multiple_answers;
+    animate_answers = config.animate_answers;
+
+    return render().then(function () {
+      // Crear la escena
+      return Promise.resolve();
+    });
+  };
+
+  var get = function get(id) {
+    return document.getElementById(id);
+  };
+
+  // Funcion que renderiza la escena, despues de cargar las imagenes
+  var render = function render() {
+
+    //dibujar la escena
+    return new Promise(function (resolve, reject) {
+      //Dibujar el fondo, si tiene
+      if (config.main_back) {
+        var img = media.getImage(config.main_back);
+        $("#" + config.scene_el).css({
+          "background-image": "url(" + img.src + ")",
+          "background-size": "contain",
+          "background-position": "center center",
+          "background-repeat": "no-repeat"
+        });
+      }
+
+      //Ver si necesita botones visibles
+      _.each(config.buttons_visible, function (value, key) {
+        $('#' + key).css({
+          "display": value ? "block" : "none"
+        });
+        if (value) {
+          active_buttons.push(key);
+        }
+      });
+      //iniciar los eventos de los botones visibles
+      //menu.startButtonsEvents(active_buttons);
+      //Poner la clase correspondiente a la pantalla
+      $('#container').removeClass();
+      $('#container').addClass(config.clase);
+      //Dibujar los contenedores
+      return drawQuestion(config.elements).then(function () {
+        //Dibujar los arrastrables
+        return drawAnswers(config.elements);
+      }).then(function () {
+        return Promise.delay(100).then(function () {
+          resolve();
+        });
+      });
+    });
+  };
+
+  var drawQuestion = function drawQuestion(els) {
+    var container = document.getElementById('container');
+    _.each(els, function (value, key) {
+      if (value.type === "question_model") {
+        containers.push(value);
+      }
+    });
+
+    return new Promise(function (resolve, reject) {
+      _.each(containers, function (value, key) {
+        drawQuestionElement(value, value.id, containers.length, container, key);
+      });
+      resolve();
+    });
+  };
+
+  var drawQuestionElement = function drawQuestionElement(el, k, total, container, index) {
+
+    var elem = "<div id='" + k + "' class='drop-target drop-target" + index + "'></div>";
+    var txt = "<div class='q_text'>" + el.text + "</div>";
+    var img = media.getImage(el.image.image);
+    $(container).append(elem);
+    if (el.text) {
+      $("#" + k).append(txt);
+    }
+
+    $('#' + k).css({
+      "background-image": "url(" + img.src + ")",
+      "background-size": resizer.getSimpleSize(el.image.size.w) + "px " + resizer.getSimpleSize(el.image.size.h) + "px",
+      "background-position": "center",
+      "background-repeat": "no-repeat",
+      "left": resizer.getPosition(el.pos).x + "px",
+      "top": resizer.getPosition(el.pos).y + "px",
+      "width": resizer.getSize(el.size).w + "px",
+      "height": resizer.getSize(el.size).h + "px",
+      "vertical-align": "middle"
+    });
+
+    $('.q_text').css({
+      // modificado para contener solo una letra 
+      "width": "75%",
+      "height": "auto",
+      "text-align": "center",
+      // modificado en diciembre
+      "font-size": resizer.getSimpleSize(65) + "px",
+      "line-height": resizer.getSimpleSize(70) + "px",
+      "vertical-align": "middle",
+      "font-weight": "bold",
+      "margin-top": resizer.getSimpleSize(el.text_margin_top) + "px"
+    });
+  };
+
+  var drawAnswers = function drawAnswers(els) {
+    var y = 0,
+        min_h = 0,
+        max_h = 0,
+        drop_y = 0,
+        compensa_h = 0,
+        pos_dr = [];
+    $('#container').append('<div id="drag-elements"></div>');
+    var drags = [];
+    _.each(els, function (value, key) {
+      if (value.type === "clickable") {
+        drags.push(value);
+        pos_dr.push(value.pos);
+      }
+    });
+
+    //Calcular el espacio q nos queda para el contenedor de arrastrables
+    drop_y = $("#question").position().top + $("#question").height();
+    max_h = resizer.getActivitySceneConfig().size.h - (drop_y - 20);
+    min_h = resizer.getSize(drags[0].size).h + 10;
+    compensa_h = (max_h - min_h) / 2;
+    y = drop_y + compensa_h;
+
+    //Posicionar el contenedor de elementos arrastrables en el sitio q nos queda
+    $("#drag-elements").css({
+      "height": min_h,
+      "width": "98%", //resizer.getSceneConfig().size.w,
+      "top": y,
+      "left": 0 //$("#drop-target-1").position().left
+    });
+    pos_dr = _.shuffle(pos_dr);
+    var c = document.getElementById('drag-elements');
+    return new Promise(function (resolve, reject) {
+      _.each(drags, function (value, key) {
+        drawAnswerElement(value, value.id, drags.length, c, key, pos_dr);
+      });
+      resolve();
+    });
+  };
+
+  var drawAnswerElement = function drawAnswerElement(el, k, total, container, index, pos) {
+    var elem_width = resizer.getSize(el.size).w;
+    var elem = "<div id='" + k + "'></div>";
+    $(container).append(elem);
+    $('#' + k).css({
+      "width": elem_width,
+      "height": elem_width,
+      "background-image": "url(" + media.getImage(el.image).src + ")",
+      "background-size": "contain",
+      "left": resizer.getSimpleSize(pos[index].x) + "px",
+      "top": resizer.getSimpleSize(pos[index].y) + "px"
+    });
+  };
+
+  var destroy = function destroy() {
+    $('#container').empty();
+    resolution = null;
+    return Promise.resolve();
+  };
+
+  return {
+    initialize: initialize,
+    render: render,
+    destroy: destroy
+  };
+};
+
+exports.default = Scene_1;
+
+/***/ }),
+/* 1313 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(1314)(undefined);
+// imports
+
+
+// module
+exports.push([module.i, ".loader_div {\r\n  z-index: 1000;\r\n  position: fixed !important;\r\n  position: absolute;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  background-color: #FFF;\r\n  height: 100%;\r\n  width: 100%;\r\n  overflow: hidden;\r\n  opacity: 1;\r\n  -webkit-transition: 1s opacity linear;\r\n  -moz-transition: 1s opacity linear;\r\n  -o-transition: 1s opacity linear;\r\n  -ms-transition: 1s opacity linearlinear;\r\n  transition: 1s opacity linear;\r\n}\r\n\r\n.loader_div div {\r\n  position: absolute;\r\n  width: 80px;\r\n  height: 80px;\r\n}\r\n\r\n.dial {\r\n  opacity: 0;\r\n}\r\n\r\n#main {\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  background-color: #FFF;\r\n  background-position: 10px 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n}\r\n\r\n#container {\r\n  padding: 0;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  float: left;\r\n  z-index: 55;\r\n  display: block;\r\n  background-color: #FFF;\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  margin-bottom: 0;\r\n}\r\n\r\n#screenBlocker {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#infoWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#bubble {\r\n  margin: 0;\r\n  display: none;\r\n  position: relative;\r\n  z-index: 2042;\r\n  background-color: rgb(255, 239, 215);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: bold;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n}\r\n\r\n\r\n/*\r\n#bubble:after {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 239, 215);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n#bubble:before {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 200, 119);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n.instruction_note {\r\n  font-weight: normal;\r\n}\r\n*/\r\n\r\n#initWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2050;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0.4);\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#init_content {\r\n  margin: 0;\r\n  position: relative;\r\n  z-index: 2052;\r\n  background-color: rgb(255, 255, 255, 1);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: normal;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#animation_ok {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n  z-index: 944;\r\n}\r\n\r\n#animation_ko {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n}\r\n\r\n\r\n/*******   MENU   ******/\r\n\r\n#menu {\r\n  padding: 0;\r\n  position: absolute;\r\n  z-index: 155;\r\n  overflow: hidden;\r\n}\r\n\r\n.slider {\r\n  position: absolute;\r\n  z-index: 155;\r\n  -webkit-transition: .5s all ease-in;\r\n  -moz-transition: .5s all ease-in;\r\n  -o-transition: .5s all ease-in;\r\n  -ms-transition: .5s all ease-in;\r\n  transition: .5s all ease-in;\r\n  -webkit-backface-visibility: hidden;\r\n  -moz-backface-visibility: hidden;\r\n  -ms-backface-visibility: hidden;\r\n  backface-visibility: hidden;\r\n  -webkit-transform: translate3d(0, 0, 0);\r\n  -moz-transform: translate3d(0, 0, 0);\r\n  -ms-transform: translate3d(0, 0, 0);\r\n  -o-transform: translate3d(0, 0, 0);\r\n  transform: translate3d(0, 0, 0);\r\n}\r\n\r\n.rita_menu {\r\n  position: absolute;\r\n  float: left;\r\n  /*background-image: url(\"../images/rita1.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  z-index: 900;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n}\r\n\r\n.rita_menu #arrow {\r\n  position: absolute;\r\n  /*background-image: url(\"../images/arrow_right.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-position: center;\r\n  background-size: initial;\r\n  z-index: 950;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n#arrow.right {\r\n  -ms-transform: rotate(0deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(0deg);\r\n  /* Safari */\r\n  transform: rotate(0deg);\r\n}\r\n\r\n#arrow.left {\r\n  -ms-transform: rotate(180deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(180deg);\r\n  /* Safari */\r\n  transform: rotate(180deg);\r\n}\r\n\r\n.btns {\r\n  display: block;\r\n  position: absolute;\r\n  z-index: 1055;\r\n}\r\n\r\n.uihome,\r\n.uiredo,\r\n.uiback {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center left;\r\n  transform-origin: center left;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uinext {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center right;\r\n  transform-origin: center right;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uihome:hover,\r\n.uiredo:hover,\r\n.uiback:hover,\r\n.uinext:hover {\r\n  -ms-transform: scale(1.2, 1.2);\r\n  /* IE 9 */\r\n  -moz-transform: scale(1.2, 1.2);\r\n  -webkit-transform: scale(1.2, 1.2);\r\n  /* Safari */\r\n  transform: scale(1.2, 1.2);\r\n}\r\n\r\n\r\n/*\r\n.uihome {\r\n  background-image: url(\"../images/btn_home.png\");\r\n}\r\n\r\n.uiredo {\r\n  background-image: url(\"../images/btn_redo.png\");\r\n}\r\n\r\n.uiback {\r\n  background-image: url(\"../images/btn_back.png\");\r\n}\r\n\r\n.uinext {\r\n  background-image: url(\"../images/btn_next.png\");\r\n}\r\n*/\r\n\r\n\r\n/**** Click ****/\r\n\r\n.check_ok {\r\n  /*background-image: url(\"../images/check.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n}\r\n\r\n#ardilla_r {\r\n  /*background-image: url(\"../images/activity/ardilla_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#arbol_r {\r\n  /*background-image: url(\"../images/activity/arbol_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#agua_r {\r\n  /*background-image: url(\"../images/activity/agua_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#abeja_r {\r\n  /*background-image: url(\"../images/activity/abeja_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n\r\n/**** dNd ****/\r\n\r\n#drag-elements {\r\n  padding: 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n  z-index: 2135;\r\n  display: block;\r\n  margin: 0;\r\n  border-radius: 20px;\r\n  border: 5px solif #FFF;\r\n}\r\n\r\n#drag-elements>div {\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  position: absolute;\r\n  background-repeat: no-repeat;\r\n}\r\n\r\n#drag-elements>div:hover {\r\n  -ms-transform: scale(1.2, 1.2);\r\n  /* IE 9 */\r\n  -moz-transform: scale(1.2, 1.2);\r\n  -webkit-transform: scale(1.2, 1.2);\r\n  /* Safari */\r\n  transform: scale(1.2, 1.2);\r\n}\r\n\r\n.drop-target {\r\n  display: block;\r\n  text-align: left;\r\n  position: absolute;\r\n  border: 5px dotted #ccc;\r\n  border-radius: 20px;\r\n  z-index: 800;\r\n}\r\n\r\n#drop-target-1 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-2 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-1>div,\r\n#drop-target-2>div {\r\n  transition: all .5s;\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  transition: all .5s ease;\r\n}\r\n\r\n.gu-mirror {\r\n  position: fixed !important;\r\n  margin: 0 !important;\r\n  z-index: 9999 !important;\r\n  opacity: 0.8;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)\";\r\n  filter: alpha(opacity=80);\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n.gu-hide {\r\n  display: none !important;\r\n}\r\n\r\n.gu-unselectable {\r\n  -webkit-user-select: none !important;\r\n  -moz-user-select: none !important;\r\n  -ms-user-select: none !important;\r\n  user-select: none !important;\r\n}\r\n\r\n.gu-transit {\r\n  opacity: 0;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)\";\r\n  filter: alpha(opacity=0);\r\n}\r\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 1314 */
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+/* 1315 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(1313);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(1316)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../node_modules/css-loader/index.js!./app.css", function() {
+			var newContent = require("!!../../../node_modules/css-loader/index.js!./app.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 1316 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+var stylesInDom = {};
+
+var	memoize = function (fn) {
+	var memo;
+
+	return function () {
+		if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+		return memo;
+	};
+};
+
+var isOldIE = memoize(function () {
+	// Test for IE <= 9 as proposed by Browserhacks
+	// @see http://browserhacks.com/#hack-e71d8692f65334173fee715c222cb805
+	// Tests for existence of standard globals is to allow style-loader
+	// to operate correctly into non-standard environments
+	// @see https://github.com/webpack-contrib/style-loader/issues/177
+	return window && document && document.all && !window.atob;
+});
+
+var getElement = (function (fn) {
+	var memo = {};
+
+	return function(selector) {
+		if (typeof memo[selector] === "undefined") {
+			memo[selector] = fn.call(this, selector);
+		}
+
+		return memo[selector]
+	};
+})(function (target) {
+	return document.querySelector(target)
+});
+
+var singleton = null;
+var	singletonCounter = 0;
+var	stylesInsertedAtTop = [];
+
+var	fixUrls = __webpack_require__(1317);
+
+module.exports = function(list, options) {
+	if (typeof DEBUG !== "undefined" && DEBUG) {
+		if (typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+	}
+
+	options = options || {};
+
+	options.attrs = typeof options.attrs === "object" ? options.attrs : {};
+
+	// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+	// tags it will allow on a page
+	if (!options.singleton) options.singleton = isOldIE();
+
+	// By default, add <style> tags to the <head> element
+	if (!options.insertInto) options.insertInto = "head";
+
+	// By default, add <style> tags to the bottom of the target
+	if (!options.insertAt) options.insertAt = "bottom";
+
+	var styles = listToStyles(list, options);
+
+	addStylesToDom(styles, options);
+
+	return function update (newList) {
+		var mayRemove = [];
+
+		for (var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+
+			domStyle.refs--;
+			mayRemove.push(domStyle);
+		}
+
+		if(newList) {
+			var newStyles = listToStyles(newList, options);
+			addStylesToDom(newStyles, options);
+		}
+
+		for (var i = 0; i < mayRemove.length; i++) {
+			var domStyle = mayRemove[i];
+
+			if(domStyle.refs === 0) {
+				for (var j = 0; j < domStyle.parts.length; j++) domStyle.parts[j]();
+
+				delete stylesInDom[domStyle.id];
+			}
+		}
+	};
+};
+
+function addStylesToDom (styles, options) {
+	for (var i = 0; i < styles.length; i++) {
+		var item = styles[i];
+		var domStyle = stylesInDom[item.id];
+
+		if(domStyle) {
+			domStyle.refs++;
+
+			for(var j = 0; j < domStyle.parts.length; j++) {
+				domStyle.parts[j](item.parts[j]);
+			}
+
+			for(; j < item.parts.length; j++) {
+				domStyle.parts.push(addStyle(item.parts[j], options));
+			}
+		} else {
+			var parts = [];
+
+			for(var j = 0; j < item.parts.length; j++) {
+				parts.push(addStyle(item.parts[j], options));
+			}
+
+			stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+		}
+	}
+}
+
+function listToStyles (list, options) {
+	var styles = [];
+	var newStyles = {};
+
+	for (var i = 0; i < list.length; i++) {
+		var item = list[i];
+		var id = options.base ? item[0] + options.base : item[0];
+		var css = item[1];
+		var media = item[2];
+		var sourceMap = item[3];
+		var part = {css: css, media: media, sourceMap: sourceMap};
+
+		if(!newStyles[id]) styles.push(newStyles[id] = {id: id, parts: [part]});
+		else newStyles[id].parts.push(part);
+	}
+
+	return styles;
+}
+
+function insertStyleElement (options, style) {
+	var target = getElement(options.insertInto)
+
+	if (!target) {
+		throw new Error("Couldn't find a style target. This probably means that the value for the 'insertInto' parameter is invalid.");
+	}
+
+	var lastStyleElementInsertedAtTop = stylesInsertedAtTop[stylesInsertedAtTop.length - 1];
+
+	if (options.insertAt === "top") {
+		if (!lastStyleElementInsertedAtTop) {
+			target.insertBefore(style, target.firstChild);
+		} else if (lastStyleElementInsertedAtTop.nextSibling) {
+			target.insertBefore(style, lastStyleElementInsertedAtTop.nextSibling);
+		} else {
+			target.appendChild(style);
+		}
+		stylesInsertedAtTop.push(style);
+	} else if (options.insertAt === "bottom") {
+		target.appendChild(style);
+	} else {
+		throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+	}
+}
+
+function removeStyleElement (style) {
+	if (style.parentNode === null) return false;
+	style.parentNode.removeChild(style);
+
+	var idx = stylesInsertedAtTop.indexOf(style);
+	if(idx >= 0) {
+		stylesInsertedAtTop.splice(idx, 1);
+	}
+}
+
+function createStyleElement (options) {
+	var style = document.createElement("style");
+
+	options.attrs.type = "text/css";
+
+	addAttrs(style, options.attrs);
+	insertStyleElement(options, style);
+
+	return style;
+}
+
+function createLinkElement (options) {
+	var link = document.createElement("link");
+
+	options.attrs.type = "text/css";
+	options.attrs.rel = "stylesheet";
+
+	addAttrs(link, options.attrs);
+	insertStyleElement(options, link);
+
+	return link;
+}
+
+function addAttrs (el, attrs) {
+	Object.keys(attrs).forEach(function (key) {
+		el.setAttribute(key, attrs[key]);
+	});
+}
+
+function addStyle (obj, options) {
+	var style, update, remove, result;
+
+	// If a transform function was defined, run it on the css
+	if (options.transform && obj.css) {
+	    result = options.transform(obj.css);
+
+	    if (result) {
+	    	// If transform returns a value, use that instead of the original css.
+	    	// This allows running runtime transformations on the css.
+	    	obj.css = result;
+	    } else {
+	    	// If the transform function returns a falsy value, don't add this css.
+	    	// This allows conditional loading of css
+	    	return function() {
+	    		// noop
+	    	};
+	    }
+	}
+
+	if (options.singleton) {
+		var styleIndex = singletonCounter++;
+
+		style = singleton || (singleton = createStyleElement(options));
+
+		update = applyToSingletonTag.bind(null, style, styleIndex, false);
+		remove = applyToSingletonTag.bind(null, style, styleIndex, true);
+
+	} else if (
+		obj.sourceMap &&
+		typeof URL === "function" &&
+		typeof URL.createObjectURL === "function" &&
+		typeof URL.revokeObjectURL === "function" &&
+		typeof Blob === "function" &&
+		typeof btoa === "function"
+	) {
+		style = createLinkElement(options);
+		update = updateLink.bind(null, style, options);
+		remove = function () {
+			removeStyleElement(style);
+
+			if(style.href) URL.revokeObjectURL(style.href);
+		};
+	} else {
+		style = createStyleElement(options);
+		update = applyToTag.bind(null, style);
+		remove = function () {
+			removeStyleElement(style);
+		};
+	}
+
+	update(obj);
+
+	return function updateStyle (newObj) {
+		if (newObj) {
+			if (
+				newObj.css === obj.css &&
+				newObj.media === obj.media &&
+				newObj.sourceMap === obj.sourceMap
+			) {
+				return;
+			}
+
+			update(obj = newObj);
+		} else {
+			remove();
+		}
+	};
+}
+
+var replaceText = (function () {
+	var textStore = [];
+
+	return function (index, replacement) {
+		textStore[index] = replacement;
+
+		return textStore.filter(Boolean).join('\n');
+	};
+})();
+
+function applyToSingletonTag (style, index, remove, obj) {
+	var css = remove ? "" : obj.css;
+
+	if (style.styleSheet) {
+		style.styleSheet.cssText = replaceText(index, css);
+	} else {
+		var cssNode = document.createTextNode(css);
+		var childNodes = style.childNodes;
+
+		if (childNodes[index]) style.removeChild(childNodes[index]);
+
+		if (childNodes.length) {
+			style.insertBefore(cssNode, childNodes[index]);
+		} else {
+			style.appendChild(cssNode);
+		}
+	}
+}
+
+function applyToTag (style, obj) {
+	var css = obj.css;
+	var media = obj.media;
+
+	if(media) {
+		style.setAttribute("media", media)
+	}
+
+	if(style.styleSheet) {
+		style.styleSheet.cssText = css;
+	} else {
+		while(style.firstChild) {
+			style.removeChild(style.firstChild);
+		}
+
+		style.appendChild(document.createTextNode(css));
+	}
+}
+
+function updateLink (link, options, obj) {
+	var css = obj.css;
+	var sourceMap = obj.sourceMap;
+
+	/*
+		If convertToAbsoluteUrls isn't defined, but sourcemaps are enabled
+		and there is no publicPath defined then lets turn convertToAbsoluteUrls
+		on by default.  Otherwise default to the convertToAbsoluteUrls option
+		directly
+	*/
+	var autoFixUrls = options.convertToAbsoluteUrls === undefined && sourceMap;
+
+	if (options.convertToAbsoluteUrls || autoFixUrls) {
+		css = fixUrls(css);
+	}
+
+	if (sourceMap) {
+		// http://stackoverflow.com/a/26603875
+		css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+	}
+
+	var blob = new Blob([css], { type: "text/css" });
+
+	var oldSrc = link.href;
+
+	link.href = URL.createObjectURL(blob);
+
+	if(oldSrc) URL.revokeObjectURL(oldSrc);
+}
+
+
+/***/ }),
+/* 1317 */
+/***/ (function(module, exports) {
+
+
+/**
+ * When source maps are enabled, `style-loader` uses a link element with a data-uri to
+ * embed the css on the page. This breaks all relative urls because now they are relative to a
+ * bundle instead of the current page.
+ *
+ * One solution is to only use full urls, but that may be impossible.
+ *
+ * Instead, this function "fixes" the relative urls to be absolute according to the current page location.
+ *
+ * A rudimentary test suite is located at `test/fixUrls.js` and can be run via the `npm test` command.
+ *
+ */
+
+module.exports = function (css) {
+  // get current location
+  var location = typeof window !== "undefined" && window.location;
+
+  if (!location) {
+    throw new Error("fixUrls requires window.location");
+  }
+
+	// blank or null?
+	if (!css || typeof css !== "string") {
+	  return css;
+  }
+
+  var baseUrl = location.protocol + "//" + location.host;
+  var currentDir = baseUrl + location.pathname.replace(/\/[^\/]*$/, "/");
+
+	// convert each url(...)
+	/*
+	This regular expression is just a way to recursively match brackets within
+	a string.
+
+	 /url\s*\(  = Match on the word "url" with any whitespace after it and then a parens
+	   (  = Start a capturing group
+	     (?:  = Start a non-capturing group
+	         [^)(]  = Match anything that isn't a parentheses
+	         |  = OR
+	         \(  = Match a start parentheses
+	             (?:  = Start another non-capturing groups
+	                 [^)(]+  = Match anything that isn't a parentheses
+	                 |  = OR
+	                 \(  = Match a start parentheses
+	                     [^)(]*  = Match anything that isn't a parentheses
+	                 \)  = Match a end parentheses
+	             )  = End Group
+              *\) = Match anything and then a close parens
+          )  = Close non-capturing group
+          *  = Match anything
+       )  = Close capturing group
+	 \)  = Match a close parens
+
+	 /gi  = Get all matches, not the first.  Be case insensitive.
+	 */
+	var fixedCss = css.replace(/url\s*\(((?:[^)(]|\((?:[^)(]+|\([^)(]*\))*\))*)\)/gi, function(fullMatch, origUrl) {
+		// strip quotes (if they exist)
+		var unquotedOrigUrl = origUrl
+			.trim()
+			.replace(/^"(.*)"$/, function(o, $1){ return $1; })
+			.replace(/^'(.*)'$/, function(o, $1){ return $1; });
+
+		// already a full url? no change
+		if (/^(#|data:|http:\/\/|https:\/\/|file:\/\/\/)/i.test(unquotedOrigUrl)) {
+		  return fullMatch;
+		}
+
+		// convert the url to a full url
+		var newUrl;
+
+		if (unquotedOrigUrl.indexOf("//") === 0) {
+		  	//TODO: should we add protocol?
+			newUrl = unquotedOrigUrl;
+		} else if (unquotedOrigUrl.indexOf("/") === 0) {
+			// path should be relative to the base url
+			newUrl = baseUrl + unquotedOrigUrl; // already starts with '/'
+		} else {
+			// path should be relative to current directory
+			newUrl = currentDir + unquotedOrigUrl.replace(/^\.\//, ""); // Strip leading './'
+		}
+
+		// send back the fixed url(...)
+		return "url(" + JSON.stringify(newUrl) + ")";
+	});
+
+	// send back the fixed css
+	return fixedCss;
+};
+
 
 /***/ })
 /******/ ]);

@@ -10,6 +10,7 @@ import ColorPicker from '../inputs/ColorPicker.jsx';
 import LabeledInputText from '../inputs/TextSimpleLabeled.jsx';
 import CheckboxLabeled from '../inputs/CheckboxLabeled.jsx';
 import CheckboxResolution from '../inputs/CheckboxResolution.jsx';
+import Elements from '../inputs/Elements.jsx';
 import Helpers from './helpers.js';
 import MediaComponent from '../inputs/MediaComponent.jsx';
 import R from 'ramda';
@@ -53,10 +54,6 @@ const FormPanel = (props) => {
 
 const formClickTemplate = (props) => {
   /*
-  "instruction": {
-    "text": "Hacemos algo en equipo. Empiezan con A.",
-    "sound": "titulo0"
-  }
   TIPOS DE ACTIVIDAD:
   0: ESTÁTICA CON O SIN timer
   1: Click
@@ -66,12 +63,10 @@ const formClickTemplate = (props) => {
   //ELEMENTS //Depende del type
 
   TODO: MANEJAR LOS ELEMENTOS DEPENDIENDO DEL TIPO DE ACTIVIDAD
-  TODO: MADIACOMPONENT PARA LA IMAGEN DE FONDO DE LA ACTIVIDAD _>revisar
   TODO: MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!!
 
   DISEÑAR LA CONFIGURACIÓN DE CAMPOS PARA ACTIVIDADES (VALIDACIÓN, VALORES POR DEFECTO, ASPECTO, ETC...).
   MEDIACOMPONENT:
-    TODO: SI TIENE UN MEDIO SELECCIONADO, MOSTRAR EL NOMBRE
     TODO: IMAGEN: AGREGAR EL TIPO DE IMAGEN -> combo: IMAGEN/ANIMACION
     TODO: AGREGAR UN BUSCADOR DE MEDIOS, QUE PRESENTA LOS RESULTADOS EN UNA TABLA PAGINADA
     ESTUDIAR LA CONVERSIÓN DE MP3 A OGG NODE ffmpeg?
@@ -103,130 +98,23 @@ const formClickTemplate = (props) => {
     props.handleCreateElement(element, opts.index, name);
   };
 
-  //Borrar elemento (respuesta o modelo)
-  const deleteElementClick = (opts) => {
-    props.handleDeleteElement(opts.element, opts.index);
-  };
-
-  const getActivityElements = (elements_array, scene_index) => {
-    let el_arr = [];
-    let has_model = false;
-    let btn = '';
-    R.mapObjIndexed(function (element, key) {
-      if (element.type === 'question_model') {
-        has_model = true;
-      } else {
-        el_arr.push(_getElementContent(element, key, scene_index));
-      }
-    }, elements_array);
-    if (has_model) {
-      const model_el = elements_array.question;
-      el_arr = R.prepend(_getElementContent(model_el, model_el.id, scene_index), el_arr)
-    } else {
-      btn = <Button content='Crear Modelo/Pregunta' icon='add circle' labelPosition='left' onClick={newModelElementClick.bind(this, { index: props.index })} />
-    }
-    return (
-      <div>
-        {btn}
-        <Card.Group key={'main_elements_' + scene_index}>{el_arr}</Card.Group>
-      </div>)
-  };
-
-  const getMediaImageUrl = (img) => {
-    return props.state.media.images[img];
-  };
-
-  const _getSoundName = (name) => {
-    let str = '';
-    if (name.length > 30) {
-      str = name.substring(0, 20) + "..." + name.substring(name.length - 4);
-      return str;
-    }
-    return name;
-  };
-
-  const _getElementText = (text) => {
-    if (text.length > 30) {
-      return text.substring(0, 30) + "...";
-    }
-    return text;
-  };
-
-  const _getElementContent = (el, el_key, scene_index) => {
-    let image = '';
-    let sound = '';
-    let text = '';
-    let check = '';
-    let fluid = false;
-    let meta = <Card.Meta>Tipo: Respuesta - Clickable</Card.Meta>;
-    if (el.image) {
-      image = <div className='element_media'><Icon name='image' />: <Image key={'image' + el.image} size='mini' src={Helpers.uploadedImage(getMediaImageUrl(el.image))} /></div>
-    }
-    if (el.sound) {
-      sound = <div className='element_media'><Icon name='music' />: {_getSoundName(el.sound)}</div>
-    }
-    if (el.text) {
-      text = <div className='element_media'><Icon name='file text outline' />: {_getElementText(el.text)}</div>
-    }
-    if (el.type === 'question_model') {
-      fluid = true;
-      meta = <Card.Meta key={el.type + _.uniqueId()} >Tipo: Pregunta/Modelo</Card.Meta>;
-    } else {
-      check = <CheckboxResolution {...props}
-        name={el_key}
-        title='Correcta' />
-    }
-
-
-    return (<Card key={'element_' + el.id} fluid={fluid}>
-      <Card.Content key={'content_' + _.uniqueId()}>
-        <Popup
-          trigger={<Button circular icon='remove circle' floated='right' onClick={deleteElementClick.bind(this, { element: el.id, index: props.index })} />}
-          content='Borrar elemento.'
-          on='hover'
-        />
-        <Card.Header key={'header_' + _.uniqueId()}>
-          {el.id}
-        </Card.Header>
-        {meta}
-        <Card.Description>
-          {image}
-          {sound}
-          {text}
-          {check}
-        </Card.Description>
-      </Card.Content>
-      <Card.Content extra key={'extra_content_' + _.uniqueId()}>
-        <MediaComponent {...props}
-          name={'elements' + el_key}
-          title='Añadir medios'
-          field={['code', scene_index, 'elements', el_key]}
-          options={{
-            image: el.image,
-            sound: el.sound,
-            text: el.text,
-            enabled: {
-              image: true,
-              sound: true,
-              text: false,
-            }
-          }} />
-      </Card.Content>
-    </Card>)
-  };
+  let back_image = props.state.code[props.index].main_back;
+  if (R.type(back_image) === 'Object') {
+    back_image = back_image.image;
+  }
 
   return (
     <div>
       <CheckboxLabeled {...props}
-        name={'show_instruction' + _.uniqueId()}
+        name={'show_instruction'}
         title='Mostrar la instrucción al iniciar'
         field={['code', index, 'show_instruction']} />
-      <SimpleInputText key={'instruction' + _.uniqueId()} {...props}
-        name={'instruction_text' + _.uniqueId()}
+      <SimpleInputText key={'instruction'} {...props}
+        name={'instruction_text'}
         title='Instrucción'
         field={['code', index, 'instruction', 'text']} />
       <Form.Field>
-        <label>Audio: {props.state.code[props.index].instruction.sound || "Ninguno..." }</label>
+        <label>Audio: {props.state.code[props.index].instruction.sound || "Ninguno..."}</label>
       </Form.Field>
       <MediaComponent {...props}
         name={'audio_instruction'}
@@ -243,8 +131,8 @@ const formClickTemplate = (props) => {
           }
         }} />
       <Form.Field>
-      <Divider section />
-        <label>Imagen: {props.state.code[props.index].main_back || "Ninguna..." }</label>
+        <Divider section />
+        <label>Imagen: {back_image || "Ninguna..."}</label>
       </Form.Field>
       <MediaComponent {...props}
         name={'main_back' + _.uniqueId()}
@@ -265,8 +153,8 @@ const formClickTemplate = (props) => {
         <label>Color de fondo de la actividad</label>
       </Form.Field>
       <ColorPicker {...props}
-        name={'background_color' + _.uniqueId()}
-        key={'background_color' + _.uniqueId()}
+        name={'background_color'}
+        key={'background_color'}
         field={['code', index, 'background_color']}
       />
       <Divider section />
@@ -325,8 +213,8 @@ const formClickTemplate = (props) => {
       </Form.Field>
       <Form.Group widths='equal'>
         <Form.Field>
-          <LabeledInputText key={'timer' + _.uniqueId()} {...props}
-            name={'time' + _.uniqueId()}
+          <LabeledInputText key={'timer'} {...props}
+            name={'time'}
             title='Tiempo'
             field={['code', index, 'timer', 'time']}
             label='ms.'
@@ -344,7 +232,7 @@ const formClickTemplate = (props) => {
         <label>Elementos de la actividad</label>
       </Form.Field>
       <Button content='Crear nuevo elemento' icon='add circle' labelPosition='left' onClick={newElementClick.bind(this, { index: props.index })} />
-      {getActivityElements(props.state.code[index].elements, index)}
+      <Elements {...props} elements={props.state.code[props.index].elements} />
     </div>
   );
 };

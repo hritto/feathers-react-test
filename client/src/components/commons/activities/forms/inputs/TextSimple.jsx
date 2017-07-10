@@ -7,6 +7,7 @@ const SimpleInputText = (props) => {
   const handleChange = (lens, evt) => {
     const value = evt.target.value;
     props.change(lens, evt.target.value);
+    return true;
   }
 
   return (
