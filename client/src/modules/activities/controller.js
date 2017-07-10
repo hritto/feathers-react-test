@@ -175,6 +175,10 @@ const ActivitiesController = function () {
     model.set('activity_code', data, false);
   };
 
+  const setElementData = (data) => {
+    model.set(data.lens, data.value, data.dispatch);
+  }
+
   const destroy = () => {
     model.destroy();
   };
@@ -187,6 +191,7 @@ const ActivitiesController = function () {
     handleSubmit: handleSubmit,
     tabClick: tabClick,
     updateActivityCode: updateActivityCode,
+    setElementData: setElementData,
     destroy: destroy
   };
 };

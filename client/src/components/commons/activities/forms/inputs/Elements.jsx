@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon, Button, Card, Image, Popup } from 'semantic-ui-react';
+import { Icon, Button, Card, Image, Popup, Divider } from 'semantic-ui-react';
 import R from 'ramda';
 import Element from './Element.jsx';
 
@@ -59,7 +59,15 @@ const Elements = (props) => {
     el_arr = R.prepend(<Element {...props} element={model_el} field={model_el.id} key={model_el.id} />, el_arr);
   } else {
     if (props.activity_type === 1 || props.activity_type === 2) {
-      btn = <Button content='Crear Modelo/Pregunta' icon='add circle' labelPosition='left' onClick={newModelElementClick.bind(this, { index: props.index })} />
+      btn = (<div>
+        <Button
+          content='Crear Modelo/Pregunta'
+          icon='add circle'
+          labelPosition='left'
+          onClick={newModelElementClick.bind(this, { index: props.index })}
+        />
+        <Divider section />
+      </div>);
     }
   }
 

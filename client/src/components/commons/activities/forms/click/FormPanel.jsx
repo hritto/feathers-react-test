@@ -76,7 +76,10 @@ const formClickTemplate = (props) => {
   //ELEMENTS //Depende del type
 
   TODO: MANEJAR LOS ELEMENTOS DEPENDIENDO DEL TIPO DE ACTIVIDAD
-  TODO: MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!!
+  TODO: MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!! 
+  -----> FALTA GUARDAR LOS DATOS EN EL SERVIDOR
+  -----> FALTA CONTROLAR EL LAYOUT AL AGREGAR/QUITAR ELEMENTOS
+  
 
   DISEÑAR LA CONFIGURACIÓN DE CAMPOS PARA ACTIVIDADES (VALIDACIÓN, VALORES POR DEFECTO, ASPECTO, ETC...).
   MEDIACOMPONENT:
@@ -245,6 +248,7 @@ const formClickTemplate = (props) => {
         <label>Elementos de la actividad</label>
       </Form.Field>
       <Button content='Crear nuevo elemento' icon='add circle' labelPosition='left' onClick={newElementClick.bind(this, { index: props.index })} />
+      <Divider section />
       <Elements {...props} elements={props.state.code[props.index].elements} />
     </div>
   );

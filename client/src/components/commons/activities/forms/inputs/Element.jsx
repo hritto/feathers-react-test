@@ -9,7 +9,6 @@ let mProps = null;
 
 //Borrar elemento (respuesta o modelo)
 const deleteElementClick = (opts) => {
-  debugger;
   mProps.handleDeleteElement(opts.element, opts.index);
 };
 

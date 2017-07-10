@@ -43505,12 +43505,15 @@ var ClickForm = function (_Component) {
             var media_form = '';
             var panels = mapIndexed(function (code, i) {
                 return self._getPanelContent(code, i);
-            }, this.props.model.activity_code.code);
+            }, this.state.code);
 
             // Abrir la modal de carga/seleccion de medios
             if (this.state.addMedia) {
                 media_form = this._getMediaForm();
             }
+
+            console.log("Form");
+            console.log(this.state);
 
             return _react2.default.createElement(
                 _semanticUiReact.Segment,
@@ -43537,6 +43540,8 @@ var ClickForm = function (_Component) {
                 change: this.handleChange,
                 state: this.state
             };
+            console.log("Layout");
+            console.log(this.state);
             layout = _react2.default.createElement(_LayoutClick2.default, p);
             return _react2.default.createElement(
                 _semanticUiReact.Segment,
@@ -43702,7 +43707,10 @@ var formClickTemplate = function formClickTemplate(props) {
   4: DIBUJO LIBRE
   //ELEMENTS //Depende del type
    TODO: MANEJAR LOS ELEMENTOS DEPENDIENDO DEL TIPO DE ACTIVIDAD
-  TODO: MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!!
+  TODO: MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!! 
+  -----> FALTA GUARDAR LOS DATOS EN EL SERVIDOR
+  -----> FALTA CONTROLAR EL LAYOUT AL AGREGAR/QUITAR ELEMENTOS
+  
    DISEÑAR LA CONFIGURACIÓN DE CAMPOS PARA ACTIVIDADES (VALIDACIÓN, VALORES POR DEFECTO, ASPECTO, ETC...).
   MEDIACOMPONENT:
     TODO: IMAGEN: AGREGAR EL TIPO DE IMAGEN -> combo: IMAGEN/ANIMACION
@@ -43922,6 +43930,7 @@ var formClickTemplate = function formClickTemplate(props) {
       )
     ),
     _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear nuevo elemento', icon: 'add circle', labelPosition: 'left', onClick: newElementClick.bind(undefined, { index: props.index }) }),
+    _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
     _react2.default.createElement(_Elements2.default, _extends({}, props, { elements: props.state.code[props.index].elements }))
   );
 };
@@ -44044,6 +44053,8 @@ var LayoutClickForm = function (_Component) {
         code: this.state.code,
         media: this.state.media
       };
+      console.log("App: ");
+      console.log(this.state.code);
       if (!this.app) {
         this.app = new _app4.default(config, _common_config2.default, this.state.layout_active_index);
         this.app.init();
@@ -44055,9 +44066,29 @@ var LayoutClickForm = function (_Component) {
       //////////////////////////////
       // GUARDAR LOS DATOS
       /////////////////////////////
-      debugger;
-      app.destroy();
-      this.props.props.controller.tabClick('form');
+      var self = this;
+      var layout_data = null;
+      this.app.destroy().then(function (el_layout) {
+        // GUARDAR LOS DATOS
+        self.updateModelLayout(el_layout);
+        // VOLVER AL FORM
+        self.props.props.controller.tabClick('form');
+      });
+    }
+  }, {
+    key: 'updateModelLayout',
+    value: function updateModelLayout(layout_data) {
+      var self = this;
+      var index = this.props.state.active_index;
+
+      _.each(layout_data, function (element, key) {
+        if (element.size) {
+          self.props.change(['code', index, 'elements', key, 'size'], element.size);
+        }
+        if (element.pos) {
+          self.props.change(['code', index, 'elements', key, 'pos'], element.pos);
+        }
+      });
     }
   }, {
     key: '_setLayoutActiveIndex',
@@ -44073,8 +44104,6 @@ var LayoutClickForm = function (_Component) {
     }
   }, {
     key: 'render',
-
-    // onClick={props.controller.tabClick.bind(this, 'form')}
     value: function render() {
       return _react2.default.createElement(
         _semanticUiReact.Segment,
@@ -44439,7 +44468,6 @@ var mProps = null;
 
 //Borrar elemento (respuesta o modelo)
 var deleteElementClick = function deleteElementClick(opts) {
-  debugger;
   mProps.handleDeleteElement(opts.element, opts.index);
 };
 
@@ -44636,10 +44664,9 @@ var element_default = {
   "sound": null,
   "text": null,
   "type": "clickable"
-};
 
-// Crear un nuevo modelo
-var newModelElementClick = function newModelElementClick(opts) {
+  // Crear un nuevo modelo
+};var newModelElementClick = function newModelElementClick(opts) {
   var element = _ramda2.default.clone(element_default);
   var name = 'question';
   element.id = name;
@@ -44677,7 +44704,17 @@ var Elements = function Elements(props) {
     el_arr = _ramda2.default.prepend(_react2.default.createElement(_Element2.default, _extends({}, props, { element: model_el, field: model_el.id, key: model_el.id })), el_arr);
   } else {
     if (props.activity_type === 1 || props.activity_type === 2) {
-      btn = _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear Modelo/Pregunta', icon: 'add circle', labelPosition: 'left', onClick: newModelElementClick.bind(undefined, { index: props.index }) });
+      btn = _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(_semanticUiReact.Button, {
+          content: 'Crear Modelo/Pregunta',
+          icon: 'add circle',
+          labelPosition: 'left',
+          onClick: newModelElementClick.bind(undefined, { index: props.index })
+        }),
+        _react2.default.createElement(_semanticUiReact.Divider, { section: true })
+      );
     }
   }
 
@@ -44822,10 +44859,9 @@ var MediaUpload = function MediaUpload(props) {
                 myDropzone.removeFile(file);
             });
         }
-    };
 
-    // Callback de la creación de imágenes en el servidor
-    _feathers_client_io2.default.removeListener('created').on('created', function (file) {
+        // Callback de la creación de imágenes en el servidor
+    };_feathers_client_io2.default.removeListener('created').on('created', function (file) {
         //Notificar al form que se ha subido la nueva imagen
         //y agregarla al estado del formulario
         props.addMedia({
@@ -45203,12 +45239,14 @@ var LayoutClickPreview = function LayoutClickPreview(opts, common_conf, s_index)
   };
 
   var destroy = function destroy(done) {
-    return scene.destroy().then(function () {
-      scene = null;
-      debugger;
-      media.promiseDestroy().then(function () {
-        debugger;
-        return true;
+    var el_layout = null;
+    return new Promise(function (resolve, reject) {
+      return scene.destroy().then(function (elements_layout) {
+        el_layout = _.clone(elements_layout);
+        scene = null;
+        media.promiseDestroy().then(function () {
+          return resolve(el_layout);
+        });
       });
     });
   };
@@ -45488,17 +45526,11 @@ var media = function media(options) {
       var keys_arr = Object.keys(images),
           i = 0,
           index_key = null;
-
       images = {};
-
-      // Liberando sonidos
-      //sound_object.destroy();
       sounds = {};
-
       setLoaded(0);
       total = 0;
-      resolve();
-      console.log("DESTROYED MEDIA");
+      return resolve();
     });
   };
 
@@ -45556,6 +45588,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var Promise = __webpack_require__(35);
+var interact = __webpack_require__(706);
 
 var Scene_0 = function Scene_0() {
 
@@ -45570,6 +45603,7 @@ var Scene_0 = function Scene_0() {
   var intro;
   var resizer = null;
   var layout = null; //El objeto encargado del layout
+  var elements_layout = {};
 
   var initialize = function initialize(options, med, res, resizer_obj, layout_obj) {
 
@@ -45587,7 +45621,7 @@ var Scene_0 = function Scene_0() {
 
   // Funcion que renderiza la escena, despues de cargar las imagenes
   var render = function render() {
-
+    elements_layout = config.elements;
     //dibujar la escena
     return new Promise(function (resolve, reject) {
       //Dibujar el fondo, si tiene
@@ -45608,17 +45642,72 @@ var Scene_0 = function Scene_0() {
       //Dibujar los elementos
       return drawElements(config.elements).then(function () {
         //Se ha terminado de renderizar la escena
-        return resolve();
+        return Promise.delay(100).then(function () {
+          interact('.resize-drag').draggable({
+            onmove: window.dragMoveListener,
+            onend: function onend(event) {
+              // recalculateLayout(event);
+            }
+          }).resizable({
+            preserveAspectRatio: false,
+            edges: {
+              left: true,
+              right: true,
+              bottom: true,
+              top: true
+            },
+            onend: function onend(event) {
+              // recalculateLayout(event);
+            }
+          }).on('resizemove', function (event) {
+            var target = event.target,
+                x = parseFloat(target.getAttribute('data-x')) || 0,
+                y = parseFloat(target.getAttribute('data-y')) || 0;
+
+            // update the element's style
+            target.style.width = event.rect.width + 'px';
+            target.style.height = event.rect.height + 'px';
+
+            elements_layout[target.id].size = {
+              w: event.rect.width,
+              h: event.rect.height
+            };
+          });
+          resolve();
+        });
       });
     });
   };
+
+  function dragMoveListener(event) {
+    var target = event.target,
+
+    // keep the dragged position in the data-x/data-y attributes
+    x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+        y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+    $('#' + target.id).css('left', x + 'px');
+    $('#' + target.id).css('top', y + 'px');
+
+    // update the position attributes
+    target.setAttribute('data-x', x);
+    target.setAttribute('data-y', y);
+
+    elements_layout[target.id].pos = {
+      x: x,
+      y: y
+    };
+  }
+
+  // this is used later in the resizing and gesture demos
+  window.dragMoveListener = dragMoveListener;
 
   var drawElements = function drawElements() {
     return new Promise(function (resolve, reject) {
       _.each(config.elements, function (value, key) {
 
         if (value.type !== "audio") {
-          el = "<div id='" + key + "'></div>";
+          el = "<div class='resize-drag' id='" + key + "' data-x='" + resizer.getPosition(value.pos).x + "' data-y='" + resizer.getPosition(value.pos).y + "'></div>";
           $(scene_el).append(el);
           $('#' + key).css({
             position: 'absolute',
@@ -45641,13 +45730,18 @@ var Scene_0 = function Scene_0() {
       "height": resizer.getSize(obj.size).h,
       'background-image': 'url("' + media.getImage(obj.image).src + '")',
       'background-repeat': 'no-repeat',
-      'background-size': "contain"
+      'background-size': "contain",
+      "background-position": "center center",
+      "border": "1px solid red"
     });
   };
 
   var destroy = function destroy() {
-    $('#container').empty();
-    return Promise.resolve();
+    interact('.resize-drag').unset();
+    return new Promise(function (resolve, reject) {
+      $('#container').empty();
+      return resolve(elements_layout);
+    });
   };
 
   return {
@@ -45669,8 +45763,16 @@ exports.default = Scene_0;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _ramda = __webpack_require__(17);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var Promise = __webpack_require__(35);
 var interact = __webpack_require__(706);
+
 
 var Scene_1 = function Scene_1() {
   'use strict';
@@ -45690,6 +45792,7 @@ var Scene_1 = function Scene_1() {
   var containers = [];
   var resizer = null;
   var layout = null; //El objeto encargado del layout
+  var elements_layout = {};
 
   var initialize = function initialize(options, med, res, resizer_obj, layout_obj) {
 
@@ -45712,6 +45815,7 @@ var Scene_1 = function Scene_1() {
 
     //dibujar la escena
     return new Promise(function (resolve, reject) {
+      elements_layout = config.elements;
       //Dibujar el fondo, si tiene
       if (config.main_back) {
         var img = media.getImage(config.main_back);
@@ -45725,15 +45829,19 @@ var Scene_1 = function Scene_1() {
 
       ///Poner la clase correspondiente a la pantalla
       $('#container').removeClass();
+      $('#container').empty();
       $('#container').addClass(config.clase);
       //Dibujar los contenedores
-      return drawQuestion(config.elements).then(function () {
+      return drawQuestion(elements_layout).then(function () {
         //Dibujar los arrastrables
-        return drawAnswers(config.elements);
+        return drawAnswers(elements_layout);
       }).then(function () {
         return Promise.delay(100).then(function () {
           interact('.resize-drag').draggable({
-            onmove: window.dragMoveListener
+            onmove: window.dragMoveListener,
+            onend: function onend(event) {
+              recalculateLayout(event);
+            }
           }).resizable({
             preserveAspectRatio: false,
             edges: {
@@ -45741,6 +45849,9 @@ var Scene_1 = function Scene_1() {
               right: true,
               bottom: true,
               top: true
+            },
+            onend: function onend(event) {
+              recalculateLayout(event);
             }
           }).on('resizemove', function (event) {
             var target = event.target,
@@ -45750,17 +45861,71 @@ var Scene_1 = function Scene_1() {
             // update the element's style
             target.style.width = event.rect.width + 'px';
             target.style.height = event.rect.height + 'px';
-
-            console.log("element: " + target.id);
-            console.log("x: " + x);
-            console.log("y: " + y);
-            console.log("w: " + event.rect.width);
-            console.log("h: " + event.rect.height);
+            elements_layout[target.id].size = {
+              w: event.rect.width,
+              h: event.rect.height
+            };
           });
           resolve();
         });
       });
     });
+  };
+
+  var recalculateLayout = function recalculateLayout(event) {
+    var target = event.target;
+    if (target.id === 'question') {
+      //Recalcular el tamaño del comtendor de clicks
+      var question_height = $("#question").position().top + $("#question").height();
+      var max_height_click_container = 550 - question_height;
+      $("#drag-elements").css({
+        "top": question_height + 20,
+        "left": 0,
+        "height": 550 - question_height - 40
+      });
+      //Ver si los elementos han quedado fuera del area de la actividad
+      _.each(elements_layout, function (el, key) {
+        if (el.type === 'question_model') {
+          var img;
+          var q_width = $('#question').width() - 40;
+          var q_height = $('#question').height() - 20;
+          var s;
+          var img_name;
+          // Ajustar la imagen al contenedor
+          if (_ramda2.default.type(el.image) !== 'Object') {
+            img = media.getImage(el.image);
+            img_name = _.clone(el.image);
+          } else {
+            img = media.getImage(el.image.image);
+            img_name = _.clone(el.image.image);
+          }
+
+          s = getImageSize(img.width, img.height, q_width, q_height);
+          var image_size = {
+            w: s.w,
+            h: s.h
+          };
+          var image_pos = {
+            x: (q_width - image_size.w) / 2,
+            y: (q_height - image_size.h) / 2
+          };
+          el.image = {
+            image: img_name,
+            size: image_size,
+            pos: image_pos
+          };
+          $('#question').css({
+            "background-size": resizer.getSimpleSize(el.image.size.w) + "px " + resizer.getSimpleSize(el.image.size.h) + "px"
+          });
+        } else {
+          if ($('#' + el.id).position().top > max_height_click_container - 20) {
+            el.pos.y = max_height_click_container - 40;
+            // update the position attributes
+            document.getElementById(el.id).setAttribute('data-y', max_height_click_container - 40);
+          }
+        }
+      });
+    }
   };
 
   function dragMoveListener(event) {
@@ -45776,6 +45941,11 @@ var Scene_1 = function Scene_1() {
     // update the position attributes
     target.setAttribute('data-x', x);
     target.setAttribute('data-y', y);
+
+    elements_layout[target.id].pos = {
+      x: x,
+      y: y
+    };
   }
 
   // this is used later in the resizing and gesture demos
@@ -45797,11 +45967,51 @@ var Scene_1 = function Scene_1() {
     });
   };
 
-  var drawQuestionElement = function drawQuestionElement(el, k, total, container, index) {
+  var getImageSize = function getImageSize(iwidth, iheight, q_width, q_height) {
+    var config = {
+      w: null,
+      h: null
+    };
 
+    var ratio = q_height / iheight;
+
+    // if (iheight > q_height) {
+    config.h = iheight * ratio;
+    config.w = iwidth * ratio;
+    // }
+    return config;
+  };
+
+  var drawQuestionElement = function drawQuestionElement(el, k, total, container, index) {
     var elem = "<div id='" + k + "' class='resize-drag drop-target drop-target" + index + "' data-x='" + resizer.getPosition(el.pos).x + "' data-y='" + resizer.getPosition(el.pos).y + "'></div>";
     var txt = "<div class='q_text'>" + el.text + "</div>";
-    var img = media.getImage(el.image.image);
+    var img;
+    var image_size;
+    var image_pos;
+    var q_width = $(container).width() - 40;
+    var q_height = 60;
+    var q_pos_x = 10;
+    var q_pos_y = 10;
+    var s;
+    if (_ramda2.default.type(el.image) !== 'Object') {
+      // Ajustar la imagen al contenedor
+      img = media.getImage(el.image);
+      s = getImageSize(img.width, img.height, q_width, q_height);
+      image_size = {
+        w: s.w,
+        h: s.h
+      };
+      image_pos = {
+        x: (q_width - image_size.w) / 2,
+        y: (q_height - image_size.h) / 2
+      };
+      el.image = {
+        image: el.image,
+        size: image_size,
+        pos: image_pos
+      };
+    }
+    img = media.getImage(el.image.image);
     $(container).append(elem);
     if (el.text) {
       $("#" + k).append(txt);
@@ -45835,29 +46045,30 @@ var Scene_1 = function Scene_1() {
   };
 
   var drawAnswers = function drawAnswers(els) {
-    debugger;
     var y = 0,
         min_h = 0,
         max_h = 0,
         drop_y = 0,
         compensa_h = 0,
-        pos_dr = [];
+        pos_dr = [],
+        has_question = false;
     $('#container').append('<div id="drag-elements"></div>');
     var drags = [];
     _.each(els, function (value, key) {
       if (value.type === "clickable") {
         drags.push(value);
         pos_dr.push(value.pos);
+      } else {
+        has_question = true;
       }
     });
 
     //Calcular el espacio q nos queda para el contenedor de arrastrables
-    if ($("#question") && $("#question").length) {
+    if (has_question) {
       drop_y = $("#question").position().top + $("#question").height();
-      max_h = 550 - (drop_y - 20);
+      max_h = 550 - (drop_y + 40);
       min_h = max_h;
-      compensa_h = (max_h - min_h) / 2;
-      y = drop_y + compensa_h;
+      y = drop_y + 20;
     } else {
       min_h = resizer.getSimpleSize(500);
       y = 10;
@@ -45868,7 +46079,8 @@ var Scene_1 = function Scene_1() {
       "height": min_h,
       "width": "98%", //resizer.getSceneConfig().size.w,
       "top": y,
-      "left": 0 //$("#drop-target-1").position().left
+      "left": 0, //$("#drop-target-1").position().left
+      "border": "1px solid red"
     });
     pos_dr = _.shuffle(pos_dr);
     var c = document.getElementById('drag-elements');
@@ -45881,22 +46093,26 @@ var Scene_1 = function Scene_1() {
   };
 
   var drawAnswerElement = function drawAnswerElement(el, k, total, container, index, pos) {
-    var elem_width = resizer.getSize(el.size).w;
     var elem = "<div id='" + k + "' class='resize-drag' data-x='" + resizer.getSimpleSize(pos[index].x) + "' data-y='" + resizer.getSimpleSize(pos[index].y) + "'></div>";
     $(container).append(elem);
     $('#' + k).css({
-      "width": elem_width,
-      "height": elem_width,
+      "width": resizer.getSize(el.size).w,
+      "height": resizer.getSize(el.size).h,
       "background-image": "url(" + media.getImage(el.image).src + ")",
       "background-size": "contain",
+      "background-position": "center center",
       "left": resizer.getSimpleSize(pos[index].x) + "px",
-      "top": resizer.getSimpleSize(pos[index].y) + "px"
+      "top": resizer.getSimpleSize(pos[index].y) + "px",
+      "border": "1px solid red"
     });
   };
 
   var destroy = function destroy() {
-    $('#container').empty();
-    return Promise.resolve();
+    interact('.resize-drag').unset();
+    return new Promise(function (resolve, reject) {
+      $('#container').empty();
+      return resolve(elements_layout);
+    });
   };
 
   return {
@@ -46048,9 +46264,9 @@ var FormGroup = function (_Component) {
       // Callback de la creación de imágenes en el servidor
       _feathers_client_io2.default.removeListener('created').on('created', function (file) {
         //Cambiar la foto del usuario por la recién creada
-        self.setState({ photo: file.id });
+        self.setState({ photo: file.id }
         //Agregar la nueva imagen a la lista (local/temporal)
-        self.props.controller.addNewAvatar({
+        );self.props.controller.addNewAvatar({
           "url": _helpers2.default.imageParser(file.id),
           "original_name": "unknown.png",
           "mediatype": "avatar",
@@ -47419,6 +47635,10 @@ var ActivitiesController = function ActivitiesController() {
     model.set('activity_code', data, false);
   };
 
+  var setElementData = function setElementData(data) {
+    model.set(data.lens, data.value, data.dispatch);
+  };
+
   var destroy = function destroy() {
     model.destroy();
   };
@@ -47431,6 +47651,7 @@ var ActivitiesController = function ActivitiesController() {
     handleSubmit: handleSubmit,
     tabClick: tabClick,
     updateActivityCode: updateActivityCode,
+    setElementData: setElementData,
     destroy: destroy
   };
 };
@@ -49573,7 +49794,7 @@ exports = module.exports = __webpack_require__(689)(undefined);
 
 
 // module
-exports.push([module.i, "x.loader_div {\r\n  z-index: 1000;\r\n  position: fixed !important;\r\n  position: absolute;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  background-color: #FFF;\r\n  height: 100%;\r\n  width: 100%;\r\n  overflow: hidden;\r\n  opacity: 1;\r\n  -webkit-transition: 1s opacity linear;\r\n  -moz-transition: 1s opacity linear;\r\n  -o-transition: 1s opacity linear;\r\n  -ms-transition: 1s opacity linearlinear;\r\n  transition: 1s opacity linear;\r\n}\r\n\r\n.loader_div div {\r\n  position: absolute;\r\n  width: 80px;\r\n  height: 80px;\r\n}\r\n\r\n.dial {\r\n  opacity: 0;\r\n}\r\n\r\n#main {\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  background-color: #FFF;\r\n  background-position: 10px 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n}\r\n\r\n#container {\r\n  padding: 0;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  float: left;\r\n  z-index: 55;\r\n  display: block;\r\n  background-color: #FFF;\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  margin-bottom: 0;\r\n  margin-top: 10px;\r\n  border: 1px solid #ccc;\r\n}\r\n\r\n#screenBlocker {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#infoWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#bubble {\r\n  margin: 0;\r\n  display: none;\r\n  position: relative;\r\n  z-index: 2042;\r\n  background-color: rgb(255, 239, 215);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: bold;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n}\r\n\r\n\r\n/*\r\n#bubble:after {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 239, 215);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n#bubble:before {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 200, 119);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n.instruction_note {\r\n  font-weight: normal;\r\n}\r\n*/\r\n\r\n#initWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2050;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0.4);\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#init_content {\r\n  margin: 0;\r\n  position: relative;\r\n  z-index: 2052;\r\n  background-color: rgb(255, 255, 255, 1);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: normal;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#animation_ok {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n  z-index: 944;\r\n}\r\n\r\n#animation_ko {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n}\r\n\r\n\r\n/*******   MENU   ******/\r\n\r\n#menu {\r\n  padding: 0;\r\n  position: absolute;\r\n  z-index: 155;\r\n  overflow: hidden;\r\n}\r\n\r\n.slider {\r\n  position: absolute;\r\n  z-index: 155;\r\n  -webkit-transition: .5s all ease-in;\r\n  -moz-transition: .5s all ease-in;\r\n  -o-transition: .5s all ease-in;\r\n  -ms-transition: .5s all ease-in;\r\n  transition: .5s all ease-in;\r\n  -webkit-backface-visibility: hidden;\r\n  -moz-backface-visibility: hidden;\r\n  -ms-backface-visibility: hidden;\r\n  backface-visibility: hidden;\r\n  -webkit-transform: translate3d(0, 0, 0);\r\n  -moz-transform: translate3d(0, 0, 0);\r\n  -ms-transform: translate3d(0, 0, 0);\r\n  -o-transform: translate3d(0, 0, 0);\r\n  transform: translate3d(0, 0, 0);\r\n}\r\n\r\n.rita_menu {\r\n  position: absolute;\r\n  float: left;\r\n  /*background-image: url(\"../images/rita1.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  z-index: 900;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n}\r\n\r\n.rita_menu #arrow {\r\n  position: absolute;\r\n  /*background-image: url(\"../images/arrow_right.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-position: center;\r\n  background-size: initial;\r\n  z-index: 950;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n#arrow.right {\r\n  -ms-transform: rotate(0deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(0deg);\r\n  /* Safari */\r\n  transform: rotate(0deg);\r\n}\r\n\r\n#arrow.left {\r\n  -ms-transform: rotate(180deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(180deg);\r\n  /* Safari */\r\n  transform: rotate(180deg);\r\n}\r\n\r\n.btns {\r\n  display: block;\r\n  position: absolute;\r\n  z-index: 1055;\r\n}\r\n\r\n.uihome,\r\n.uiredo,\r\n.uiback {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center left;\r\n  transform-origin: center left;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uinext {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center right;\r\n  transform-origin: center right;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uihome:hover,\r\n.uiredo:hover,\r\n.uiback:hover,\r\n.uinext:hover {\r\n  -ms-transform: scale(1.2, 1.2);\r\n  /* IE 9 */\r\n  -moz-transform: scale(1.2, 1.2);\r\n  -webkit-transform: scale(1.2, 1.2);\r\n  /* Safari */\r\n  transform: scale(1.2, 1.2);\r\n}\r\n\r\n\r\n/*\r\n.uihome {\r\n  background-image: url(\"../images/btn_home.png\");\r\n}\r\n\r\n.uiredo {\r\n  background-image: url(\"../images/btn_redo.png\");\r\n}\r\n\r\n.uiback {\r\n  background-image: url(\"../images/btn_back.png\");\r\n}\r\n\r\n.uinext {\r\n  background-image: url(\"../images/btn_next.png\");\r\n}\r\n*/\r\n\r\n\r\n/**** Click ****/\r\n\r\n.check_ok {\r\n  /*background-image: url(\"../images/check.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n}\r\n\r\n#ardilla_r {\r\n  /*background-image: url(\"../images/activity/ardilla_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#arbol_r {\r\n  /*background-image: url(\"../images/activity/arbol_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#agua_r {\r\n  /*background-image: url(\"../images/activity/agua_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#abeja_r {\r\n  /*background-image: url(\"../images/activity/abeja_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n\r\n/**** dNd ****/\r\n\r\n#drag-elements {\r\n  padding: 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n  z-index: 2135;\r\n  display: block;\r\n  margin: 0;\r\n  border-radius: 20px;\r\n  border: 5px solif #FFF;\r\n}\r\n\r\n#drag-elements>div {\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  position: absolute;\r\n  background-repeat: no-repeat;\r\n}\r\n\r\n#drag-elements>div:hover {\r\n  /* -ms-transform: scale(1.2, 1.2);\r\n  -moz-transform: scale(1.2, 1.2);\r\n  -webkit-transform: scale(1.2, 1.2);\r\n  transform: scale(1.2, 1.2);*/\r\n}\r\n\r\n.drop-target {\r\n  display: block;\r\n  text-align: left;\r\n  position: absolute;\r\n  border: 5px dotted #ccc;\r\n  border-radius: 20px;\r\n  z-index: 800;\r\n}\r\n\r\n#drop-target-1 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-2 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-1>div,\r\n#drop-target-2>div {\r\n  transition: all .5s;\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  transition: all .5s ease;\r\n}\r\n\r\n.gu-mirror {\r\n  position: fixed !important;\r\n  margin: 0 !important;\r\n  z-index: 9999 !important;\r\n  opacity: 0.8;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)\";\r\n  filter: alpha(opacity=80);\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n.gu-hide {\r\n  display: none !important;\r\n}\r\n\r\n.gu-unselectable {\r\n  -webkit-user-select: none !important;\r\n  -moz-user-select: none !important;\r\n  -ms-user-select: none !important;\r\n  user-select: none !important;\r\n}\r\n\r\n.gu-transit {\r\n  opacity: 0;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)\";\r\n  filter: alpha(opacity=0);\r\n}\r\n", ""]);
+exports.push([module.i, "x.loader_div {\r\n  z-index: 1000;\r\n  position: fixed !important;\r\n  position: absolute;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  background-color: #FFF;\r\n  height: 100%;\r\n  width: 100%;\r\n  overflow: hidden;\r\n  opacity: 1;\r\n  -webkit-transition: 1s opacity linear;\r\n  -moz-transition: 1s opacity linear;\r\n  -o-transition: 1s opacity linear;\r\n  -ms-transition: 1s opacity linearlinear;\r\n  transition: 1s opacity linear;\r\n}\r\n\r\n.loader_div div {\r\n  position: absolute;\r\n  width: 80px;\r\n  height: 80px;\r\n}\r\n\r\n.dial {\r\n  opacity: 0;\r\n}\r\n\r\n#main {\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  background-color: #FFF;\r\n  background-position: 10px 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n}\r\n\r\n#container {\r\n  padding: 0;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  float: left;\r\n  z-index: 55;\r\n  display: block;\r\n  background-color: #FFF;\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  margin-bottom: 0;\r\n  margin-top: 10px;\r\n  border: 1px solid #ccc;\r\n}\r\n\r\n#screenBlocker {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#infoWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#bubble {\r\n  margin: 0;\r\n  display: none;\r\n  position: relative;\r\n  z-index: 2042;\r\n  background-color: rgb(255, 239, 215);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: bold;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n}\r\n\r\n\r\n/*\r\n#bubble:after {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 239, 215);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n#bubble:before {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 200, 119);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n.instruction_note {\r\n  font-weight: normal;\r\n}\r\n*/\r\n\r\n#initWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2050;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0.4);\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#init_content {\r\n  margin: 0;\r\n  position: relative;\r\n  z-index: 2052;\r\n  background-color: rgb(255, 255, 255, 1);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: normal;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#animation_ok {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n  z-index: 944;\r\n}\r\n\r\n#animation_ko {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n}\r\n\r\n\r\n/*******   MENU   ******/\r\n\r\n#menu {\r\n  padding: 0;\r\n  position: absolute;\r\n  z-index: 155;\r\n  overflow: hidden;\r\n}\r\n\r\n.slider {\r\n  position: absolute;\r\n  z-index: 155;\r\n  -webkit-transition: .5s all ease-in;\r\n  -moz-transition: .5s all ease-in;\r\n  -o-transition: .5s all ease-in;\r\n  -ms-transition: .5s all ease-in;\r\n  transition: .5s all ease-in;\r\n  -webkit-backface-visibility: hidden;\r\n  -moz-backface-visibility: hidden;\r\n  -ms-backface-visibility: hidden;\r\n  backface-visibility: hidden;\r\n  -webkit-transform: translate3d(0, 0, 0);\r\n  -moz-transform: translate3d(0, 0, 0);\r\n  -ms-transform: translate3d(0, 0, 0);\r\n  -o-transform: translate3d(0, 0, 0);\r\n  transform: translate3d(0, 0, 0);\r\n}\r\n\r\n.rita_menu {\r\n  position: absolute;\r\n  float: left;\r\n  /*background-image: url(\"../images/rita1.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  z-index: 900;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n}\r\n\r\n.rita_menu #arrow {\r\n  position: absolute;\r\n  /*background-image: url(\"../images/arrow_right.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-position: center;\r\n  background-size: initial;\r\n  z-index: 950;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n#arrow.right {\r\n  -ms-transform: rotate(0deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(0deg);\r\n  /* Safari */\r\n  transform: rotate(0deg);\r\n}\r\n\r\n#arrow.left {\r\n  -ms-transform: rotate(180deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(180deg);\r\n  /* Safari */\r\n  transform: rotate(180deg);\r\n}\r\n\r\n.btns {\r\n  display: block;\r\n  position: absolute;\r\n  z-index: 1055;\r\n}\r\n\r\n.uihome,\r\n.uiredo,\r\n.uiback {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center left;\r\n  transform-origin: center left;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uinext {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center right;\r\n  transform-origin: center right;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uihome:hover,\r\n.uiredo:hover,\r\n.uiback:hover,\r\n.uinext:hover {\r\n  -ms-transform: scale(1.2, 1.2);\r\n  /* IE 9 */\r\n  -moz-transform: scale(1.2, 1.2);\r\n  -webkit-transform: scale(1.2, 1.2);\r\n  /* Safari */\r\n  transform: scale(1.2, 1.2);\r\n}\r\n\r\n\r\n/*\r\n.uihome {\r\n  background-image: url(\"../images/btn_home.png\");\r\n}\r\n\r\n.uiredo {\r\n  background-image: url(\"../images/btn_redo.png\");\r\n}\r\n\r\n.uiback {\r\n  background-image: url(\"../images/btn_back.png\");\r\n}\r\n\r\n.uinext {\r\n  background-image: url(\"../images/btn_next.png\");\r\n}\r\n*/\r\n\r\n\r\n/**** Click ****/\r\n\r\n.check_ok {\r\n  /*background-image: url(\"../images/check.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n}\r\n\r\n#ardilla_r {\r\n  /*background-image: url(\"../images/activity/ardilla_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#arbol_r {\r\n  /*background-image: url(\"../images/activity/arbol_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#agua_r {\r\n  /*background-image: url(\"../images/activity/agua_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#abeja_r {\r\n  /*background-image: url(\"../images/activity/abeja_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n\r\n/**** dNd ****/\r\n\r\n#drag-elements {\r\n  padding: 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n  z-index: 2135;\r\n  display: block;\r\n  margin: 0;\r\n  border-radius: 20px;\r\n  border: 5px solif #FFF;\r\n}\r\n\r\n#drag-elements>div {\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  position: absolute;\r\n  background-repeat: no-repeat;\r\n}\r\n\r\n.drop-target {\r\n  display: block;\r\n  text-align: left;\r\n  position: absolute;\r\n  border: 5px dotted #ccc;\r\n  border-radius: 20px;\r\n  z-index: 800;\r\n}\r\n\r\n#drop-target-1 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-2 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-1>div,\r\n#drop-target-2>div {\r\n  transition: all .5s;\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  transition: all .5s ease;\r\n}\r\n\r\n.gu-mirror {\r\n  position: fixed !important;\r\n  margin: 0 !important;\r\n  z-index: 9999 !important;\r\n  opacity: 0.8;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)\";\r\n  filter: alpha(opacity=80);\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n.gu-hide {\r\n  display: none !important;\r\n}\r\n\r\n.gu-unselectable {\r\n  -webkit-user-select: none !important;\r\n  -moz-user-select: none !important;\r\n  -ms-user-select: none !important;\r\n  user-select: none !important;\r\n}\r\n\r\n.gu-transit {\r\n  opacity: 0;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)\";\r\n  filter: alpha(opacity=0);\r\n}\r\n", ""]);
 
 // exports
 

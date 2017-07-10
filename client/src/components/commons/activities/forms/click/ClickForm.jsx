@@ -54,8 +54,7 @@ class ClickForm extends Component {
             const lens = R.lensProp('error_messages');
             return R.set(lens, errors, state);
         });
-    }
-
+    };
 
     _setActiveIndex(e, i) {
         if (e.target.tagName === 'BUTTON') {
@@ -214,15 +213,18 @@ class ClickForm extends Component {
     _renderFieldsForm() {
         const self = this;
         const mapIndexed = R.addIndex(R.map);
-        let media_form = ''
+        let media_form = '';
         const panels = mapIndexed(function (code, i) {
             return self._getPanelContent(code, i);
-        }, this.props.model.activity_code.code);
+        }, this.state.code);
 
         // Abrir la modal de carga/seleccion de medios
         if (this.state.addMedia) {
             media_form = this._getMediaForm();
         }
+
+        console.log("Form");
+        console.log(this.state);
 
         return (
             <Segment attached>
@@ -245,6 +247,8 @@ class ClickForm extends Component {
             change: this.handleChange,
             state: this.state
         };
+        console.log("Layout");
+        console.log(this.state);
         layout = <LayoutClickForm {...p} />;
         return (
             <Segment attached>

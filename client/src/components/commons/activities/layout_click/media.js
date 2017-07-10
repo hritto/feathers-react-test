@@ -189,17 +189,11 @@ const media = (options) => {
       var keys_arr = Object.keys(images),
         i = 0,
         index_key = null;
-
       images = {};
-
-      // Liberando sonidos
-      //sound_object.destroy();
       sounds = {};
-
       setLoaded(0);
       total = 0;
-      resolve();
-      console.log("DESTROYED MEDIA");
+      return resolve();
     });
   };
 

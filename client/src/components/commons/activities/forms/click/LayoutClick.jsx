@@ -62,6 +62,8 @@ class LayoutClickForm extends Component {
       code: this.state.code,
       media: this.state.media
     };
+    console.log("App: ");
+    console.log(this.state.code);
     if (!this.app) {
       this.app = new LayoutClickPreview(config, common_config, this.state.layout_active_index);
       this.app.init();
@@ -72,16 +74,29 @@ class LayoutClickForm extends Component {
     //////////////////////////////
     // GUARDAR LOS DATOS
     /////////////////////////////
-    debugger;
-    app.destroy().then(function(el_layout){
-      debugger;
+    const self = this;
+    let layout_data = null;
+    this.app.destroy().then(function (el_layout) {
       // GUARDAR LOS DATOS
-      console.log(el_layout);
+      self.updateModelLayout(el_layout);
       // VOLVER AL FORM
-      this.props.props.controller.tabClick('form');
+      self.props.props.controller.tabClick('form');
     });
-
   };
+
+  updateModelLayout(layout_data) {
+    const self = this;
+    const index = this.props.state.active_index;
+
+    _.each(layout_data, function (element, key) {
+      if (element.size) {
+        self.props.change(['code', index, 'elements', key, 'size'], element.size);
+      }
+      if (element.pos) {
+        self.props.change(['code', index, 'elements', key, 'pos'], element.pos);
+      }
+    });
+  }
 
   _setLayoutActiveIndex(e, i) {
     let val = i;
@@ -93,7 +108,7 @@ class LayoutClickForm extends Component {
     });
     window.dispatchEvent(new Event('resize'));
   };
-  // onClick={props.controller.tabClick.bind(this, 'form')}
+
   render() {
     return <Segment id='main_layout'>
       <Button type="button" floated='right' color='blue' key={'button_back'} content='Volver' icon='arrow circle left' size='mini' labelPosition='right' onClick={this.formView.bind(this, { target: 'form' })} />
