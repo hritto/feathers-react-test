@@ -19,6 +19,7 @@ const Scene_1 = () => {
   var containers = [];
   var resizer = null;
   var layout = null; //El objeto encargado del layout
+  var elements_layout = {};
 
   var initialize = function (options, med, res, resizer_obj, layout_obj) {
 
@@ -83,6 +84,15 @@ const Scene_1 = () => {
               target.style.width = event.rect.width + 'px';
               target.style.height = event.rect.height + 'px';
 
+              if (!elements_layout[target.id]) {
+                elements_layout[target.id] = {};
+              }
+
+              elements_layout[target.id].size = {
+                w: event.rect.width,
+                h: event.rect.height
+              };
+
               console.log("element: " + target.id);
               console.log("x: " + x);
               console.log("y: " + y);
@@ -107,6 +117,15 @@ const Scene_1 = () => {
     // update the position attributes
     target.setAttribute('data-x', x);
     target.setAttribute('data-y', y);
+
+    if (!elements_layout[target.id]) {
+      elements_layout[target.id] = {};
+    }
+
+    elements_layout[target.id].pos = {
+      x: x,
+      y: y
+    };
   }
 
   // this is used later in the resizing and gesture demos
@@ -167,7 +186,6 @@ const Scene_1 = () => {
 
 
   var drawAnswers = function (els) {
-debugger;
     var y = 0,
       min_h = 0,
       max_h = 0,
@@ -229,7 +247,7 @@ debugger;
 
   var destroy = function () {
     $('#container').empty();
-    return Promise.resolve();
+    return Promise.resolve(elements_layout);
   };
 
   return {

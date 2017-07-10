@@ -121,12 +121,14 @@ const LayoutClickPreview = (opts, common_conf, s_index) => {
   };
 
   var destroy = function (done) {
-    return scene.destroy().then(function(){
+    var el_layout = null;
+    return scene.destroy().then(function(elements_layout){
+      el_layout = _.clone(elements_layout);
       scene = null;
       debugger;
       media.promiseDestroy().then(function(){
         debugger;
-        return true;
+        return el_layout;
       });
     })
   };

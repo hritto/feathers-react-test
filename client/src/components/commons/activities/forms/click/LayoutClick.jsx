@@ -73,8 +73,14 @@ class LayoutClickForm extends Component {
     // GUARDAR LOS DATOS
     /////////////////////////////
     debugger;
-    app.destroy();
-    this.props.props.controller.tabClick('form');
+    app.destroy().then(function(el_layout){
+      debugger;
+      // GUARDAR LOS DATOS
+      console.log(el_layout);
+      // VOLVER AL FORM
+      this.props.props.controller.tabClick('form');
+    });
+
   };
 
   _setLayoutActiveIndex(e, i) {
