@@ -76,10 +76,10 @@ const formClickTemplate = (props) => {
   //ELEMENTS //Depende del type
 
   TODO: MANEJAR LOS ELEMENTOS DEPENDIENDO DEL TIPO DE ACTIVIDAD
-  TODO: MANEJAR EL LAYOUT DE ELEMENTOS DE ACTIVIDADES...!!!!!!!! 
-  -----> FALTA GUARDAR LOS DATOS EN EL SERVIDOR
+  TODO:
+  -----> FALTA GUARDAR LOS META-DATOS EN EL SERVIDOR
   -----> FALTA CONTROLAR EL LAYOUT AL AGREGAR/QUITAR ELEMENTOS
-  
+
 
   DISEÑAR LA CONFIGURACIÓN DE CAMPOS PARA ACTIVIDADES (VALIDACIÓN, VALORES POR DEFECTO, ASPECTO, ETC...).
   MEDIACOMPONENT:
@@ -146,8 +146,8 @@ const formClickTemplate = (props) => {
             text: false,
           }
         }} />
+      <Divider section />
       <Form.Field>
-        <Divider section />
         <label>Imagen: {back_image || "Ninguna..."}</label>
       </Form.Field>
       <MediaComponent {...props}
@@ -171,8 +171,7 @@ const formClickTemplate = (props) => {
       <ColorPicker {...props}
         name={'background_color'}
         key={'background_color'}
-        field={['code', index, 'background_color']}
-      />
+        field={['code', index, 'background_color']} />
       <Divider section />
       <Form.Group>
         <DropdownSelection {...props}

@@ -1,6 +1,7 @@
 const Promise = require("bluebird");
 import ResponsiveHelper from '../common/responsive_helpers.js';
 import feathersServices from '../common/feathers_client';
+import R from 'ramda'
 
 const ActivitiesController = function () {
   let options = null;
@@ -23,7 +24,7 @@ const ActivitiesController = function () {
       activity_type:'click',
       level: 1,
       published: true,
-      code_id: '6IZHe1gFlVfWvBbn' 
+      code_id: '6IZHe1gFlVfWvBbn'
     };
     Promise.all([
         feathersServices.activities.create(act_data),
@@ -123,7 +124,6 @@ const ActivitiesController = function () {
         }
       }).then(code => {
         const obj = JSON.parse(code.data[0].code);
-
         model.set('activity_code', obj, false);
         model.set('state', opts.action, true);
       });
@@ -175,9 +175,72 @@ const ActivitiesController = function () {
     model.set('activity_code', data, false);
   };
 
+  const updateActivityMetadata = (data) => {
+    debugger;
+    model.set(['selected_record','name'], data.name, false);
+    model.set(['selected_record','activity_type'], data.activity_type, false);
+    model.set(['selected_record','level'], data.level, false);
+    model.set(['selected_record','published'], data.published, false);
+    model.set(['selected_record','capacity'], data.capacity, false);
+    model.set(['selected_record','cognitive_process'], data.cognitive_process, false);
+    model.set(['selected_record','competence'], data.competence, true);
+  };
+
   const setElementData = (data) => {
     model.set(data.lens, data.value, data.dispatch);
-  }
+  };
+
+  const updateCode = () => {
+    const selected_record = model.get('selected_record');
+    if(!selected_record){
+      return;
+    }
+    let data = model.get('activity_code');
+    let activity_id = selected_record._id;
+    debugger;
+    let metadata = {
+      name: selected_record.name,
+      activity_type: selected_record.activity_type,
+      level: selected_record.level,
+      published: selected_record.published,
+      capacity: selected_record.capacity,
+      cognitive_process: selected_record.cognitive_process,
+      competence: selected_record.competence,
+      code_id: selected_record.code_id
+    };
+
+    if(data){
+      data = {
+        code: JSON.stringify(data)
+      };
+    }
+    const id = selected_record.code_id;
+    return Promise.all([
+      feathersServices.activityCode.update(id, data, {}),
+      feathersServices.activities.update(activity_id, metadata, {}),
+    ]).then(results => {
+      debugger;
+        if(results && results.length){
+          const obj = JSON.parse(results[0].code);
+          model.set('activity_code', obj, false);
+          updateActivityMetadata(results[1]);
+          resetState();
+        } else {
+          //TODO: mensaje de error de servidor, no han llegado datos
+          console.log('Error occurred:', err)
+          resetState();
+        }
+    }).catch(err => {
+      //TODO: mensaje de error de servidor, no ha podido conectarse
+      console.log('Error occurred:', err)
+      resetState();
+    });
+  };
+
+  const resetState = () => {
+    model.set('selected_record', null, false);
+    model.set('state', 'initial', true);
+  };
 
   const destroy = () => {
     model.destroy();
@@ -191,7 +254,9 @@ const ActivitiesController = function () {
     handleSubmit: handleSubmit,
     tabClick: tabClick,
     updateActivityCode: updateActivityCode,
+    updateActivityMetadata: updateActivityMetadata,
     setElementData: setElementData,
+    updateCode: updateCode,
     destroy: destroy
   };
 };
