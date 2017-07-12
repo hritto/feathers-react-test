@@ -1,9 +1,9 @@
-
+const searchRegex = require('./filter_hook');
 
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [searchRegex.searchRegex()],
     get: [],
     create: [],
     update: [],

@@ -31,8 +31,13 @@ class ClickForm extends Component {
       media_description: '',
       error_messages: [], //Los errores de upload de medios
       active_metadata: null,
-      metadata: props.model.selected_record
+      metadata: props.model.selected_record,
+      combo_values: props.model.config.combo_values,
+      media_tab: 'table',
+      media_filter_records: props.model.media_filter_records,
+      media_filter: props.model.media_filter,
     });
+
     this.handleChange = this.handleChange.bind(this);
     this.handleResolution = this.handleResolution.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -50,6 +55,7 @@ class ClickForm extends Component {
     this._updateModel = this._updateModel.bind(this);
     this._calculateLayout = this._calculateLayout.bind(this);
     this.setActiveMetadata = this.setActiveMetadata.bind(this);
+    this.setMediaTabs = this.setMediaTabs.bind(this);
   }
 
   _updateModel() {
@@ -100,6 +106,12 @@ class ClickForm extends Component {
         : null, state);
     });
     window.dispatchEvent(new Event('resize'));
+  };
+
+  setMediaTabs(active, e) {
+    this.setState((state) => {
+      return R.set(R.lensProp('media_tab'), active, state);
+    });
   };
 
   handleChange(lens, value) {
@@ -171,7 +183,8 @@ class ClickForm extends Component {
       handleDeleteElement: this.handleDeleteElement,
       handleCreateElement: this.handleCreateElement,
       media: this._setAddMedia,
-      activity_type: code.type
+      activity_type: code.type,
+      media_tab: this.setMediaTabs
     };
     return FormPanel(p);
   };
@@ -184,7 +197,8 @@ class ClickForm extends Component {
       media: this._setAddMedia,
       error: this._setErrors,
       addMedia: this._addMediaState,
-      change: this.handleChange
+      change: this.handleChange,
+      media_tab: this.setMediaTabs
     };
     return <MediaModalView {...p}/>
   };
@@ -247,6 +261,11 @@ class ClickForm extends Component {
       state: this.state
     };
     // Panel de metadata de la actividad
+    const level_options = this.state.combo_values.level;
+    const activity_type_options = this.state.combo_values.activity_type;
+    const competence_options = this.state.combo_values.competence;
+    const cognitive_process_options = this.state.combo_values.cognitive_process;
+    const capacity_options = this.state.combo_values.capacity;
     const metadata_panel = [
       {
         key: 'metadata',
@@ -255,106 +274,16 @@ class ClickForm extends Component {
           <div>
             <SimpleInputText key={'name'} {...p} name={'activity_name'} title='Nombre de la actividad' field={['metadata', 'name']}/>
             <Form.Group>
-              <DropdownSelection {...p} name={'level'} title='Nivel de la actividad' field={['metadata', 'level']} options={[
-                {
-                  key: '0',
-                  value: 0,
-                  text: 'Nivel Inicial'
-                }, {
-                  key: '1',
-                  value: 1,
-                  text: 'Nivel Básico'
-                }, {
-                  key: '2',
-                  value: 2,
-                  text: 'Nivel Medio'
-                }, {
-                  key: '3',
-                  value: 3,
-                  text: 'Nivel Alto'
-                }
-              ]}/>
+              <DropdownSelection {...p} name={'level'} title='Nivel de la actividad' field={['metadata', 'level']} options={level_options}/>
             </Form.Group>
             <Form.Group>
-              <DropdownSelection {...p} name={'activity_type'} title='Tipo de actividad' field={['metadata', 'activity_type']} options={[
-                {
-                  key: '0',
-                  value: 0,
-                  text: 'Múltiple'
-                }, {
-                  key: '1',
-                  value: 1,
-                  text: 'Click'
-                }, {
-                  key: '2',
-                  value: 2,
-                  text: 'Arrastrar y soltar'
-                }, {
-                  key: '3',
-                  value: 3,
-                  text: 'Pintar'
-                }
-              ]}/>
+              <DropdownSelection {...p} name={'activity_type'} title='Tipo de actividad' field={['metadata', 'activity_type']} options={activity_type_options}/>
             </Form.Group>
             <CheckboxLabeled {...p} name={'published'} title='Publicada:' field={['metadata', 'published']}/>
             <Form.Group widths='equal'>
-              <DropdownSelection {...p} name={'competence'} title='Competencia' field={['metadata', 'competence']} options={[
-                {
-                  key: '0',
-                  value: 0,
-                  text: 'Competencia 1'
-                }, {
-                  key: '1',
-                  value: 1,
-                  text: 'Competencia 2'
-                }, {
-                  key: '2',
-                  value: 2,
-                  text: 'Competencia 3'
-                }, {
-                  key: '3',
-                  value: 3,
-                  text: 'Competencia 4'
-                }
-              ]}/>
-              <DropdownSelection {...p} name={'cognitive_process'} title='Proceso cognitivo' field={['metadata', 'cognitive_process']} options={[
-                {
-                  key: '0',
-                  value: 0,
-                  text: 'Proceso 1'
-                }, {
-                  key: '1',
-                  value: 1,
-                  text: 'Proceso 2'
-                }, {
-                  key: '2',
-                  value: 2,
-                  text: 'Proceso 3'
-                }, {
-                  key: '3',
-                  value: 3,
-                  text: 'Proceso 4'
-                }
-              ]}/>
-              <DropdownSelection {...p} name={'capacity'} title='Capacidad' field={['metadata', 'capacity']} options={[
-                {
-                  key: '0',
-                  value: 0,
-                  text: 'Capacidad 1'
-                }, {
-                  key: '1',
-                  value: 1,
-                  text: 'Capacidad 2'
-                }, {
-                  key: '2',
-                  value: 2,
-                  text: 'Capacidad 3'
-                }, {
-                  key: '3',
-                  value: 3,
-                  text: 'Capacidad 4'
-                }
-              ]}/>
+              <DropdownSelection {...p} name={'competence'} title='Competencia' field={['metadata', 'competence']} options={competence_options}/>
+              <DropdownSelection {...p} name={'cognitive_process'} title='Proceso cognitivo' field={['metadata', 'cognitive_process']} options={cognitive_process_options}/>
+              <DropdownSelection {...p} name={'capacity'} title='Capacidad' field={['metadata', 'capacity']} options={capacity_options}/>
             </Form.Group>
           </div>
         )
@@ -380,8 +309,6 @@ class ClickForm extends Component {
       change: this.handleChange,
       state: this.state
     };
-    console.log("Layout");
-    console.log(this.state);
     layout = <LayoutClickForm {...p}/>;
     return (
       <Segment attached>

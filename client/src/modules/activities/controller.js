@@ -15,8 +15,27 @@ const ActivitiesController = function () {
     sb = opts.sb;
     ResponsiveHelper();
     return feathersServices.activities.find().then(results => {
-      model.set('records', results.data, true);
+      let combo_constructors = model.get(['config', 'combo_constructors']);
+      if (combo_constructors && combo_constructors.length) {
+        //Cargar los datos de los combos
+        return new Promise(function (resolve, reject) {
+          _.map(combo_constructors, function (fn, i, obj) {
+            let func = Object.keys(fn)[0];
+            return fn[func]().then(function (val) {
+              if (val && val.data) {
+                model.set(['config', 'combo_values', val.name], val.data, false);
+              }
+            });
+          });
+          return resolve();
+        }).then(function(){
+          model.set('records', results.data, true);
+        });
+      } else {
+        model.set('records', results.data, true);
+      }
     });
+
     /*
     //Seed
     var act_data = {
@@ -85,7 +104,6 @@ const ActivitiesController = function () {
   const updClick = (opts) => {
     let combo_constructors = model.get(['config', 'combo_constructors']);
     let selected_record = {};
-
     if (!opts.id) {
       closeModal();
       return;
@@ -176,7 +194,6 @@ const ActivitiesController = function () {
   };
 
   const updateActivityMetadata = (data) => {
-    debugger;
     model.set(['selected_record','name'], data.name, false);
     model.set(['selected_record','activity_type'], data.activity_type, false);
     model.set(['selected_record','level'], data.level, false);
@@ -197,7 +214,6 @@ const ActivitiesController = function () {
     }
     let data = model.get('activity_code');
     let activity_id = selected_record._id;
-    debugger;
     let metadata = {
       name: selected_record.name,
       activity_type: selected_record.activity_type,
@@ -219,11 +235,12 @@ const ActivitiesController = function () {
       feathersServices.activityCode.update(id, data, {}),
       feathersServices.activities.update(activity_id, metadata, {}),
     ]).then(results => {
-      debugger;
         if(results && results.length){
           const obj = JSON.parse(results[0].code);
           model.set('activity_code', obj, false);
           updateActivityMetadata(results[1]);
+          let index = R.findIndex(R.propEq('_id', results[1]._id))(model.get('records')); //=> 1
+          model.setRecord(index, results[1]);
           resetState();
         } else {
           //TODO: mensaje de error de servidor, no han llegado datos
@@ -242,6 +259,44 @@ const ActivitiesController = function () {
     model.set('state', 'initial', true);
   };
 
+  const setMediaFilterRecords = (records) => {
+    model.set('media_filter_records', records, true);
+  };
+
+  const getMediaFilterRecords = (filter, mediatype) => {
+    let query = {
+      query: {
+        name: {
+          $search: ['ef']
+        },
+        original_name: {
+          $search: ['ro']
+        },
+        mediatype: mediatype
+      }
+    }
+    if (filter.name) {
+      query.query['name'] = {
+        $search: [filter.name]
+      };
+    }
+    if (filter.original_name) {
+      query.query['original_name'] = {
+        $search: [filter.original_name]
+      };
+    }
+    if (filter.description) {
+      query.query['description'] = {
+        $search: [filter.description]
+      };
+    }
+    
+    return feathersServices.media.find(query).then(results => {
+      debugger;
+      // "original_name":"roto_txt.png","mediatype":"image","name":"wefq","description":"erg"
+    });
+  };
+
   const destroy = () => {
     model.destroy();
   };
@@ -257,6 +312,8 @@ const ActivitiesController = function () {
     updateActivityMetadata: updateActivityMetadata,
     setElementData: setElementData,
     updateCode: updateCode,
+    setMediaFilterRecords: setMediaFilterRecords,
+    getMediaFilterRecords: getMediaFilterRecords,
     destroy: destroy
   };
 };

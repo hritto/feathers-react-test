@@ -4,15 +4,16 @@ import ButtonIcon from '../ButtonIcon.jsx';
 import Helpers from '../helpers.js';
 import R from 'ramda';
 
-const _renderHeader = (record, config, props) => {
+const _renderHeader = (record, opts, props) => {
   let columns = R.keys(record[0]),
     display = '',
     width = '',
     conf = null,
+    config = opts.fields,
     header = R.map((column) => {
       display = '';
       conf = R.find(R.propEq('name', column))(config) || {};
-      
+
       if(!conf.visibility){
         display = 'none';
       }
@@ -43,14 +44,16 @@ const getCellContent = (config, content) => {
   }
 };
 
-const _row = (record, config, props) => {
+const _row = (record, opts, props) => {
   let columns = R.keys(record),
+    config = opts.fields,
     style = '',
     display = '',
     width = '',
     content = '',
     row_id = '',
     conf = null,
+    options = null,
     cells = R.map((column) => {
       display = '';
       conf = R.find(R.propEq('name', column))(config) || {};
@@ -58,15 +61,20 @@ const _row = (record, config, props) => {
         // El renderer es una función para formatear los valores de los campos cuando es necesario
         content = getCellContent(conf, record[column]);
       }
-      
+
       if(!conf.visibility){
         display = 'none';
       }
-      
+
       if (conf.renderer && typeof conf.renderer === 'function') {
-        content = conf.renderer(record[column]);
+        if(conf.type === 'combo' && conf.constructor){
+            options = opts.combo_values[conf.constructor];
+            content = conf.renderer(record[column], options);
+        } else {
+            content = conf.renderer(record[column]);
+        }
       }
-      
+
       width = conf.flex + '%';
       row_id = 'cell-' + conf['name'] + record['_id'];
 
@@ -81,8 +89,8 @@ const _row = (record, config, props) => {
   return <Table.Row key={'row_'+record._id}>{cells}</Table.Row>
 };
 
-const _renderBody = (records, config, props) => {
-  const rows = R.map((record) => _row(record, config, props), records);
+const _renderBody = (records, opts, props) => {
+  const rows = R.map((record) => _row(record, opts, props), records);
   return (
     <tbody>
       {rows}
@@ -98,8 +106,8 @@ const TableLayout = (props) => {
   let config = props.model.config;
 
   if(records.length){
-    let head = _renderHeader(records, config.fields, props);
-    let body = _renderBody(records, config.fields, props);
+    let head = _renderHeader(records, config, props);
+    let body = _renderBody(records, config, props);
     return (
       <div id={"table_"+props.title}>
         <Table celled selectable>

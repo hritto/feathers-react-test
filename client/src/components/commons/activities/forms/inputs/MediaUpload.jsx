@@ -114,28 +114,25 @@ const MediaUpload = (props) => {
         </Message>);
     }
 
-
     return (
         <Segment attached>
-            <Segment>
-                {message}
-                <Form onSubmit={handleSubmit}>
-                    <label>{'Medio actual:' + getMediaName(props)}</label>
-                    <SimpleInputText key={'media_name'} {...props}
-                        name={'media_name'}
-                        title='Nombre'
-                        field={['media_name']} />
-                    <SimpleTextArea key={'media_description'} {...props}
-                        name={'media_description'}
-                        title='Descripción'
-                        field={['media_description']} />
-                    <DropzoneComponent config={componentConfig}
-                        eventHandlers={eventHandlers}
-                        djsConfig={djsConfig} />
-                    <Button content='Guardar' primary />
-                    <Button content='Cancelar' secondary onClick={closeModal} />
-                </Form>
-            </Segment>
+          {message}
+          <Form onSubmit={handleSubmit}>
+              <label>{'Medio actual:' + getMediaName(props)}</label>
+              <SimpleInputText key={'media_name'} {...props}
+                  name={'media_name'}
+                  title='Nombre'
+                  field={['media_name']} />
+              <SimpleTextArea key={'media_description'} {...props}
+                  name={'media_description'}
+                  title='Descripción'
+                  field={['media_description']} />
+              <DropzoneComponent config={componentConfig}
+                  eventHandlers={eventHandlers}
+                  djsConfig={djsConfig} />
+              <Button content='Guardar' primary />
+              <Button content='Cancelar' secondary onClick={closeModal} />
+          </Form>
         </Segment>
     )
 }

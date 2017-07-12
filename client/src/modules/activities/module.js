@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
 import ActivitiesController from './controller.js';
 import ActivitiesView from '../../components/activities/view.jsx';
+import R from 'ramda'
 
 if (module.hot) {
   module.hot.accept();
@@ -24,6 +25,8 @@ const Activities = function (sb) {
     selected_record: null,
     activity_code: null,
     tab: 'form', // form, layout, preview
+    media_filter_records: [], //Los resultados del filtro de medios del formulario
+    media_filter: {}, //Los filtros de medios del formulario 
     config: {
       combo_constructors: [{
         activity_type: function () {
@@ -31,31 +34,22 @@ const Activities = function (sb) {
             resolve({
               name: 'activity_type',
               data: [{
-                  key: 'click',
-                  value: 'click',
-                  text: 'Hacer click'
-                },
-                {
-                  key: 'drag',
-                  value: 'drag',
+                  key: '0',
+                  value: 0,
+                  text: 'Múltiple'
+                }, {
+                  key: '1',
+                  value: 1,
+                  text: 'Click'
+                }, {
+                  key: '2',
+                  value: 2,
                   text: 'Arrastrar y soltar'
-                },
-                {
-                  key: 'memory',
-                  value: 'memory',
-                  text: 'Memoria'
-                },
-                {
-                  key: 'paint',
-                  value: 'paint',
-                  text: 'Dibujo libre'
-                },
-                {
-                  key: 'intro',
-                  value: 'intro',
-                  text: 'Escena introductoria'
-                }
-              ]
+                }, {
+                  key: '3',
+                  value: 3,
+                  text: 'Pintar'
+                }]
             });
           });
         }
@@ -85,6 +79,82 @@ const Activities = function (sb) {
                   text: 'Nivel Alto'
                 },
               ]
+            });
+          });
+        }
+      }, {
+        competence: function () {
+          return new Promise(function (resolve, reject) {
+            resolve({
+              name: 'competence',
+              data: [{
+                key: '0',
+                value: 0,
+                text: 'Competencia 1'
+              }, {
+                key: '1',
+                value: 1,
+                text: 'Competencia 2'
+              }, {
+                key: '2',
+                value: 2,
+                text: 'Competencia 3'
+              }, {
+                key: '3',
+                value: 3,
+                text: 'Competencia 4'
+              }]
+            });
+          });
+        }
+      }, {
+        cognitive_process: function () {
+          return new Promise(function (resolve, reject) {
+            resolve({
+              name: 'cognitive_process',
+              data: [
+                {
+                  key: '0',
+                  value: 0,
+                  text: 'Proceso 1'
+                }, {
+                  key: '1',
+                  value: 1,
+                  text: 'Proceso 2'
+                }, {
+                  key: '2',
+                  value: 2,
+                  text: 'Proceso 3'
+                }, {
+                  key: '3',
+                  value: 3,
+                  text: 'Proceso 4'
+                }]
+            });
+          });
+        }
+      }, {
+        capacity: function () {
+          return new Promise(function (resolve, reject) {
+            resolve({
+              name: 'capacity',
+              data: [{
+                key: '0',
+                value: 0,
+                text: 'Capacidad 1'
+              }, {
+                key: '1',
+                value: 1,
+                text: 'Capacidad 2'
+              }, {
+                key: '2',
+                value: 2,
+                text: 'Capacidad 3'
+              }, {
+                key: '3',
+                value: 3,
+                text: 'Capacidad 4'
+              }]
             });
           });
         }
@@ -131,11 +201,15 @@ const Activities = function (sb) {
           filter: false,
           validation: {},
           message: '',
-          constructor: null,
+          constructor: 'activity_type',
           wrapped: false,
           form_visible: true,
           label: 'Tipo de actividad',
           state: 'initial',
+          renderer: function(value, opts){
+            const selected = R.find(R.propEq('value', value), opts);
+            return R.prop('text', selected);
+          }
         },
         {
           name: 'level',
@@ -145,11 +219,15 @@ const Activities = function (sb) {
           filter: false,
           validation: {},
           message: '',
-          constructor: null,
+          constructor: 'level',
           wrapped: false,
           form_visible: true,
           label: 'Nivel',
           state: 'initial',
+          renderer: function(value, opts){
+            const selected = R.find(R.propEq('value', value), opts);
+            return R.prop('text', selected);
+          }
         },
         {
           name: 'published',
@@ -186,11 +264,15 @@ const Activities = function (sb) {
           filter: false,
           validation: {},
           message: '',
-          constructor: null,
+          constructor: 'competence',
           wrapped: false,
           form_visible: true,
           label: 'Competencia',
           state: 'initial',
+          renderer: function(value, opts){
+            const selected = R.find(R.propEq('value', value), opts);
+            return R.prop('text', selected);
+          }
         },{
           name: 'cognitive_process',
           type: 'combo',
@@ -199,11 +281,15 @@ const Activities = function (sb) {
           filter: false,
           validation: {},
           message: '',
-          constructor: null,
+          constructor: 'cognitive_process',
           wrapped: false,
           form_visible: true,
           label: 'Proceso cognitivo',
           state: 'initial',
+          renderer: function(value, opts){
+            const selected = R.find(R.propEq('value', value), opts);
+            return R.prop('text', selected);
+          }
         },{
           name: 'capacity',
           type: 'combo',
@@ -212,11 +298,15 @@ const Activities = function (sb) {
           filter: false,
           validation: {},
           message: '',
-          constructor: null,
+          constructor: 'capacity',
           wrapped: false,
           form_visible: true,
           label: 'Capacidad',
           state: 'initial',
+          renderer: function(value, opts){
+            const selected = R.find(R.propEq('value', value), opts);
+            return R.prop('text', selected);
+          }
         },{
           name: 'code',
           type: 'json',
