@@ -9,8 +9,8 @@ module.exports = function () {
   const Model = createModel(app);
   //const paginate = app.get('paginate');
   const paginate = {
-      default: 100,
-      max: 200
+      default: 15,
+      max: 15
     };
 
   const options = {

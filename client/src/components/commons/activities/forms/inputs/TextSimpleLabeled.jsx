@@ -11,7 +11,7 @@ const LabeledInputText = (props) => {
   return (
     <Form.Field>
       <label>{props.title}</label>
-      <Input key={'_' + props.title}
+      <Input key={'_' + props.title} size='small'
         label={{ basic: true, content: props.label }}
         labelPosition={props.label_position}
         type='text'

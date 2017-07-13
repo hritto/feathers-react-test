@@ -48,7 +48,7 @@ const MediaUpload = (props) => {
     let acceptedFiles = ".png,.jpg,.gif,.jpeg";
     let dictDefaultMessage = 'Arrastra aquí la imagen a subir o haz click para seleccionarla.';
     let mediatype = 'image';
-    if (props.state.addMedia === 'audio') {
+    if (props.state.mediatype === 'audio') {
         iconFiletypes = ['.mp3'];
         acceptedFiles = ".mp3";
         dictDefaultMessage = 'Arrastra aquí el audio a subir o haz click para seleccionarlo.';
@@ -118,7 +118,7 @@ const MediaUpload = (props) => {
         <Segment attached>
           {message}
           <Form onSubmit={handleSubmit}>
-              <label>{'Medio actual:' + getMediaName(props)}</label>
+              <Message><p><b>Medio actual: </b>{getMediaName(props)}</p></Message>
               <SimpleInputText key={'media_name'} {...props}
                   name={'media_name'}
                   title='Nombre'

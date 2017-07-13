@@ -47,6 +47,9 @@ const Scene_1 = () => {
       //Dibujar el fondo, si tiene
       if (config.main_back) {
         var img = media.getImage(config.main_back);
+        if(R.type(config.main_back) === 'Object'){
+          img = media.getImage(config.main_back.image);
+        }
         $("#" + config.scene_el).css({
           "background-image": "url(" + img.src + ")",
           "background-size": "contain",

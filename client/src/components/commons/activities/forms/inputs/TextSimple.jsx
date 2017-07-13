@@ -13,7 +13,7 @@ const SimpleInputText = (props) => {
   return (
     <Form.Field>
       <label>{props.title}</label>
-      <Input key={'_' + props.title}
+      <Input key={'_' + props.title} size='small'
         type='text'
         name={props.name}
         onChange={handleChange.bind(this, props.field)}

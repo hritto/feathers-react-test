@@ -263,15 +263,19 @@ const ActivitiesController = function () {
     model.set('media_filter_records', records, true);
   };
 
-  const getMediaFilterRecords = (filter, mediatype) => {
+  const setMediaFilterPage = (next_skip) => {
+    model.set(['media_filter_pagination', 'skip'], next_skip, false);
+  };
+
+  const getMediaFilterRecords = (filter, mediatype, sk) => {
+    let skip = model.get(['media_filter_pagination', 'skip']);
+    if (sk === 'filter'){
+      skip = 0;
+    }
+
     let query = {
       query: {
-        name: {
-          $search: ['ef']
-        },
-        original_name: {
-          $search: ['ro']
-        },
+        $skip: skip,
         mediatype: mediatype
       }
     }
@@ -290,10 +294,19 @@ const ActivitiesController = function () {
         $search: [filter.description]
       };
     }
-    
+
     return feathersServices.media.find(query).then(results => {
-      debugger;
-      // "original_name":"roto_txt.png","mediatype":"image","name":"wefq","description":"erg"
+      if(results && results.data){
+        model.set('media_filter_records', results.data, false);
+        model.set('media_filter_pagination', {
+          skip: results.skip,
+          total: results.total,
+          limit: results.limit,
+        }, true);
+      } else {
+        // TODO: mensaje de error del servidor
+        console.log('error');
+      }
     });
   };
 
@@ -314,6 +327,7 @@ const ActivitiesController = function () {
     updateCode: updateCode,
     setMediaFilterRecords: setMediaFilterRecords,
     getMediaFilterRecords: getMediaFilterRecords,
+    setMediaFilterPage: setMediaFilterPage,
     destroy: destroy
   };
 };

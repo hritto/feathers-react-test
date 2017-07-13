@@ -26,7 +26,11 @@ const Activities = function (sb) {
     activity_code: null,
     tab: 'form', // form, layout, preview
     media_filter_records: [], //Los resultados del filtro de medios del formulario
-    media_filter: {}, //Los filtros de medios del formulario 
+    media_filter_pagination: {
+      skip: 0,
+      total: 0,
+      limit: 15,
+    },
     config: {
       combo_constructors: [{
         activity_type: function () {

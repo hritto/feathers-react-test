@@ -25,7 +25,7 @@ class ClickForm extends Component {
     super(props);
     this.state = R.merge(props.model.activity_code, {
       active_index: null,
-      addMedia: null, // image, audio, text
+      mediatype: null, // image, audio, text (mediatype del manejador de medios)
       media_lens: [], // el lens al elemento que va a modificar sus medios
       media_name: '',
       media_description: '',
@@ -34,8 +34,7 @@ class ClickForm extends Component {
       metadata: props.model.selected_record,
       combo_values: props.model.config.combo_values,
       media_tab: 'table',
-      media_filter_records: props.model.media_filter_records,
-      media_filter: props.model.media_filter,
+      media_filter: {},
     });
 
     this.handleChange = this.handleChange.bind(this);
@@ -56,6 +55,8 @@ class ClickForm extends Component {
     this._calculateLayout = this._calculateLayout.bind(this);
     this.setActiveMetadata = this.setActiveMetadata.bind(this);
     this.setMediaTabs = this.setMediaTabs.bind(this);
+    this.filterMedia = this.filterMedia.bind(this);
+    this.addElementMedia = this.addElementMedia.bind(this);
   }
 
   _updateModel() {
@@ -121,6 +122,13 @@ class ClickForm extends Component {
       this._updateModel();
     });
   };
+
+  filterMedia(doSkip){
+    let options = this.state.media_filter;
+    if(options.name || options.original_name || options.description){
+      this.props.controller.getMediaFilterRecords(options, this.state.mediatype, doSkip);
+    }
+  }
 
   handleResolution(name, value, index) {
     this.setState((state) => {
@@ -197,15 +205,24 @@ class ClickForm extends Component {
       media: this._setAddMedia,
       error: this._setErrors,
       addMedia: this._addMediaState,
+      mediatype: this.state.mediatype,
       change: this.handleChange,
-      media_tab: this.setMediaTabs
+      media_tab: this.setMediaTabs,
+      filterMedia: this.filterMedia,
+      addElementMedia: this.addElementMedia
     };
     return <MediaModalView {...p}/>
   };
 
   _setAddMedia(opts) {
     this.setState((state) => {
-      return {addMedia: opts.action, media_lens: opts.lens, media_name: opts.media_name, media_description: opts.media_description};
+      return {
+        mediatype: opts.action,
+        media_lens: opts.lens,
+        media_name: opts.media_name,
+        media_description: opts.media_description,
+        media_filter: opts.media_filter || {}
+      };
     });
   }
 
@@ -236,9 +253,43 @@ class ClickForm extends Component {
     });
     //Quitar el mensaje de error y resetear el estado del componente MediaUpload
     this.setState((state) => {
-      return {addMedia: null, media_lens: [], media_name: '', media_description: '', error_messages: []};
+      return {mediatype: null, media_lens: [], media_name: '', media_description: '', error_messages: []};
     }, function() {
       this._updateModel();
+    });
+  }
+
+  addElementMedia(opts){
+    let lens = this.state.media_lens;
+    let mediaLens = [];
+    let val = opts.url_name;
+    if (opts.mediatype === 'audio') {
+      mediaLens = ['media', 'sounds', val]; // = opts.file.id;
+      opts.mediatype = 'sound'
+      val = {
+        mp3: opts.val
+      };
+    }
+    if (opts.mediatype === 'image') {
+      mediaLens = ['media', 'images', val]; // = opts.file.id;
+    }
+    lens.push(opts.mediatype); // image, sound, text
+    //Cambiar la imagen del elemento
+    this.setState((state) => {
+      const lensP = R.lensPath(lens);
+      return R.set(lensP, val, state);
+    });
+    //Añadir la imagen al hash de media
+    this.setState((state) => {
+      const lensMedia = R.lensPath(mediaLens);
+      return R.set(lensMedia, val, state);
+    });
+    //Quitar el mensaje de error y resetear el estado del componente MediaUpload
+    this.setState((state) => {
+      return {mediatype: null, media_lens: [], media_name: '', media_description: '', error_messages: []};
+    }, function() {
+      this._updateModel();
+      console.log(this.state)
     });
   }
 
@@ -251,7 +302,7 @@ class ClickForm extends Component {
     }, this.state.code);
 
     // Abrir la modal de carga/seleccion de medios
-    if (this.state.addMedia) {
+    if (this.state.mediatype) {
       media_form = this._getMediaForm();
     }
 

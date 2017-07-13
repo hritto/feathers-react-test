@@ -13,13 +13,13 @@ const TabPanels = (props) => {
     content = <MediaUpload {...props} />
   }
   return (
-    <Segment attached>
+    <div>
       <Menu tabular attached>
         <Menu.Item name='Buscar' active={props.state.media_tab === 'table'} onClick={props.media_tab.bind(this, 'table')} />
         <Menu.Item name='Subir' active={props.state.media_tab === 'upload'} onClick={props.media_tab.bind(this, 'upload')} />
       </Menu>
       {content}
-    </Segment>
+    </div>
   )
 }
 
@@ -27,15 +27,15 @@ const TabPanels = (props) => {
 const MediaModalView = (props) => {
     let txt_action = '';
     let modal_content = '';
-    switch (props.state.addMedia) {
+    switch (props.state.mediatype) {
         case 'image':
-            txt_action = 'Añadir Imagen';
+            txt_action = 'Añadir o Cambiar Imagen';
             break;
         case 'audio':
-            txt_action = 'Añadir Audio';
+            txt_action = 'Añadir o Cambiar Audio';
             break;
         case 'text':
-            txt_action = 'Añadir Texto';
+            txt_action = 'Añadir o Cambiar Texto';
             break;
     }
 
