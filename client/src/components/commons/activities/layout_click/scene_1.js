@@ -316,7 +316,7 @@ const Scene_1 = () => {
       "left": 0, //$("#drop-target-1").position().left
       "border": "1px solid red"
     });
-    pos_dr = _.shuffle(pos_dr);
+    //pos_dr = _.shuffle(pos_dr);
     var c = document.getElementById('drag-elements');
     return new Promise(function (resolve, reject) {
       _.each(drags, function (value, key) {

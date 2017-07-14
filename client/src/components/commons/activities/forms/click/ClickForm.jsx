@@ -19,6 +19,7 @@ import SimpleInputText from '../inputs/TextSimple.jsx';
 import DropdownSelection from '../inputs/DropDown.jsx';
 import CheckboxLabeled from '../inputs/CheckboxLabeled.jsx';
 import R from 'ramda';
+import * as Positioning from '../../../positioning_helper.js';
 
 class ClickForm extends Component {
   constructor(props) {
@@ -71,6 +72,7 @@ class ClickForm extends Component {
       cognitive_process: this.state.metadata.cognitive_process,
       competence: this.state.metadata.competence
     });
+    console.log(this.state);
   };
 
   _setErrors(opts) {
@@ -138,9 +140,35 @@ class ClickForm extends Component {
     });
   };
 
-  _calculateLayout() {
+  _calculateLayout(index) {
+    const self = this;
     return new Promise(function(resolve, reject) {
       //LayoutHelpers
+      debugger;
+      const elements = R.clone(self.state.code[index].elements);
+      const has_question = R.filter(R.propEq('type', 'question_model'))(elements);
+      let area = {
+        w: 950,
+        h: 490
+      };
+      const deck = Positioning.calculateDeck(_.size(elements), area);
+      const positions = Positioning.calculateCardPositions(elements, deck.size, deck.col, deck.row, _.size(elements), area);
+      let counter = 0;
+      _.each(elements, function(elem, key){
+        elem.size = {
+          w: deck.size,
+          h: deck.size
+        };
+        elem.pos = {
+          x: positions.x[counter],
+          y: positions.y[counter]
+        };
+        counter++
+      });
+      self.setState((state) => {
+        return R.set(R.lensPath(['code', index, 'elements']), elements, state);
+      });
+      debugger;
     }).then(function() {
       return resolve();
     });
@@ -153,7 +181,7 @@ class ClickForm extends Component {
       return st;
     }, function() {
       // Recalcular el layour
-      this._calculateLayout().then(function() {
+      this._calculateLayout(i).then(function() {
         this._updateModel();
       });
     });
@@ -165,7 +193,10 @@ class ClickForm extends Component {
       st.code[i].elements[name] = element;
       return st;
     }, function() {
-      this._updateModel();
+      // Recalcular el layour
+      this._calculateLayout(i).then(function() {
+        this._updateModel();
+      });
     });
   };
 

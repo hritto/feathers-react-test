@@ -61,6 +61,7 @@ const Elements = (props) => {
     if (props.activity_type === 1 || props.activity_type === 2) {
       btn = (<div>
         <Button
+          type='button'
           content='Crear Modelo/Pregunta'
           icon='add circle'
           labelPosition='left'

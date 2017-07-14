@@ -2,18 +2,25 @@ module.exports = {
 
   calculateDeck: function (card_num, area) {
     let t_col, t_row, card_size;
-    let w = area.w;
+    let w = w = area.h;
+    let size = null;
+    if(area.w < area.h){
+      w = area.w;
+    }
+    size = function(c, r){
+      return Math.min(Math.floor(w / r), Math.floor(w / c));
+    };
 
     switch (card_num) {
       case 12:
         t_col = 4;
         t_row = 3;
-        card_size = Math.floor(w / t_row);
+        card_size = size(t_col, t_row);
         break;
       case 16:
         t_col = 4;
         t_row = 4;
-        card_size = Math.floor(w / t_row);
+        card_size = size(t_col, t_row);
         break;
       case 18:
         t_col = 6;
@@ -23,22 +30,22 @@ module.exports = {
       case 20:
         t_col = 5;
         t_row = 4;
-        card_size = Math.floor(w / t_row);
+        card_size = size(t_col, t_row);
         break;
       case 22:
         t_col = 6;
         t_row = 4;
-        card_size = Math.floor(w / t_row);
+        card_size = size(t_col, t_row);
         break;
       case 24:
         t_col = 6;
         t_row = 4;
-        card_size = Math.floor(w / t_row);
+        card_size = size(t_col, t_row);
         break;
       case 26:
         t_col = 7;
         t_row = 4;
-        card_size = Math.floor((w - 100) / t_row);
+        card_size = size(t_col, t_row);
         break;
       case 28:
         t_col = 7;
@@ -48,7 +55,7 @@ module.exports = {
       case 30:
         t_col = 6;
         t_row = 5;
-        card_size = Math.floor(w / t_row);
+        card_size = size(t_col, t_row);
         break;
       case 32:
         t_col = 8;
@@ -58,12 +65,12 @@ module.exports = {
       case 34:
         t_col = 6;
         t_row = 6;
-        card_size = Math.floor(w / t_row);
+        card_size = size(t_col, t_row);
         break;
       case 36:
         t_col = 6;
         t_row = 6;
-        card_size = Math.floor(w / t_row);
+        card_size = size(t_col, t_row);
         break;
       case 38:
         t_col = 8;
@@ -77,9 +84,9 @@ module.exports = {
         break;
 
       default:
-        t_col = card_num / 2;
+        t_col = Math.ceil(card_num / 2);
         t_row = 2;
-        card_size = Math.floor(w / t_col);
+        card_size = size(t_col, t_row);
     }
 
     return {
@@ -90,7 +97,7 @@ module.exports = {
 
   },
   //La siguiente función crea un array de posiciones x/y, dependiendo del deck, y las mezcla
-  calculateCardPositions: function (data, size, cols, rows) {
+  calculateCardPositions: function (elements, size, cols, rows, cardsNum, area) {
 
     let posY = [];
     let posX = [];
@@ -98,12 +105,11 @@ module.exports = {
     let stepY = 0;
     let margen = 10;
     let posN;
-    let sobraX = (resizer.getActivitySceneConfig().size.w - (size + margen) * cols) / 2;
-    let sobraY = (resizer.getActivitySceneConfig().size.h - (size + margen) * rows) / 2;
-    let cardsNum;
+    let sobraX = (area.w - (size + margen) * cols) / 2;
+    let sobraY = (area.h - (size + margen) * rows) / 2;
 
-    if (data.elements.cards) {
-      cardsNum = data.elements.cards.length;
+
+    if (elements) {
       posN = sobraX;
 
       for (var j = 0; j < rows; j++) { //cada fila
@@ -119,11 +125,14 @@ module.exports = {
     }
 
     if (cardsNum === 22 || cardsNum === 26 || cardsNum === 34 || cardsNum === 38) {
-      posY = nonRegularPositions(posY, cardsNum);
-      posX = nonRegularPositions(posX, cardsNum);
+      //posY = nonRegularPositions(posY, cardsNum);
+      //posX = nonRegularPositions(posX, cardsNum);
     }
 
-    return shuffle(posY, posX);
+    return {
+      y: posY,
+      x: posX
+    }//shuffle(posY, posX);
   },
   nonRegularPositions: function (array, num) {
     array.shift();
