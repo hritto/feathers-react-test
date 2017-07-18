@@ -31,7 +31,7 @@ x.loader_div {
 #main {
   -moz-border-radius: 20px;
   border-radius: 20px;
-  background-color: #FFF;
+  /*background-color: #FFF;*/
   background-position: 10px 0;
   overflow: visible;
   position: absolute;

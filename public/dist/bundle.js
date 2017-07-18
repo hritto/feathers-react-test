@@ -26369,11 +26369,50 @@ exports.default = common_config;
 
 module.exports = {
 
+  calculateArea: function calculateArea(model) {
+    if (!model || _.isEmpty(model)) {
+      return {
+        w: 950,
+        h: 490
+      };
+    }
+    if (model.question.layout_type === 'landscape') {
+      //Si tiene definido un tamaño, usarlo
+      if (model.question.size.h) {
+        return {
+          w: 950,
+          h: 490 - model.question.size.h
+        };
+      }
+      return {
+        w: 950,
+        h: 390
+      };
+    }
+    if (model.question.layout_type === 'portrait') {
+      //Si tiene definido un tamaño, usarlo
+      if (model.question.size.w) {
+        return {
+          w: 950 - model.question.size.w,
+          h: 490
+        };
+      }
+      return {
+        w: 850,
+        h: 490
+      };
+    }
+    return {
+      w: 950,
+      h: 490
+    };
+  },
+
   calculateDeck: function calculateDeck(card_num, area) {
     var t_col = void 0,
         t_row = void 0,
         card_size = void 0;
-    var w = w = area.h;
+    var w = area.h;
     var size = null;
     if (area.w < area.h) {
       w = area.w;
@@ -49989,32 +50028,34 @@ var ClickForm = function (_Component) {
     value: function _calculateLayout(index) {
       var self = this;
       return new Promise(function (resolve, reject) {
-        //LayoutHelpers
         debugger;
         var elements = _ramda2.default.clone(self.state.code[index].elements);
         var has_question = _ramda2.default.filter(_ramda2.default.propEq('type', 'question_model'))(elements);
-        var area = {
-          w: 950,
-          h: 490
-        };
-        var deck = Positioning.calculateDeck(_.size(elements), area);
-        var positions = Positioning.calculateCardPositions(elements, deck.size, deck.col, deck.row, _.size(elements), area);
+        var area = Positioning.calculateArea(has_question);
+        var l = !_.isEmpty(has_question) ? 1 : 0;
+        // Si tiene un tipo de layout libre, no hay que tocar las posiciones
+        if (has_question && has_question.layout_type === 'other') {
+          return resolve();
+        }
+        var deck = Positioning.calculateDeck(_.size(elements) - l, area);
+        var positions = Positioning.calculateCardPositions(elements, deck.size, deck.col, deck.row, _.size(elements) - l, area);
         var counter = 0;
         _.each(elements, function (elem, key) {
-          elem.size = {
-            w: deck.size,
-            h: deck.size
-          };
-          elem.pos = {
-            x: positions.x[counter],
-            y: positions.y[counter]
-          };
-          counter++;
+          if (elem.type !== 'question_model') {
+            elem.size = {
+              w: deck.size,
+              h: deck.size
+            };
+            elem.pos = {
+              x: positions.x[counter],
+              y: positions.y[counter]
+            };
+            counter++;
+          }
         });
         self.setState(function (state) {
           return _ramda2.default.set(_ramda2.default.lensPath(['code', index, 'elements']), elements, state);
         });
-        debugger;
       }).then(function () {
         return resolve();
       });
@@ -50074,7 +50115,8 @@ var ClickForm = function (_Component) {
         handleCreateElement: this.handleCreateElement,
         media: this._setAddMedia,
         activity_type: code.type,
-        media_tab: this.setMediaTabs
+        media_tab: this.setMediaTabs,
+        calculateLayout: this._calculateLayout
       };
       return (0, _FormPanel2.default)(p);
     }
@@ -50111,6 +50153,9 @@ var ClickForm = function (_Component) {
         };
       });
     }
+
+    // Configurar en el estado del formulario los datos para el nuevo medio (image/audio/texto)
+
   }, {
     key: '_addMediaState',
     value: function _addMediaState(opts) {
@@ -50145,6 +50190,9 @@ var ClickForm = function (_Component) {
         this._updateModel();
       });
     }
+
+    //Añadir una imagen o audio al hash de medios
+
   }, {
     key: 'addElementMedia',
     value: function addElementMedia(opts) {
@@ -50177,7 +50225,6 @@ var ClickForm = function (_Component) {
         return { mediatype: null, media_lens: [], media_name: '', media_description: '', error_messages: [] };
       }, function () {
         this._updateModel();
-        console.log(this.state);
       });
     }
   }, {
@@ -50190,7 +50237,7 @@ var ClickForm = function (_Component) {
         return self._getPanelContent(code, i);
       }, this.state.code);
 
-      // Abrir la modal de carga/seleccion de medios
+      // Abrir la modal de carga/seleccion de medios si es el caso
       if (this.state.mediatype) {
         media_form = this._getMediaForm();
       }
@@ -50454,6 +50501,8 @@ var formClickTemplate = function formClickTemplate(props) {
       "x": 1,
       "y": 1
     };
+    element.layout_type = 'landscape';
+    element.layout_position = 'top';
     props.handleCreateElement(element, opts.index, name);
   };
 
@@ -50465,86 +50514,100 @@ var formClickTemplate = function formClickTemplate(props) {
   return _react2.default.createElement(
     'div',
     null,
-    _react2.default.createElement(_CheckboxLabeled2.default, _extends({}, props, {
-      name: 'show_instruction',
-      title: 'Mostrar la instrucci\xF3n al iniciar',
-      field: ['code', index, 'show_instruction'] })),
-    _react2.default.createElement(_TextSimple2.default, _extends({ key: 'instruction' }, props, {
-      name: 'instruction_text',
-      title: 'Instrucci\xF3n',
-      field: ['code', index, 'instruction', 'text'] })),
     _react2.default.createElement(
       _semanticUiReact.Form.Field,
-      null,
-      _react2.default.createElement(
-        'label',
-        null,
-        'Audio: ',
-        props.state.code[props.index].instruction.sound || "Ninguno..."
-      )
-    ),
-    _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
-      name: 'audio_instruction',
-      title: 'A\xF1adir medios',
-      field: ['code', index, 'instruction'],
-      options: {
-        image: null,
-        sound: props.state.code[props.index].instruction.sound,
-        text: null,
-        enabled: {
-          image: false,
-          sound: true,
-          text: false
-        }
-      } })),
-    _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
-    _react2.default.createElement(
-      _semanticUiReact.Form.Field,
-      null,
-      _react2.default.createElement(
-        'label',
-        null,
-        'Imagen: ',
-        back_image || "Ninguna..."
-      )
-    ),
-    _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
-      name: 'main_back' + _.uniqueId(),
-      title: 'Imagen de Fondo de la actividad',
-      field: ['code', index, 'main_back'],
-      options: {
-        image: props.state.code[props.index].main_back,
-        sound: null,
-        text: null,
-        enabled: {
-          image: true,
-          sound: false,
-          text: false
-        }
-      } })),
-    _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
-    _react2.default.createElement(
-      _semanticUiReact.Form.Field,
-      null,
-      _react2.default.createElement(
-        'label',
-        null,
-        'Color de fondo de la actividad'
-      )
-    ),
-    _react2.default.createElement(_ColorPicker2.default, _extends({}, props, {
-      name: 'background_color',
-      key: 'background_color',
-      field: ['code', index, 'background_color'] })),
-    _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
-    _react2.default.createElement(
-      _semanticUiReact.Form.Group,
       null,
       _react2.default.createElement(_DropDown2.default, _extends({}, props, {
         name: 'type' + _.uniqueId(),
         title: 'Tipo de pantalla',
         field: ['code', index, 'type'],
         options: [{ key: 'static', value: 0, text: 'Estática/Introducción' }, { key: 'click', value: 1, text: 'Click' }, { key: 'dnd', value: 2, text: 'Arrastrar y soltar' }, { key: 'memory', value: 3, text: 'Memory' }, { key: 'paint', value: 4, text: 'Paint' }] }))
+    ),
+    _react2.default.createElement(
+      _semanticUiReact.Form.Group,
+      { widths: 'equal' },
+      _react2.default.createElement(_TextSimple2.default, _extends({ key: 'instruction' }, props, {
+        name: 'instruction_text',
+        title: 'Instrucci\xF3n',
+        field: ['code', index, 'instruction', 'text'] }))
+    ),
+    _react2.default.createElement(
+      _semanticUiReact.Form.Group,
+      { widths: 'equal' },
+      _react2.default.createElement(
+        _semanticUiReact.Form.Field,
+        null,
+        _react2.default.createElement(
+          'label',
+          null,
+          'Audio de la instrucci\xF3n: ',
+          props.state.code[props.index].instruction.sound || "Ninguno..."
+        ),
+        _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
+          name: 'audio_instruction',
+          title: 'A\xF1adir medios',
+          field: ['code', index, 'instruction'],
+          options: {
+            image: null,
+            sound: props.state.code[props.index].instruction.sound,
+            text: null,
+            enabled: {
+              image: false,
+              sound: true,
+              text: false
+            }
+          } }))
+      ),
+      _react2.default.createElement(
+        _semanticUiReact.Form.Field,
+        null,
+        _react2.default.createElement(_CheckboxLabeled2.default, _extends({}, props, {
+          name: 'show_instruction',
+          title: 'Mostrar la instrucci\xF3n al iniciar',
+          field: ['code', index, 'show_instruction'] }))
+      )
+    ),
+    _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
+    _react2.default.createElement(
+      _semanticUiReact.Form.Group,
+      { widths: 'equal' },
+      _react2.default.createElement(
+        _semanticUiReact.Form.Field,
+        null,
+        _react2.default.createElement(
+          'label',
+          null,
+          'Color de fondo de la actividad'
+        ),
+        _react2.default.createElement(_ColorPicker2.default, _extends({}, props, {
+          name: 'background_color',
+          key: 'background_color',
+          field: ['code', index, 'background_color'] }))
+      ),
+      _react2.default.createElement(
+        _semanticUiReact.Form.Field,
+        null,
+        _react2.default.createElement(
+          'label',
+          null,
+          'Imagen de Fondo de la actividad: ',
+          back_image || "Ninguna..."
+        ),
+        _react2.default.createElement(_MediaComponent2.default, _extends({}, props, {
+          name: 'main_back' + _.uniqueId(),
+          title: 'Imagen de Fondo de la actividad',
+          field: ['code', index, 'main_back'],
+          options: {
+            image: props.state.code[props.index].main_back,
+            sound: null,
+            text: null,
+            enabled: {
+              image: true,
+              sound: false,
+              text: false
+            }
+          } }))
+      )
     ),
     _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
     _react2.default.createElement(
@@ -50634,17 +50697,18 @@ var formClickTemplate = function formClickTemplate(props) {
     ),
     _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
     _react2.default.createElement(
-      _semanticUiReact.Form.Field,
-      null,
+      _semanticUiReact.Header,
+      { as: 'h3' },
+      _react2.default.createElement(_semanticUiReact.Icon, { name: 'grid layout', size: 'tiny' }),
       _react2.default.createElement(
-        'label',
-        null,
+        _semanticUiReact.Header.Content,
+        { style: { padding: '0 0 0 10px' } },
         'Elementos de la actividad'
       )
     ),
-    _react2.default.createElement(_semanticUiReact.Button, { content: 'Crear nuevo elemento', icon: 'add circle', labelPosition: 'left', onClick: newElementClick.bind(undefined, { index: props.index }) }),
+    _react2.default.createElement(_Elements2.default, _extends({}, props, { elements: props.state.code[props.index].elements })),
     _react2.default.createElement(_semanticUiReact.Divider, { section: true }),
-    _react2.default.createElement(_Elements2.default, _extends({}, props, { elements: props.state.code[props.index].elements }))
+    _react2.default.createElement(_semanticUiReact.Button, { type: 'button', content: 'Crear nuevo elemento', icon: 'add circle', labelPosition: 'left', onClick: newElementClick.bind(undefined, { index: props.index }) })
   );
 };
 
@@ -51079,6 +51143,10 @@ var _CheckboxResolution = __webpack_require__(318);
 
 var _CheckboxResolution2 = _interopRequireDefault(_CheckboxResolution);
 
+var _DropDownQuestionModel = __webpack_require__(1322);
+
+var _DropDownQuestionModel2 = _interopRequireDefault(_DropDownQuestionModel);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var mProps = null;
@@ -51108,6 +51176,13 @@ var _getElementText = function _getElementText(text) {
   return text;
 };
 
+var getDropdownLayoutPositionOptions = function getDropdownLayoutPositionOptions(layout_type) {
+  if (!layout_type || layout_type === 'landscape') {
+    return [{ key: 'up', value: 'up', text: 'Arriba', icon: 'arrow up' }, { key: 'down', value: 'down', text: 'Abajo', icon: 'arrow down' }];
+  }
+  return [{ key: 'left', value: 'left', text: 'Izquierda', icon: 'arrow left' }, { key: 'right', value: 'right', text: 'Derecha', icon: 'arrow right' }];
+};
+
 var Element = function Element(props) {
   // el, el_key, scene_index
   mProps = props;
@@ -51121,6 +51196,8 @@ var Element = function Element(props) {
   var el_key = props.field;
   var meta = '';
   var el_type = '';
+  var dropdown_model_layout_type = '';
+  var dropdown_model_layout_position = '';
 
   if (el.image) {
     image = _react2.default.createElement(
@@ -51159,6 +51236,18 @@ var Element = function Element(props) {
       { key: el.type + _.uniqueId() },
       'Tipo: Pregunta/Modelo'
     );
+    dropdown_model_layout_type = _react2.default.createElement(_DropDownQuestionModel2.default, _extends({}, props, {
+      name: 'layout_type' + _.uniqueId(),
+      title: 'Tipo de layout',
+      field: ['code', scene_index, 'elements', el_key, 'layout_type'],
+      options: [{ key: 'horizontal', value: 'landscape', text: 'Horizontal', icon: 'resize horizontal' }, { key: 'vertical', value: 'portrait', text: 'Vertical', icon: 'resize vertical' }, { key: 'libre', value: 'other', text: 'Libre', icon: 'newspaper' }] }));
+    if (el.layout_type !== 'other') {
+      dropdown_model_layout_position = _react2.default.createElement(_DropDownQuestionModel2.default, _extends({}, props, {
+        name: 'layout_position' + _.uniqueId(),
+        title: 'Posici\xF3n del modelo',
+        field: ['code', scene_index, 'elements', el_key, 'layout_position'],
+        options: getDropdownLayoutPositionOptions(el.layout_type) }));
+    }
   } else {
     //Tipos de actividades
     if (props.activity_type === 0) {
@@ -51211,7 +51300,9 @@ var Element = function Element(props) {
         image,
         sound,
         text,
-        check
+        check,
+        dropdown_model_layout_type,
+        dropdown_model_layout_position
       )
     ),
     _react2.default.createElement(
@@ -51290,13 +51381,15 @@ var newModelElementClick = function newModelElementClick(opts) {
   element.id = name;
   element.type = 'question_model';
   element.size = {
-    "w": 920,
-    "h": 80
+    "w": 950,
+    "h": 100
   };
   element.pos = {
     "x": 1,
     "y": 1
   };
+  element.layout_type = 'landscape';
+  element.layout_position = 'top';
   mProps.handleCreateElement(element, opts.index, name);
 };
 
@@ -52573,6 +52666,10 @@ var Scene_1 = function Scene_1() {
     // keep the dragged position in the data-x/data-y attributes
     x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
         y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+    if (target.id === 'question') {
+      return false;
+    }
 
     $('#' + target.id).css('left', x + 'px');
     $('#' + target.id).css('top', y + 'px');
@@ -56729,7 +56826,7 @@ exports = module.exports = __webpack_require__(693)(undefined);
 
 
 // module
-exports.push([module.i, "x.loader_div {\r\n  z-index: 1000;\r\n  position: fixed !important;\r\n  position: absolute;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  background-color: #FFF;\r\n  height: 100%;\r\n  width: 100%;\r\n  overflow: hidden;\r\n  opacity: 1;\r\n  -webkit-transition: 1s opacity linear;\r\n  -moz-transition: 1s opacity linear;\r\n  -o-transition: 1s opacity linear;\r\n  -ms-transition: 1s opacity linearlinear;\r\n  transition: 1s opacity linear;\r\n}\r\n\r\n.loader_div div {\r\n  position: absolute;\r\n  width: 80px;\r\n  height: 80px;\r\n}\r\n\r\n.dial {\r\n  opacity: 0;\r\n}\r\n\r\n#main {\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  background-color: #FFF;\r\n  background-position: 10px 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n}\r\n\r\n#container {\r\n  padding: 0;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  float: left;\r\n  z-index: 55;\r\n  display: block;\r\n  background-color: #FFF;\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  margin-bottom: 0;\r\n  margin-top: 10px;\r\n  border: 1px solid #ccc;\r\n}\r\n\r\n#screenBlocker {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#infoWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#bubble {\r\n  margin: 0;\r\n  display: none;\r\n  position: relative;\r\n  z-index: 2042;\r\n  background-color: rgb(255, 239, 215);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: bold;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n}\r\n\r\n\r\n/*\r\n#bubble:after {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 239, 215);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n#bubble:before {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 200, 119);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n.instruction_note {\r\n  font-weight: normal;\r\n}\r\n*/\r\n\r\n#initWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2050;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0.4);\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#init_content {\r\n  margin: 0;\r\n  position: relative;\r\n  z-index: 2052;\r\n  background-color: rgb(255, 255, 255, 1);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: normal;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#animation_ok {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n  z-index: 944;\r\n}\r\n\r\n#animation_ko {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n}\r\n\r\n\r\n/*******   MENU   ******/\r\n\r\n#menu {\r\n  padding: 0;\r\n  position: absolute;\r\n  z-index: 155;\r\n  overflow: hidden;\r\n}\r\n\r\n.slider {\r\n  position: absolute;\r\n  z-index: 155;\r\n  -webkit-transition: .5s all ease-in;\r\n  -moz-transition: .5s all ease-in;\r\n  -o-transition: .5s all ease-in;\r\n  -ms-transition: .5s all ease-in;\r\n  transition: .5s all ease-in;\r\n  -webkit-backface-visibility: hidden;\r\n  -moz-backface-visibility: hidden;\r\n  -ms-backface-visibility: hidden;\r\n  backface-visibility: hidden;\r\n  -webkit-transform: translate3d(0, 0, 0);\r\n  -moz-transform: translate3d(0, 0, 0);\r\n  -ms-transform: translate3d(0, 0, 0);\r\n  -o-transform: translate3d(0, 0, 0);\r\n  transform: translate3d(0, 0, 0);\r\n}\r\n\r\n.rita_menu {\r\n  position: absolute;\r\n  float: left;\r\n  /*background-image: url(\"../images/rita1.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  z-index: 900;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n}\r\n\r\n.rita_menu #arrow {\r\n  position: absolute;\r\n  /*background-image: url(\"../images/arrow_right.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-position: center;\r\n  background-size: initial;\r\n  z-index: 950;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n#arrow.right {\r\n  -ms-transform: rotate(0deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(0deg);\r\n  /* Safari */\r\n  transform: rotate(0deg);\r\n}\r\n\r\n#arrow.left {\r\n  -ms-transform: rotate(180deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(180deg);\r\n  /* Safari */\r\n  transform: rotate(180deg);\r\n}\r\n\r\n.btns {\r\n  display: block;\r\n  position: absolute;\r\n  z-index: 1055;\r\n}\r\n\r\n.uihome,\r\n.uiredo,\r\n.uiback {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center left;\r\n  transform-origin: center left;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uinext {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center right;\r\n  transform-origin: center right;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uihome:hover,\r\n.uiredo:hover,\r\n.uiback:hover,\r\n.uinext:hover {\r\n  -ms-transform: scale(1.2, 1.2);\r\n  /* IE 9 */\r\n  -moz-transform: scale(1.2, 1.2);\r\n  -webkit-transform: scale(1.2, 1.2);\r\n  /* Safari */\r\n  transform: scale(1.2, 1.2);\r\n}\r\n\r\n\r\n/*\r\n.uihome {\r\n  background-image: url(\"../images/btn_home.png\");\r\n}\r\n\r\n.uiredo {\r\n  background-image: url(\"../images/btn_redo.png\");\r\n}\r\n\r\n.uiback {\r\n  background-image: url(\"../images/btn_back.png\");\r\n}\r\n\r\n.uinext {\r\n  background-image: url(\"../images/btn_next.png\");\r\n}\r\n*/\r\n\r\n\r\n/**** Click ****/\r\n\r\n.check_ok {\r\n  /*background-image: url(\"../images/check.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n}\r\n\r\n#ardilla_r {\r\n  /*background-image: url(\"../images/activity/ardilla_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#arbol_r {\r\n  /*background-image: url(\"../images/activity/arbol_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#agua_r {\r\n  /*background-image: url(\"../images/activity/agua_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#abeja_r {\r\n  /*background-image: url(\"../images/activity/abeja_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n\r\n/**** dNd ****/\r\n\r\n#drag-elements {\r\n  padding: 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n  z-index: 2135;\r\n  display: block;\r\n  margin: 0;\r\n  border-radius: 20px;\r\n  border: 5px solif #FFF;\r\n}\r\n\r\n#drag-elements>div {\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  position: absolute;\r\n  background-repeat: no-repeat;\r\n}\r\n\r\n.drop-target {\r\n  display: block;\r\n  text-align: left;\r\n  position: absolute;\r\n  border: 5px dotted #ccc;\r\n  border-radius: 20px;\r\n  z-index: 800;\r\n}\r\n\r\n#drop-target-1 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-2 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-1>div,\r\n#drop-target-2>div {\r\n  transition: all .5s;\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  transition: all .5s ease;\r\n}\r\n\r\n.gu-mirror {\r\n  position: fixed !important;\r\n  margin: 0 !important;\r\n  z-index: 9999 !important;\r\n  opacity: 0.8;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)\";\r\n  filter: alpha(opacity=80);\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n.gu-hide {\r\n  display: none !important;\r\n}\r\n\r\n.gu-unselectable {\r\n  -webkit-user-select: none !important;\r\n  -moz-user-select: none !important;\r\n  -ms-user-select: none !important;\r\n  user-select: none !important;\r\n}\r\n\r\n.gu-transit {\r\n  opacity: 0;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)\";\r\n  filter: alpha(opacity=0);\r\n}\r\n", ""]);
+exports.push([module.i, "x.loader_div {\r\n  z-index: 1000;\r\n  position: fixed !important;\r\n  position: absolute;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  background-color: #FFF;\r\n  height: 100%;\r\n  width: 100%;\r\n  overflow: hidden;\r\n  opacity: 1;\r\n  -webkit-transition: 1s opacity linear;\r\n  -moz-transition: 1s opacity linear;\r\n  -o-transition: 1s opacity linear;\r\n  -ms-transition: 1s opacity linearlinear;\r\n  transition: 1s opacity linear;\r\n}\r\n\r\n.loader_div div {\r\n  position: absolute;\r\n  width: 80px;\r\n  height: 80px;\r\n}\r\n\r\n.dial {\r\n  opacity: 0;\r\n}\r\n\r\n#main {\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  /*background-color: #FFF;*/\r\n  background-position: 10px 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n}\r\n\r\n#container {\r\n  padding: 0;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  float: left;\r\n  z-index: 55;\r\n  display: block;\r\n  background-color: #FFF;\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  margin-bottom: 0;\r\n  margin-top: 10px;\r\n  border: 1px solid #ccc;\r\n}\r\n\r\n#screenBlocker {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#infoWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#bubble {\r\n  margin: 0;\r\n  display: none;\r\n  position: relative;\r\n  z-index: 2042;\r\n  background-color: rgb(255, 239, 215);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: bold;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n}\r\n\r\n\r\n/*\r\n#bubble:after {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 239, 215);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n#bubble:before {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 200, 119);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n.instruction_note {\r\n  font-weight: normal;\r\n}\r\n*/\r\n\r\n#initWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2050;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0.4);\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#init_content {\r\n  margin: 0;\r\n  position: relative;\r\n  z-index: 2052;\r\n  background-color: rgb(255, 255, 255, 1);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: normal;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#animation_ok {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n  z-index: 944;\r\n}\r\n\r\n#animation_ko {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n}\r\n\r\n\r\n/*******   MENU   ******/\r\n\r\n#menu {\r\n  padding: 0;\r\n  position: absolute;\r\n  z-index: 155;\r\n  overflow: hidden;\r\n}\r\n\r\n.slider {\r\n  position: absolute;\r\n  z-index: 155;\r\n  -webkit-transition: .5s all ease-in;\r\n  -moz-transition: .5s all ease-in;\r\n  -o-transition: .5s all ease-in;\r\n  -ms-transition: .5s all ease-in;\r\n  transition: .5s all ease-in;\r\n  -webkit-backface-visibility: hidden;\r\n  -moz-backface-visibility: hidden;\r\n  -ms-backface-visibility: hidden;\r\n  backface-visibility: hidden;\r\n  -webkit-transform: translate3d(0, 0, 0);\r\n  -moz-transform: translate3d(0, 0, 0);\r\n  -ms-transform: translate3d(0, 0, 0);\r\n  -o-transform: translate3d(0, 0, 0);\r\n  transform: translate3d(0, 0, 0);\r\n}\r\n\r\n.rita_menu {\r\n  position: absolute;\r\n  float: left;\r\n  /*background-image: url(\"../images/rita1.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  z-index: 900;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n}\r\n\r\n.rita_menu #arrow {\r\n  position: absolute;\r\n  /*background-image: url(\"../images/arrow_right.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-position: center;\r\n  background-size: initial;\r\n  z-index: 950;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n#arrow.right {\r\n  -ms-transform: rotate(0deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(0deg);\r\n  /* Safari */\r\n  transform: rotate(0deg);\r\n}\r\n\r\n#arrow.left {\r\n  -ms-transform: rotate(180deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(180deg);\r\n  /* Safari */\r\n  transform: rotate(180deg);\r\n}\r\n\r\n.btns {\r\n  display: block;\r\n  position: absolute;\r\n  z-index: 1055;\r\n}\r\n\r\n.uihome,\r\n.uiredo,\r\n.uiback {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center left;\r\n  transform-origin: center left;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uinext {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center right;\r\n  transform-origin: center right;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uihome:hover,\r\n.uiredo:hover,\r\n.uiback:hover,\r\n.uinext:hover {\r\n  -ms-transform: scale(1.2, 1.2);\r\n  /* IE 9 */\r\n  -moz-transform: scale(1.2, 1.2);\r\n  -webkit-transform: scale(1.2, 1.2);\r\n  /* Safari */\r\n  transform: scale(1.2, 1.2);\r\n}\r\n\r\n\r\n/*\r\n.uihome {\r\n  background-image: url(\"../images/btn_home.png\");\r\n}\r\n\r\n.uiredo {\r\n  background-image: url(\"../images/btn_redo.png\");\r\n}\r\n\r\n.uiback {\r\n  background-image: url(\"../images/btn_back.png\");\r\n}\r\n\r\n.uinext {\r\n  background-image: url(\"../images/btn_next.png\");\r\n}\r\n*/\r\n\r\n\r\n/**** Click ****/\r\n\r\n.check_ok {\r\n  /*background-image: url(\"../images/check.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n}\r\n\r\n#ardilla_r {\r\n  /*background-image: url(\"../images/activity/ardilla_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#arbol_r {\r\n  /*background-image: url(\"../images/activity/arbol_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#agua_r {\r\n  /*background-image: url(\"../images/activity/agua_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#abeja_r {\r\n  /*background-image: url(\"../images/activity/abeja_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n\r\n/**** dNd ****/\r\n\r\n#drag-elements {\r\n  padding: 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n  z-index: 2135;\r\n  display: block;\r\n  margin: 0;\r\n  border-radius: 20px;\r\n  border: 5px solif #FFF;\r\n}\r\n\r\n#drag-elements>div {\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  position: absolute;\r\n  background-repeat: no-repeat;\r\n}\r\n\r\n.drop-target {\r\n  display: block;\r\n  text-align: left;\r\n  position: absolute;\r\n  border: 5px dotted #ccc;\r\n  border-radius: 20px;\r\n  z-index: 800;\r\n}\r\n\r\n#drop-target-1 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-2 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-1>div,\r\n#drop-target-2>div {\r\n  transition: all .5s;\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  transition: all .5s ease;\r\n}\r\n\r\n.gu-mirror {\r\n  position: fixed !important;\r\n  margin: 0 !important;\r\n  z-index: 9999 !important;\r\n  opacity: 0.8;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)\";\r\n  filter: alpha(opacity=80);\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n.gu-hide {\r\n  display: none !important;\r\n}\r\n\r\n.gu-unselectable {\r\n  -webkit-user-select: none !important;\r\n  -moz-user-select: none !important;\r\n  -ms-user-select: none !important;\r\n  user-select: none !important;\r\n}\r\n\r\n.gu-transit {\r\n  opacity: 0;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)\";\r\n  filter: alpha(opacity=0);\r\n}\r\n", ""]);
 
 // exports
 
@@ -120308,6 +120405,57 @@ module.exports = function() {
 module.exports = __webpack_amd_options__;
 
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 1322 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _semanticUiReact = __webpack_require__(13);
+
+var _ramda = __webpack_require__(12);
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Promise = __webpack_require__(35);
+
+var DropdownQuestionModel = function DropdownQuestionModel(props) {
+  var handleChange = function handleChange(evt, result) {
+    props.change(props.field, result.value);
+    return Promise.delay(200).then(function () {
+      props.calculateLayout(props.index);
+    });
+  };
+  return _react2.default.createElement(
+    _semanticUiReact.Form.Field,
+    null,
+    _react2.default.createElement(
+      'label',
+      null,
+      props.title
+    ),
+    _react2.default.createElement(_semanticUiReact.Dropdown, { placeholder: 'Seleccionar...',
+      selection: true,
+      options: props.options,
+      onChange: handleChange.bind(undefined),
+      name: props.name,
+      value: _ramda2.default.view(_ramda2.default.lensPath(props.field), props.state) })
+  );
+};
+
+exports.default = DropdownQuestionModel;
 
 /***/ })
 /******/ ]);

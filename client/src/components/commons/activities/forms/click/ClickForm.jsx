@@ -143,32 +143,34 @@ class ClickForm extends Component {
   _calculateLayout(index) {
     const self = this;
     return new Promise(function(resolve, reject) {
-      //LayoutHelpers
       debugger;
       const elements = R.clone(self.state.code[index].elements);
       const has_question = R.filter(R.propEq('type', 'question_model'))(elements);
-      let area = {
-        w: 950,
-        h: 490
-      };
-      const deck = Positioning.calculateDeck(_.size(elements), area);
-      const positions = Positioning.calculateCardPositions(elements, deck.size, deck.col, deck.row, _.size(elements), area);
+      const area = Positioning.calculateArea(has_question);
+      const l = !_.isEmpty(has_question) ? 1 : 0;
+      // Si tiene un tipo de layout libre, no hay que tocar las posiciones
+      if (has_question && has_question.layout_type === 'other'){
+        return resolve();
+      }
+      const deck = Positioning.calculateDeck(_.size(elements) - l, area);
+      const positions = Positioning.calculateCardPositions(elements, deck.size, deck.col, deck.row, _.size(elements) - l, area);
       let counter = 0;
       _.each(elements, function(elem, key){
-        elem.size = {
-          w: deck.size,
-          h: deck.size
-        };
-        elem.pos = {
-          x: positions.x[counter],
-          y: positions.y[counter]
-        };
-        counter++
+        if(elem.type !== 'question_model'){
+          elem.size = {
+            w: deck.size,
+            h: deck.size
+          };
+          elem.pos = {
+            x: positions.x[counter],
+            y: positions.y[counter]
+          };
+          counter++
+        }
       });
       self.setState((state) => {
         return R.set(R.lensPath(['code', index, 'elements']), elements, state);
       });
-      debugger;
     }).then(function() {
       return resolve();
     });
@@ -223,7 +225,8 @@ class ClickForm extends Component {
       handleCreateElement: this.handleCreateElement,
       media: this._setAddMedia,
       activity_type: code.type,
-      media_tab: this.setMediaTabs
+      media_tab: this.setMediaTabs,
+      calculateLayout: this._calculateLayout
     };
     return FormPanel(p);
   };
@@ -257,6 +260,7 @@ class ClickForm extends Component {
     });
   }
 
+  // Configurar en el estado del formulario los datos para el nuevo medio (image/audio/texto)
   _addMediaState(opts) {
     let lens = this.state.media_lens;
     let mediaLens = [];
@@ -290,6 +294,7 @@ class ClickForm extends Component {
     });
   }
 
+  //Añadir una imagen o audio al hash de medios
   addElementMedia(opts){
     let lens = this.state.media_lens;
     let mediaLens = [];
@@ -320,7 +325,6 @@ class ClickForm extends Component {
       return {mediatype: null, media_lens: [], media_name: '', media_description: '', error_messages: []};
     }, function() {
       this._updateModel();
-      console.log(this.state)
     });
   }
 
@@ -332,7 +336,7 @@ class ClickForm extends Component {
       return self._getPanelContent(code, i);
     }, this.state.code);
 
-    // Abrir la modal de carga/seleccion de medios
+    // Abrir la modal de carga/seleccion de medios si es el caso
     if (this.state.mediatype) {
       media_form = this._getMediaForm();
     }

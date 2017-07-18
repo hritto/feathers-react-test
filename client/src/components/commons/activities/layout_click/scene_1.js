@@ -168,6 +168,10 @@ const Scene_1 = () => {
       x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
       y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
+    if (target.id === 'question') {
+      return false;
+    }
+
     $('#' + target.id).css('left', x + 'px');
     $('#' + target.id).css('top', y + 'px');
 

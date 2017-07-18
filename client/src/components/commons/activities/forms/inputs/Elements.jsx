@@ -27,13 +27,15 @@ const newModelElementClick = (opts) => {
   element.id = name;
   element.type = 'question_model';
   element.size = {
-    "w": 920,
-    "h": 80
+    "w": 950,
+    "h": 100
   }
   element.pos = {
     "x": 1,
     "y": 1
   };
+  element.layout_type = 'landscape'
+  element.layout_position = 'top'
   mProps.handleCreateElement(element, opts.index, name);
 };
 

@@ -4,6 +4,7 @@ import Helpers from '../click/helpers.js';
 import R from 'ramda';
 import MediaComponent from './MediaComponent.jsx';
 import CheckboxResolution from './CheckboxResolution.jsx';
+import DropdownQuestionModel from './DropDownQuestionModel.jsx';
 
 let mProps = null;
 
@@ -32,6 +33,19 @@ const _getElementText = (text) => {
   return text;
 };
 
+const getDropdownLayoutPositionOptions = (layout_type) => {
+  if (!layout_type || layout_type === 'landscape') {
+    return [
+      { key: 'up', value: 'up', text: 'Arriba', icon:'arrow up' },
+      { key: 'down', value: 'down', text: 'Abajo', icon: 'arrow down' }
+    ];
+  }
+  return [
+    { key: 'left', value: 'left', text: 'Izquierda', icon:'arrow left' },
+    { key: 'right', value: 'right', text: 'Derecha', icon: 'arrow right' }
+  ];
+};
+
 
 const Element = (props) => { // el, el_key, scene_index
   mProps = props;
@@ -45,6 +59,8 @@ const Element = (props) => { // el, el_key, scene_index
   let el_key = props.field;
   let meta = '';
   let el_type = '';
+  let dropdown_model_layout_type = '';
+  let dropdown_model_layout_position = '';
 
   if (el.image) {
     image = <div className='element_media'><Icon name='image' />: <Image key={'image' + el.image} size='mini' src={Helpers.uploadedImage(getMediaImageUrl(el.image))} /></div>
@@ -61,6 +77,23 @@ const Element = (props) => { // el, el_key, scene_index
   if (el.type === 'question_model') {
     fluid = true;
     meta = <Card.Meta key={el.type + _.uniqueId()} >Tipo: Pregunta/Modelo</Card.Meta>;
+    dropdown_model_layout_type = <DropdownQuestionModel {...props}
+      name={'layout_type' + _.uniqueId()}
+      title='Tipo de layout'
+      field={['code', scene_index, 'elements', el_key, 'layout_type']}
+      options={[
+        { key: 'horizontal', value: 'landscape', text: 'Horizontal', icon:'resize horizontal' },
+        { key: 'vertical', value: 'portrait', text: 'Vertical', icon: 'resize vertical' },
+        { key: 'libre', value: 'other', text: 'Libre', icon: 'newspaper' }
+      ]} />
+    if (el.layout_type !== 'other'){
+      dropdown_model_layout_position = <DropdownQuestionModel {...props}
+        name={'layout_position' + _.uniqueId()}
+        title='Posición del modelo'
+        field={['code', scene_index, 'elements', el_key, 'layout_position']}
+        options={getDropdownLayoutPositionOptions(el.layout_type)} />
+    }
+
   } else {
     //Tipos de actividades
     if (props.activity_type === 0) { // Click
@@ -92,6 +125,8 @@ const Element = (props) => { // el, el_key, scene_index
         {sound}
         {text}
         {check}
+        {dropdown_model_layout_type}
+        {dropdown_model_layout_position}
       </Card.Description>
     </Card.Content>
     <Card.Content extra key={'extra_content_' + _.uniqueId()}>

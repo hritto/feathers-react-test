@@ -1,8 +1,47 @@
 module.exports = {
 
+  calculateArea: function (model) {
+    if(!model || _.isEmpty(model)){
+      return {
+        w: 950,
+        h: 490
+      };
+    }
+    if (model.question.layout_type === 'landscape'){
+      //Si tiene definido un tamaño, usarlo
+      if (model.question.size.h) {
+        return {
+          w: 950,
+          h: 490 - model.question.size.h
+        };
+      }
+      return {
+        w: 950,
+        h: 390
+      };
+    }
+    if (model.question.layout_type === 'portrait'){
+      //Si tiene definido un tamaño, usarlo
+      if (model.question.size.w) {
+        return {
+          w: 950 - model.question.size.w,
+          h: 490
+        };
+      }
+      return {
+        w: 850,
+        h: 490
+      };
+    }
+    return {
+      w: 950,
+      h: 490
+    };
+  },
+
   calculateDeck: function (card_num, area) {
     let t_col, t_row, card_size;
-    let w = w = area.h;
+    let w = area.h;
     let size = null;
     if(area.w < area.h){
       w = area.w;

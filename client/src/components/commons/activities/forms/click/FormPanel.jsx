@@ -111,6 +111,8 @@ const formClickTemplate = (props) => {
       "x": 1,
       "y": 1
     };
+    element.layout_type = 'landscape';
+    element.layout_position = 'top';
     props.handleCreateElement(element, opts.index, name);
   };
 
@@ -121,59 +123,7 @@ const formClickTemplate = (props) => {
 
   return (
     <div>
-      <CheckboxLabeled {...props}
-        name={'show_instruction'}
-        title='Mostrar la instrucción al iniciar'
-        field={['code', index, 'show_instruction']} />
-      <SimpleInputText key={'instruction'} {...props}
-        name={'instruction_text'}
-        title='Instrucción'
-        field={['code', index, 'instruction', 'text']} />
       <Form.Field>
-        <label>Audio: {props.state.code[props.index].instruction.sound || "Ninguno..."}</label>
-      </Form.Field>
-      <MediaComponent {...props}
-        name={'audio_instruction'}
-        title='Añadir medios'
-        field={['code', index, 'instruction']}
-        options={{
-          image: null,
-          sound: props.state.code[props.index].instruction.sound,
-          text: null,
-          enabled: {
-            image: false,
-            sound: true,
-            text: false,
-          }
-        }} />
-      <Divider section />
-      <Form.Field>
-        <label>Imagen: {back_image || "Ninguna..."}</label>
-      </Form.Field>
-      <MediaComponent {...props}
-        name={'main_back' + _.uniqueId()}
-        title='Imagen de Fondo de la actividad'
-        field={['code', index, 'main_back']}
-        options={{
-          image: props.state.code[props.index].main_back,
-          sound: null,
-          text: null,
-          enabled: {
-            image: true,
-            sound: false,
-            text: false,
-          }
-        }} />
-      <Divider section />
-      <Form.Field>
-        <label>Color de fondo de la actividad</label>
-      </Form.Field>
-      <ColorPicker {...props}
-        name={'background_color'}
-        key={'background_color'}
-        field={['code', index, 'background_color']} />
-      <Divider section />
-      <Form.Group>
         <DropdownSelection {...props}
           name={'type' + _.uniqueId()}
           title='Tipo de pantalla'
@@ -185,6 +135,64 @@ const formClickTemplate = (props) => {
             { key: 'memory', value: 3, text: 'Memory' },
             { key: 'paint', value: 4, text: 'Paint' }
           ]} />
+      </Form.Field>
+      <Form.Group widths='equal'>
+        <SimpleInputText key={'instruction'} {...props}
+          name={'instruction_text'}
+          title='Instrucción'
+          field={['code', index, 'instruction', 'text']} />
+      </Form.Group>
+      <Form.Group widths='equal'>
+        <Form.Field>
+          <label>Audio de la instrucción: {props.state.code[props.index].instruction.sound || "Ninguno..."}</label>
+          <MediaComponent {...props}
+            name={'audio_instruction'}
+            title='Añadir medios'
+            field={['code', index, 'instruction']}
+            options={{
+              image: null,
+              sound: props.state.code[props.index].instruction.sound,
+              text: null,
+              enabled: {
+                image: false,
+                sound: true,
+                text: false,
+              }
+            }} />
+        </Form.Field>
+        <Form.Field>
+        <CheckboxLabeled {...props}
+          name={'show_instruction'}
+          title='Mostrar la instrucción al iniciar'
+          field={['code', index, 'show_instruction']} />
+        </Form.Field>
+      </Form.Group>
+      <Divider section />
+      <Form.Group widths='equal'>
+        <Form.Field>
+          <label>Color de fondo de la actividad</label>
+          <ColorPicker {...props}
+            name={'background_color'}
+            key={'background_color'}
+            field={['code', index, 'background_color']} />
+        </Form.Field>
+        <Form.Field>
+          <label>Imagen de Fondo de la actividad: {back_image || "Ninguna..."}</label>
+          <MediaComponent {...props}
+            name={'main_back' + _.uniqueId()}
+            title='Imagen de Fondo de la actividad'
+            field={['code', index, 'main_back']}
+            options={{
+              image: props.state.code[props.index].main_back,
+              sound: null,
+              text: null,
+              enabled: {
+                image: true,
+                sound: false,
+                text: false,
+              }
+            }} />
+        </Form.Field>
       </Form.Group>
       <Divider section />
       <Form.Group widths='equal'>
@@ -243,12 +251,15 @@ const formClickTemplate = (props) => {
         </Form.Field>
       </Form.Group>
       <Divider section />
-      <Form.Field>
-        <label>Elementos de la actividad</label>
-      </Form.Field>
-      <Button content='Crear nuevo elemento' icon='add circle' labelPosition='left' onClick={newElementClick.bind(this, { index: props.index })} />
-      <Divider section />
+      <Header as='h3'>
+       <Icon name='grid layout' size='tiny' />
+       <Header.Content style={{padding:'0 0 0 10px'}}>
+         Elementos de la actividad
+       </Header.Content>
+      </Header>
       <Elements {...props} elements={props.state.code[props.index].elements} />
+      <Divider section />
+      <Button type='button' content='Crear nuevo elemento' icon='add circle' labelPosition='left' onClick={newElementClick.bind(this, { index: props.index })} />
     </div>
   );
 };
