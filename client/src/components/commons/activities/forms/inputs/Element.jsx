@@ -1,10 +1,11 @@
 import React from 'react';
-import { Icon, Button, Card, Image, Popup } from 'semantic-ui-react';
+import { Icon, Button, Card, Image, Popup, Form } from 'semantic-ui-react';
 import Helpers from '../click/helpers.js';
 import R from 'ramda';
 import MediaComponent from './MediaComponent.jsx';
 import CheckboxResolution from './CheckboxResolution.jsx';
-import DropdownQuestionModel from './DropDownQuestionModel.jsx';
+//import DropdownQuestionModel from './DropDownQuestionModel.jsx';
+import DropdownQuestionModel from './DropDownImage.jsx';
 
 let mProps = null;
 
@@ -15,6 +16,33 @@ const deleteElementClick = (opts) => {
 
 const getMediaImageUrl = (img) => {
   return mProps.state.media.images[img];
+};
+
+const getLayoutImageUrl = (lens, state) => {
+  const layout = R.view(R.lensPath(lens), state);
+  if(!layout || layout === 'landscape'){
+    return '/assets/images/activities/layout_up.png';
+  }
+  if(layout === 'portrait'){
+    return '/assets/images/activities/layout_i.png';
+  }
+  return '/assets/images/activities/layout_none.png';
+};
+
+const getLayoutImagePosUrl = (lens, state, main_layout) => {
+  const layout = R.view(R.lensPath(lens), state);
+  if(!main_layout || main_layout === 'landscape'){
+    if(!layout || layout === 'up'){
+      return '/assets/images/activities/layout_up.png';
+    }
+    return '/assets/images/activities/layout_down.png';
+  }
+  if(main_layout === 'portrait'){
+    if(layout !== 'right'){
+      return '/assets/images/activities/layout_i.png';
+    }
+    return '/assets/images/activities/layout_d.png';
+  }
 };
 
 const _getSoundName = (name) => {
@@ -36,13 +64,13 @@ const _getElementText = (text) => {
 const getDropdownLayoutPositionOptions = (layout_type) => {
   if (!layout_type || layout_type === 'landscape') {
     return [
-      { key: 'up', value: 'up', text: 'Arriba', icon:'arrow up' },
-      { key: 'down', value: 'down', text: 'Abajo', icon: 'arrow down' }
+      { key: 'up', value: 'up', text: 'Arriba', image:'/assets/images/activities/layout_up.png' },
+      { key: 'down', value: 'down', text: 'Abajo', image:'/assets/images/activities/layout_down.png' }
     ];
   }
   return [
-    { key: 'left', value: 'left', text: 'Izquierda', icon:'arrow left' },
-    { key: 'right', value: 'right', text: 'Derecha', icon: 'arrow right' }
+    { key: 'left', value: 'left', text: 'Izquierda', image:'/assets/images/activities/layout_i.png' },
+    { key: 'right', value: 'right', text: 'Derecha', image:'/assets/images/activities/layout_d.png' }
   ];
 };
 
@@ -77,21 +105,26 @@ const Element = (props) => { // el, el_key, scene_index
   if (el.type === 'question_model') {
     fluid = true;
     meta = <Card.Meta key={el.type + _.uniqueId()} >Tipo: Pregunta/Modelo</Card.Meta>;
-    dropdown_model_layout_type = <DropdownQuestionModel {...props}
-      name={'layout_type' + _.uniqueId()}
-      title='Tipo de layout'
-      field={['code', scene_index, 'elements', el_key, 'layout_type']}
-      options={[
-        { key: 'horizontal', value: 'landscape', text: 'Horizontal', icon:'resize horizontal' },
-        { key: 'vertical', value: 'portrait', text: 'Vertical', icon: 'resize vertical' },
-        { key: 'libre', value: 'other', text: 'Libre', icon: 'newspaper' }
-      ]} />
+    dropdown_model_layout_type = (
+      <DropdownQuestionModel {...props}
+        name={'layout_type' + _.uniqueId()}
+        title='Tipo de layout'
+        parent_field = {['code', scene_index, 'elements', el_key, 'layout_position']}
+        image={getLayoutImageUrl(['code', scene_index, 'elements', el_key, 'layout_type'], props.state)}
+        field={['code', scene_index, 'elements', el_key, 'layout_type']}
+        options={[
+          { key: 'horizontal', value: 'landscape', text: 'Horizontal', image:'/assets/images/activities/layout_up.png' },
+          { key: 'vertical', value: 'portrait', text: 'Vertical', image:'/assets/images/activities/layout_i.png' },
+          { key: 'libre', value: 'other', text: 'Libre', image:'/assets/images/activities/layout_none.png' }
+      ]} />);
     if (el.layout_type !== 'other'){
-      dropdown_model_layout_position = <DropdownQuestionModel {...props}
+      dropdown_model_layout_position = (
+        <DropdownQuestionModel {...props}
         name={'layout_position' + _.uniqueId()}
         title='Posición del modelo'
+        image={getLayoutImagePosUrl(['code', scene_index, 'elements', el_key, 'layout_position'], props.state, el.layout_type)}
         field={['code', scene_index, 'elements', el_key, 'layout_position']}
-        options={getDropdownLayoutPositionOptions(el.layout_type)} />
+        options={getDropdownLayoutPositionOptions(el.layout_type)} />);
     }
 
   } else {
