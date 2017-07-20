@@ -1,6 +1,7 @@
 const Promise = require("bluebird");
 const interact = require("interactjs");
 import R from 'ramda';
+import * as Positioning from '../../positioning_helper.js';
 
 const Scene_1 = () => {
   'use strict';
@@ -13,9 +14,6 @@ const Scene_1 = () => {
   var el = null;
   var scene_el = '#container';
   var media;
-  var intro;
-  var containers_arr = [];
-  var resolution = null;
   var lib = null; //la librería de audio
   var containers = [];
   var resizer = null;
@@ -27,8 +25,6 @@ const Scene_1 = () => {
     config = options;
     media = med;
     resizer = resizer_obj;
-
-    resolution = res;
     layout = layout_obj;
 
     return render();
@@ -40,7 +36,6 @@ const Scene_1 = () => {
 
   // Funcion que renderiza la escena, despues de cargar las imagenes
   var render = function () {
-
     //dibujar la escena
     return new Promise(function (resolve, reject) {
       elements_layout = config.elements;
@@ -68,98 +63,213 @@ const Scene_1 = () => {
         return drawAnswers(elements_layout);
       }).then(function () {
         return Promise.delay(100).then(function () {
-          interact('.resize-drag')
-            .draggable({
-              onmove: window.dragMoveListener,
-              onend: function (event) {
-                recalculateLayout(event);
-              }
-            })
-            .resizable({
-              preserveAspectRatio: false,
-              edges: {
-                left: true,
-                right: true,
-                bottom: true,
-                top: true
-              },
-              onend: function (event) {
-                recalculateLayout(event);
-              }
-            })
-            .on('resizemove', function (event) {
-              var target = event.target,
-                x = (parseFloat(target.getAttribute('data-x')) || 0),
-                y = (parseFloat(target.getAttribute('data-y')) || 0);
-
-              // update the element's style
-              target.style.width = event.rect.width + 'px';
-              target.style.height = event.rect.height + 'px';
-              elements_layout[target.id].size = {
-                w: event.rect.width,
-                h: event.rect.height
-              };
-            });
+          setAnswersInteractions();
+          setQuestionInteractions();
           resolve();
         })
       });
     });
   };
 
+  var setQuestionInteractions = function(){
+    var question = R.filter(R.propEq('type', 'question_model'))(config.elements);
+    var question_layout, question_position;
+    if(!question || R.isEmpty(question)){
+      return;
+    }
+    var edges = questionEdges(question);
+    var enabled = getQuestionDragEnable(question);
+    interact('.question-resize-drag')
+      .draggable({
+        enabled: enabled,
+        onmove: window.dragMoveListener,
+        onend: function (event) {
+          recalculateLayout(event);
+        }
+      })
+      .resizable({
+        preserveAspectRatio: false,
+        edges: edges,
+        onend: function (event) {
+          recalculateLayout(event);
+        }
+      })
+      .on('resizemove', function (event) {
+        var target = event.target,
+          x = (parseFloat(target.getAttribute('data-x')) || 0),
+          y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+        // update the element's style
+        target.style.width = event.rect.width + 'px';
+        target.style.height = event.rect.height + 'px';
+        elements_layout[target.id].size = {
+          w: event.rect.width,
+          h: event.rect.height
+        };
+      });
+  };
+
+  var getQuestionDragEnable = function(question){
+    if(question.layout_type === 'other'){
+      return true;
+    }
+    return false;
+  };
+
+  var questionEdges = function(question){
+    var edges = {
+      left: true,
+      right: true,
+      bottom: true,
+      top: true
+    };
+    if(question && !R.isEmpty(question)){
+      var question_layout = question.layout_type;
+      var question_position = question.layout_position;
+      if (!question_layout || question_layout === 'landscape'){
+        edges.left = false;
+        edges.right = false;
+        if(!question_position || question_position === 'up'){
+          edges.top = false;
+        }
+        if(question_position === 'down'){
+          edges.bottom = false;
+        }
+      }
+      if (question_layout === 'portrait'){
+        edges.top = false;
+        edges.bottom = false;
+        if(!question_position || question_position === 'left'){
+          edges.left = false;
+        }
+        if(question_position === 'right'){
+          edges.right = false;
+        }
+      }
+    }
+    return edges;
+  };
+
+  var setAnswersInteractions = function(){
+    interact('.resize-drag')
+      .draggable({
+        onmove: window.dragMoveListener,
+        onend: function (event) {
+          recalculateLayout(event);
+        }
+      })
+      .resizable({
+        preserveAspectRatio: false,
+        edges: {
+          left: true,
+          right: true,
+          bottom: true,
+          top: true
+        },
+        onend: function (event) {
+          recalculateLayout(event);
+        }
+      })
+      .on('resizemove', function (event) {
+        var target = event.target,
+          x = (parseFloat(target.getAttribute('data-x')) || 0),
+          y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+        // update the element's style
+        target.style.width = event.rect.width + 'px';
+        target.style.height = event.rect.height + 'px';
+        elements_layout[target.id].size = {
+          w: event.rect.width,
+          h: event.rect.height
+        };
+      });
+  };
+
+  var getNewContainerSize = function(que, w, h){
+    var question = que.question;
+    if(question.layout_type === 'landscape'){
+      return {
+        w: 950,
+        h: 550 - h
+      }
+    }
+    return {
+      w: 950 - w,
+      h: 550
+    }
+  };
+
+  var getNewContainerPos = function(que, w, h){
+    var question = que.question;
+    if(!question.layout_type || question.layout_type === 'landscape'){
+      if(!question.layout_position || question.layout_position === 'up'){
+        return {
+          x: 0,
+          y: $("#question").height()
+        }
+      }
+    }
+
+    if(question.layout_type === 'portrait'){
+      if(question.layout_position === 'left'){
+        return {
+          x: $("#question").outerWidth(),
+          y: 0
+        }
+      }
+    }
+    return {
+      x: 0,
+      y: 0
+    }
+  };
+
   var recalculateLayout = function (event) {
     var target = event.target;
     if (target.id === 'question') {
       //Recalcular el tamaño del comtendor de clicks
-      var question_height = $("#question").position().top + $("#question").height();
-      var max_height_click_container = 550 - question_height;
-      $("#drag-elements").css({
-        "top": question_height + 20,
-        "left": 0,
-        "height": 550 - question_height - 40
-      });
-      //Ver si los elementos han quedado fuera del area de la actividad
-      _.each(elements_layout, function (el, key) {
-        if (el.type === 'question_model') {
-          var img;
-          var q_width = $('#question').width() - 40;
-          var q_height = $('#question').height() - 20;
-          var s;
-          var img_name;
-          // Ajustar la imagen al contenedor
-          if (R.type(el.image) !== 'Object') {
-            img = media.getImage(el.image);
-            img_name = _.clone(el.image);
-          } else {
-            img = media.getImage(el.image.image);
-            img_name = _.clone(el.image.image);
-          }
-
-          s = getImageSize(img.width, img.height, q_width, q_height);
-          var image_size = {
-            w: s.w,
-            h: s.h,
-          };
-          var image_pos = {
-            x: (q_width - image_size.w) / 2,
-            y: (q_height - image_size.h) / 2,
-          };
-          el.image = {
-            image: img_name,
-            size: image_size,
-            pos: image_pos
-          }
-          $('#question').css({
-            "background-size": resizer.getSimpleSize(el.image.size.w) + "px " + resizer.getSimpleSize(el.image.size.h) + "px",
-          });
-        } else {
-          if ($('#' + el.id).position().top > max_height_click_container - 20) {
-            el.pos.y = max_height_click_container - 40;
-            // update the position attributes
-            document.getElementById(el.id).setAttribute('data-y', max_height_click_container - 40);
-          }
+      var question_config = R.filter(R.propEq('type', 'question_model'))(config.elements);
+      var question_height = $("#question").outerHeight();
+      var question_width = $("#question").outerWidth();
+      debugger;
+      var container_size = getNewContainerSize(question_config, question_width, question_height);
+      var container_pos = getNewContainerPos(question_config, question_width, question_height);
+      config.elements_container = {
+        size: {
+            w: container_size.w,
+            h: container_size.h
+        },
+        pos: {
+          x: container_pos.x,
+          y: container_pos.y
         }
-      });
+      }
     }
+    var area_size = Positioning.calculateAreaSize(question_config);
+    var area_pos = Positioning.calculateAreaPosition(question_config);
+    var model_length = !_.isEmpty(question_config) ? 1 : 0;
+    var click_elements_count = _.size(elements_layout) - model_length;
+    var deck = Positioning.calculateDeck(click_elements_count, area_size);
+    var positions = Positioning.calculateCardPositions(elements_layout, deck.size, deck.col, deck.row, click_elements_count, area_size);
+    var counter = 0;
+    _.each(elements_layout, function(elem, key){
+      if(elem.type !== 'question_model'){
+        elem.size = {
+          w: deck.size,
+          h: deck.size
+        };
+        elem.pos = {
+          x: positions.x[counter],
+          y: positions.y[counter]
+        };
+        counter++
+      }
+    });
+    //Quitar la interacción de los elementos
+    interact('.resize-drag').unset();
+    interact('.question-resize-drag').unset();
+    //Volver a pintar la escena
+    render();
   };
 
   function dragMoveListener(event) {
@@ -220,15 +330,19 @@ const Scene_1 = () => {
   };
 
   var drawQuestionElement = function (el, k, total, container, index) {
-    var elem = "<div id='" + k + "' class='resize-drag drop-target drop-target" + index + "' data-x='" + resizer.getPosition(el.pos).x + "' data-y='" + resizer.getPosition(el.pos).y + "'></div>";
+    var elem = "<div id='" + k + "' class='question-resize-drag drop-target drop-target" + index + "' data-x='" + resizer.getPosition(el.pos).x + "' data-y='" + resizer.getPosition(el.pos).y + "'></div>";
     var txt = "<div class='q_text'>" + el.text + "</div>";
+    if(!$('#'+k) || !$('#'+k).length){
+      $(container).append(elem);
+    }
+
     var img;
     var image_size;
     var image_pos;
-    var q_width = $(container).width() - 40;
-    var q_height = 60;
-    var q_pos_x = 10;
-    var q_pos_y = 10;
+    var q_width = resizer.getSimpleSize(el.size.w);
+    var q_height = resizer.getSimpleSize(el.size.h);
+    var q_pos_x = resizer.getSimpleSize(el.pos.x);
+    var q_pos_y = resizer.getSimpleSize(el.pos.y);
     var s;
     if (R.type(el.image) !== 'Object') {
       // Ajustar la imagen al contenedor
@@ -249,10 +363,6 @@ const Scene_1 = () => {
       }
     }
     img = media.getImage(el.image.image);
-    $(container).append(elem);
-    if (el.text) {
-      $("#" + k).append(txt);
-    }
 
     $('#' + k).css({
       "background-image": "url(" + img.src + ")",
@@ -264,21 +374,23 @@ const Scene_1 = () => {
       "width": resizer.getSize(el.size).w + "px",
       "height": resizer.getSize(el.size).h + "px",
       "vertical-align": "middle",
-      "z-index": 12000
+      // "z-index": 12000
     });
-
-    $('.q_text').css({
-      // modificado para contener solo una letra
-      "width": "75%",
-      "height": "auto",
-      "text-align": "center",
-      // modificado en diciembre
-      "font-size": resizer.getSimpleSize(65) + "px",
-      "line-height": resizer.getSimpleSize(70) + "px",
-      "vertical-align": "middle",
-      "font-weight": "bold",
-      "margin-top": resizer.getSimpleSize(el.text_margin_top) + "px"
-    });
+    if (el.text) {
+      $("#" + k).append(txt);
+      $('.q_text').css({
+        // modificado para contener solo una letra
+        "width": "75%",
+        "height": "auto",
+        "text-align": "center",
+        // modificado en diciembre
+        "font-size": resizer.getSimpleSize(65) + "px",
+        "line-height": resizer.getSimpleSize(70) + "px",
+        "vertical-align": "middle",
+        "font-weight": "bold",
+        "margin-top": resizer.getSimpleSize(el.text_margin_top) + "px"
+      });
+    }
   };
 
 
@@ -290,7 +402,9 @@ const Scene_1 = () => {
       compensa_h = 0,
       pos_dr = [],
       has_question = false;
-    $('#container').append('<div id="drag-elements"></div>');
+    if(!$('#drag-elements') || !$('#drag-elements').length){
+      $('#container').append('<div id="drag-elements"></div>');
+    }
     var drags = [];
     _.each(els, function (value, key) {
       if (value.type === "clickable") {
@@ -301,23 +415,11 @@ const Scene_1 = () => {
       }
     });
 
-    //Calcular el espacio q nos queda para el contenedor de arrastrables
-    if (has_question) {
-      drop_y = $("#question").position().top + $("#question").height();
-      max_h = 550 - (drop_y + 40);
-      min_h = max_h;
-      y = drop_y + 20;
-    } else {
-      min_h = resizer.getSimpleSize(500);
-      y = 10;
-    }
-
-    //Posicionar el contenedor de elementos arrastrables en el sitio q nos queda
     $("#drag-elements").css({
-      "height": min_h,
-      "width": "98%", //resizer.getSceneConfig().size.w,
-      "top": y,
-      "left": 0, //$("#drop-target-1").position().left
+      "height": resizer.getSimpleSize(config.elements_container.size.h),
+      "width": resizer.getSimpleSize(config.elements_container.size.w),
+      "top": resizer.getSimpleSize(config.elements_container.pos.y),
+      "left": resizer.getSimpleSize(config.elements_container.pos.x),
       "border": "1px solid red"
     });
     //pos_dr = _.shuffle(pos_dr);
@@ -332,7 +434,10 @@ const Scene_1 = () => {
 
   var drawAnswerElement = function (el, k, total, container, index, pos) {
     var elem = "<div id='" + k + "' class='resize-drag' data-x='" + resizer.getSimpleSize(pos[index].x) + "' data-y='" + resizer.getSimpleSize(pos[index].y) + "'></div>";
-    $(container).append(elem);
+    if(!$('#'+k) || !$('#'+k).length){
+      $(container).append(elem);
+    }
+
     $('#' + k).css({
       "width": resizer.getSize(el.size).w,
       "height": resizer.getSize(el.size).h,
@@ -348,6 +453,7 @@ const Scene_1 = () => {
 
   var destroy = function () {
     interact('.resize-drag').unset();
+    interact('.question-resize-drag').unset();
     return new Promise(function (resolve, reject) {
       $('#container').empty();
       return resolve(elements_layout);

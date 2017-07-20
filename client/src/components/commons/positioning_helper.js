@@ -1,6 +1,6 @@
 module.exports = {
 
-  calculateArea: function (model) {
+  calculateAreaSize: function (model) {
     if(!model || _.isEmpty(model)){
       return {
         w: 950,
@@ -38,7 +38,45 @@ module.exports = {
       h: 490
     };
   },
-
+  calculateAreaPosition: function (model) {
+    if(!model || _.isEmpty(model)){
+      return {
+        w: 0,
+        y: 0
+      };
+    }
+    if (model.question.layout_position === 'up'){
+      //Si tiene definido un tamaño, usarlo
+      if (model.question.size.h) {
+        return {
+          x: 0,
+          y: model.question.size.h
+        };
+      }
+      return {
+        x: 0,
+        y: 100
+      };
+    }
+    if (model.question.layout_position === 'left'){
+      //Si tiene definido un tamaño, usarlo
+      if (model.question.size.w) {
+        return {
+          x: model.question.size.w,
+          y: 0
+        };
+      }
+      return {
+        x: 0,
+        y: 850
+      };
+    }
+    return {
+      x: 0,
+      y: 0
+    };
+  },
+  // Calcula la posisción de los elementos dentro del área
   calculateDeck: function (card_num, area) {
     let t_col, t_row, card_size;
     let w = area.h;

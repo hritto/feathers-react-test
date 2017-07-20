@@ -467,3 +467,11 @@ x.loader_div {
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
   filter: alpha(opacity=0);
 }
+
+.question-resize-drag:hover{
+  z-index: 10000;
+}
+
+.resize-drag:hover{
+  z-index: 10000;
+}

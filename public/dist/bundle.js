@@ -26369,7 +26369,7 @@ exports.default = common_config;
 
 module.exports = {
 
-  calculateArea: function calculateArea(model) {
+  calculateAreaSize: function calculateAreaSize(model) {
     if (!model || _.isEmpty(model)) {
       return {
         w: 950,
@@ -26407,7 +26407,45 @@ module.exports = {
       h: 490
     };
   },
-
+  calculateAreaPosition: function calculateAreaPosition(model) {
+    if (!model || _.isEmpty(model)) {
+      return {
+        w: 0,
+        y: 0
+      };
+    }
+    if (model.question.layout_position === 'up') {
+      //Si tiene definido un tamaño, usarlo
+      if (model.question.size.h) {
+        return {
+          x: 0,
+          y: model.question.size.h
+        };
+      }
+      return {
+        x: 0,
+        y: 100
+      };
+    }
+    if (model.question.layout_position === 'left') {
+      //Si tiene definido un tamaño, usarlo
+      if (model.question.size.w) {
+        return {
+          x: model.question.size.w,
+          y: 0
+        };
+      }
+      return {
+        x: 0,
+        y: 850
+      };
+    }
+    return {
+      x: 0,
+      y: 0
+    };
+  },
+  // Calcula la posisción de los elementos dentro del área
   calculateDeck: function calculateDeck(card_num, area) {
     var t_col = void 0,
         t_row = void 0,
@@ -50031,17 +50069,20 @@ var ClickForm = function (_Component) {
         debugger;
         var elements = _ramda2.default.clone(self.state.code[index].elements);
         var has_question = _ramda2.default.filter(_ramda2.default.propEq('type', 'question_model'))(elements);
-        var area = Positioning.calculateArea(has_question);
-        var l = !_.isEmpty(has_question) ? 1 : 0;
+
         // Si tiene un tipo de layout libre, no hay que tocar las posiciones
-        if (has_question && has_question.layout_type === 'other') {
+        if (has_question && has_question.question.layout_type === 'other') {
           return resolve();
         }
-        var deck = Positioning.calculateDeck(_.size(elements) - l, area);
-        var positions = Positioning.calculateCardPositions(elements, deck.size, deck.col, deck.row, _.size(elements) - l, area);
+        var area_size = Positioning.calculateAreaSize(has_question);
+        var area_pos = Positioning.calculateAreaPosition(has_question);
+        var model_length = !_.isEmpty(has_question) ? 1 : 0;
+        var click_elements_count = _.size(elements) - model_length;
+        var deck = Positioning.calculateDeck(click_elements_count, area_size);
+        var positions = Positioning.calculateCardPositions(elements, deck.size, deck.col, deck.row, click_elements_count, area_size);
         var counter = 0;
         _.each(elements, function (elem, key) {
-          if (elem.type !== 'question_model') {
+          if (elem.type === 'question_model') {} else {
             elem.size = {
               w: deck.size,
               h: deck.size
@@ -50055,6 +50096,12 @@ var ClickForm = function (_Component) {
         });
         self.setState(function (state) {
           return _ramda2.default.set(_ramda2.default.lensPath(['code', index, 'elements']), elements, state);
+        });
+        self.setState(function (state) {
+          return _ramda2.default.set(_ramda2.default.lensPath(['code', index, 'elements_container']), {
+            size: area_size,
+            pos: area_pos
+          }, state);
         });
       }).then(function () {
         return resolve();
@@ -51121,8 +51168,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-//import DropdownQuestionModel from './DropDownQuestionModel.jsx';
-
 
 var _react = __webpack_require__(0);
 
@@ -51146,9 +51191,9 @@ var _CheckboxResolution = __webpack_require__(318);
 
 var _CheckboxResolution2 = _interopRequireDefault(_CheckboxResolution);
 
-var _DropDownImage = __webpack_require__(1323);
+var _DropDownQuestionModelImage = __webpack_require__(1323);
 
-var _DropDownImage2 = _interopRequireDefault(_DropDownImage);
+var _DropDownQuestionModelImage2 = _interopRequireDefault(_DropDownQuestionModelImage);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -51266,7 +51311,7 @@ var Element = function Element(props) {
       { key: el.type + _.uniqueId() },
       'Tipo: Pregunta/Modelo'
     );
-    dropdown_model_layout_type = _react2.default.createElement(_DropDownImage2.default, _extends({}, props, {
+    dropdown_model_layout_type = _react2.default.createElement(_DropDownQuestionModelImage2.default, _extends({}, props, {
       name: 'layout_type' + _.uniqueId(),
       title: 'Tipo de layout',
       parent_field: ['code', scene_index, 'elements', el_key, 'layout_position'],
@@ -51274,7 +51319,7 @@ var Element = function Element(props) {
       field: ['code', scene_index, 'elements', el_key, 'layout_type'],
       options: [{ key: 'horizontal', value: 'landscape', text: 'Horizontal', image: '/assets/images/activities/layout_up.png' }, { key: 'vertical', value: 'portrait', text: 'Vertical', image: '/assets/images/activities/layout_i.png' }, { key: 'libre', value: 'other', text: 'Libre', image: '/assets/images/activities/layout_none.png' }] }));
     if (el.layout_type !== 'other') {
-      dropdown_model_layout_position = _react2.default.createElement(_DropDownImage2.default, _extends({}, props, {
+      dropdown_model_layout_position = _react2.default.createElement(_DropDownQuestionModelImage2.default, _extends({}, props, {
         name: 'layout_position' + _.uniqueId(),
         title: 'Posici\xF3n del modelo',
         image: getLayoutImagePosUrl(['code', scene_index, 'elements', el_key, 'layout_position'], props.state, el.layout_type),
@@ -51284,7 +51329,7 @@ var Element = function Element(props) {
   } else {
     //Tipos de actividades
     if (props.activity_type === 0) {
-      // Click
+      // Estática
       meta = _react2.default.createElement(
         _semanticUiReact.Card.Meta,
         null,
@@ -51421,6 +51466,7 @@ var newModelElementClick = function newModelElementClick(opts) {
     "x": 1,
     "y": 1
   };
+  // Por defecto, el modelo es horizontal, arriba y de 950 x 100
   element.layout_type = 'landscape';
   element.layout_position = 'top';
   mProps.handleCreateElement(element, opts.index, name);
@@ -52530,6 +52576,12 @@ var _ramda = __webpack_require__(12);
 
 var _ramda2 = _interopRequireDefault(_ramda);
 
+var _positioning_helper = __webpack_require__(323);
+
+var Positioning = _interopRequireWildcard(_positioning_helper);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Promise = __webpack_require__(32);
@@ -52547,9 +52599,6 @@ var Scene_1 = function Scene_1() {
   var el = null;
   var scene_el = '#container';
   var media;
-  var intro;
-  var containers_arr = [];
-  var resolution = null;
   var lib = null; //la librería de audio
   var containers = [];
   var resizer = null;
@@ -52561,8 +52610,6 @@ var Scene_1 = function Scene_1() {
     config = options;
     media = med;
     resizer = resizer_obj;
-
-    resolution = res;
     layout = layout_obj;
 
     return render();
@@ -52574,7 +52621,6 @@ var Scene_1 = function Scene_1() {
 
   // Funcion que renderiza la escena, despues de cargar las imagenes
   var render = function render() {
-
     //dibujar la escena
     return new Promise(function (resolve, reject) {
       elements_layout = config.elements;
@@ -52602,95 +52648,207 @@ var Scene_1 = function Scene_1() {
         return drawAnswers(elements_layout);
       }).then(function () {
         return Promise.delay(100).then(function () {
-          interact('.resize-drag').draggable({
-            onmove: window.dragMoveListener,
-            onend: function onend(event) {
-              recalculateLayout(event);
-            }
-          }).resizable({
-            preserveAspectRatio: false,
-            edges: {
-              left: true,
-              right: true,
-              bottom: true,
-              top: true
-            },
-            onend: function onend(event) {
-              recalculateLayout(event);
-            }
-          }).on('resizemove', function (event) {
-            var target = event.target,
-                x = parseFloat(target.getAttribute('data-x')) || 0,
-                y = parseFloat(target.getAttribute('data-y')) || 0;
-
-            // update the element's style
-            target.style.width = event.rect.width + 'px';
-            target.style.height = event.rect.height + 'px';
-            elements_layout[target.id].size = {
-              w: event.rect.width,
-              h: event.rect.height
-            };
-          });
+          setAnswersInteractions();
+          setQuestionInteractions();
           resolve();
         });
       });
     });
   };
 
+  var setQuestionInteractions = function setQuestionInteractions() {
+    var question = _ramda2.default.filter(_ramda2.default.propEq('type', 'question_model'))(config.elements);
+    var question_layout, question_position;
+    if (!question || _ramda2.default.isEmpty(question)) {
+      return;
+    }
+    var edges = questionEdges(question);
+    var enabled = getQuestionDragEnable(question);
+    interact('.question-resize-drag').draggable({
+      enabled: enabled,
+      onmove: window.dragMoveListener,
+      onend: function onend(event) {
+        recalculateLayout(event);
+      }
+    }).resizable({
+      preserveAspectRatio: false,
+      edges: edges,
+      onend: function onend(event) {
+        recalculateLayout(event);
+      }
+    }).on('resizemove', function (event) {
+      var target = event.target,
+          x = parseFloat(target.getAttribute('data-x')) || 0,
+          y = parseFloat(target.getAttribute('data-y')) || 0;
+
+      // update the element's style
+      target.style.width = event.rect.width + 'px';
+      target.style.height = event.rect.height + 'px';
+      elements_layout[target.id].size = {
+        w: event.rect.width,
+        h: event.rect.height
+      };
+    });
+  };
+
+  var getQuestionDragEnable = function getQuestionDragEnable(question) {
+    if (question.layout_type === 'other') {
+      return true;
+    }
+    return false;
+  };
+
+  var questionEdges = function questionEdges(question) {
+    var edges = {
+      left: true,
+      right: true,
+      bottom: true,
+      top: true
+    };
+    if (question && !_ramda2.default.isEmpty(question)) {
+      var question_layout = question.layout_type;
+      var question_position = question.layout_position;
+      if (!question_layout || question_layout === 'landscape') {
+        edges.left = false;
+        edges.right = false;
+        if (!question_position || question_position === 'up') {
+          edges.top = false;
+        }
+        if (question_position === 'down') {
+          edges.bottom = false;
+        }
+      }
+      if (question_layout === 'portrait') {
+        edges.top = false;
+        edges.bottom = false;
+        if (!question_position || question_position === 'left') {
+          edges.left = false;
+        }
+        if (question_position === 'right') {
+          edges.right = false;
+        }
+      }
+    }
+    return edges;
+  };
+
+  var setAnswersInteractions = function setAnswersInteractions() {
+    interact('.resize-drag').draggable({
+      onmove: window.dragMoveListener,
+      onend: function onend(event) {
+        recalculateLayout(event);
+      }
+    }).resizable({
+      preserveAspectRatio: false,
+      edges: {
+        left: true,
+        right: true,
+        bottom: true,
+        top: true
+      },
+      onend: function onend(event) {
+        recalculateLayout(event);
+      }
+    }).on('resizemove', function (event) {
+      var target = event.target,
+          x = parseFloat(target.getAttribute('data-x')) || 0,
+          y = parseFloat(target.getAttribute('data-y')) || 0;
+
+      // update the element's style
+      target.style.width = event.rect.width + 'px';
+      target.style.height = event.rect.height + 'px';
+      elements_layout[target.id].size = {
+        w: event.rect.width,
+        h: event.rect.height
+      };
+    });
+  };
+
+  var getNewContainerSize = function getNewContainerSize(que, w, h) {
+    var question = que.question;
+    if (question.layout_type === 'landscape') {
+      return {
+        w: 950,
+        h: 550 - h
+      };
+    }
+    return {
+      w: 950 - w,
+      h: 550
+    };
+  };
+
+  var getNewContainerPos = function getNewContainerPos(que, w, h) {
+    var question = que.question;
+    if (!question.layout_type || question.layout_type === 'landscape') {
+      if (!question.layout_position || question.layout_position === 'up') {
+        return {
+          x: 0,
+          y: $("#question").height()
+        };
+      }
+    }
+
+    if (question.layout_type === 'portrait') {
+      if (question.layout_position === 'left') {
+        return {
+          x: $("#question").outerWidth(),
+          y: 0
+        };
+      }
+    }
+    return {
+      x: 0,
+      y: 0
+    };
+  };
+
   var recalculateLayout = function recalculateLayout(event) {
     var target = event.target;
     if (target.id === 'question') {
       //Recalcular el tamaño del comtendor de clicks
-      var question_height = $("#question").position().top + $("#question").height();
-      var max_height_click_container = 550 - question_height;
-      $("#drag-elements").css({
-        "top": question_height + 20,
-        "left": 0,
-        "height": 550 - question_height - 40
-      });
-      //Ver si los elementos han quedado fuera del area de la actividad
-      _.each(elements_layout, function (el, key) {
-        if (el.type === 'question_model') {
-          var img;
-          var q_width = $('#question').width() - 40;
-          var q_height = $('#question').height() - 20;
-          var s;
-          var img_name;
-          // Ajustar la imagen al contenedor
-          if (_ramda2.default.type(el.image) !== 'Object') {
-            img = media.getImage(el.image);
-            img_name = _.clone(el.image);
-          } else {
-            img = media.getImage(el.image.image);
-            img_name = _.clone(el.image.image);
-          }
-
-          s = getImageSize(img.width, img.height, q_width, q_height);
-          var image_size = {
-            w: s.w,
-            h: s.h
-          };
-          var image_pos = {
-            x: (q_width - image_size.w) / 2,
-            y: (q_height - image_size.h) / 2
-          };
-          el.image = {
-            image: img_name,
-            size: image_size,
-            pos: image_pos
-          };
-          $('#question').css({
-            "background-size": resizer.getSimpleSize(el.image.size.w) + "px " + resizer.getSimpleSize(el.image.size.h) + "px"
-          });
-        } else {
-          if ($('#' + el.id).position().top > max_height_click_container - 20) {
-            el.pos.y = max_height_click_container - 40;
-            // update the position attributes
-            document.getElementById(el.id).setAttribute('data-y', max_height_click_container - 40);
-          }
+      var question_config = _ramda2.default.filter(_ramda2.default.propEq('type', 'question_model'))(config.elements);
+      var question_height = $("#question").outerHeight();
+      var question_width = $("#question").outerWidth();
+      debugger;
+      var container_size = getNewContainerSize(question_config, question_width, question_height);
+      var container_pos = getNewContainerPos(question_config, question_width, question_height);
+      config.elements_container = {
+        size: {
+          w: container_size.w,
+          h: container_size.h
+        },
+        pos: {
+          x: container_pos.x,
+          y: container_pos.y
         }
-      });
+      };
     }
+    var area_size = Positioning.calculateAreaSize(question_config);
+    var area_pos = Positioning.calculateAreaPosition(question_config);
+    var model_length = !_.isEmpty(question_config) ? 1 : 0;
+    var click_elements_count = _.size(elements_layout) - model_length;
+    var deck = Positioning.calculateDeck(click_elements_count, area_size);
+    var positions = Positioning.calculateCardPositions(elements_layout, deck.size, deck.col, deck.row, click_elements_count, area_size);
+    var counter = 0;
+    _.each(elements_layout, function (elem, key) {
+      if (elem.type !== 'question_model') {
+        elem.size = {
+          w: deck.size,
+          h: deck.size
+        };
+        elem.pos = {
+          x: positions.x[counter],
+          y: positions.y[counter]
+        };
+        counter++;
+      }
+    });
+    //Quitar la interacción de los elementos
+    interact('.resize-drag').unset();
+    interact('.question-resize-drag').unset();
+    //Volver a pintar la escena
+    render();
   };
 
   function dragMoveListener(event) {
@@ -52752,15 +52910,19 @@ var Scene_1 = function Scene_1() {
   };
 
   var drawQuestionElement = function drawQuestionElement(el, k, total, container, index) {
-    var elem = "<div id='" + k + "' class='resize-drag drop-target drop-target" + index + "' data-x='" + resizer.getPosition(el.pos).x + "' data-y='" + resizer.getPosition(el.pos).y + "'></div>";
+    var elem = "<div id='" + k + "' class='question-resize-drag drop-target drop-target" + index + "' data-x='" + resizer.getPosition(el.pos).x + "' data-y='" + resizer.getPosition(el.pos).y + "'></div>";
     var txt = "<div class='q_text'>" + el.text + "</div>";
+    if (!$('#' + k) || !$('#' + k).length) {
+      $(container).append(elem);
+    }
+
     var img;
     var image_size;
     var image_pos;
-    var q_width = $(container).width() - 40;
-    var q_height = 60;
-    var q_pos_x = 10;
-    var q_pos_y = 10;
+    var q_width = resizer.getSimpleSize(el.size.w);
+    var q_height = resizer.getSimpleSize(el.size.h);
+    var q_pos_x = resizer.getSimpleSize(el.pos.x);
+    var q_pos_y = resizer.getSimpleSize(el.pos.y);
     var s;
     if (_ramda2.default.type(el.image) !== 'Object') {
       // Ajustar la imagen al contenedor
@@ -52781,10 +52943,6 @@ var Scene_1 = function Scene_1() {
       };
     }
     img = media.getImage(el.image.image);
-    $(container).append(elem);
-    if (el.text) {
-      $("#" + k).append(txt);
-    }
 
     $('#' + k).css({
       "background-image": "url(" + img.src + ")",
@@ -52795,22 +52953,23 @@ var Scene_1 = function Scene_1() {
       "top": resizer.getPosition(el.pos).y + "px",
       "width": resizer.getSize(el.size).w + "px",
       "height": resizer.getSize(el.size).h + "px",
-      "vertical-align": "middle",
-      "z-index": 12000
+      "vertical-align": "middle"
     });
-
-    $('.q_text').css({
-      // modificado para contener solo una letra
-      "width": "75%",
-      "height": "auto",
-      "text-align": "center",
-      // modificado en diciembre
-      "font-size": resizer.getSimpleSize(65) + "px",
-      "line-height": resizer.getSimpleSize(70) + "px",
-      "vertical-align": "middle",
-      "font-weight": "bold",
-      "margin-top": resizer.getSimpleSize(el.text_margin_top) + "px"
-    });
+    if (el.text) {
+      $("#" + k).append(txt);
+      $('.q_text').css({
+        // modificado para contener solo una letra
+        "width": "75%",
+        "height": "auto",
+        "text-align": "center",
+        // modificado en diciembre
+        "font-size": resizer.getSimpleSize(65) + "px",
+        "line-height": resizer.getSimpleSize(70) + "px",
+        "vertical-align": "middle",
+        "font-weight": "bold",
+        "margin-top": resizer.getSimpleSize(el.text_margin_top) + "px"
+      });
+    }
   };
 
   var drawAnswers = function drawAnswers(els) {
@@ -52821,7 +52980,9 @@ var Scene_1 = function Scene_1() {
         compensa_h = 0,
         pos_dr = [],
         has_question = false;
-    $('#container').append('<div id="drag-elements"></div>');
+    if (!$('#drag-elements') || !$('#drag-elements').length) {
+      $('#container').append('<div id="drag-elements"></div>');
+    }
     var drags = [];
     _.each(els, function (value, key) {
       if (value.type === "clickable") {
@@ -52832,23 +52993,11 @@ var Scene_1 = function Scene_1() {
       }
     });
 
-    //Calcular el espacio q nos queda para el contenedor de arrastrables
-    if (has_question) {
-      drop_y = $("#question").position().top + $("#question").height();
-      max_h = 550 - (drop_y + 40);
-      min_h = max_h;
-      y = drop_y + 20;
-    } else {
-      min_h = resizer.getSimpleSize(500);
-      y = 10;
-    }
-
-    //Posicionar el contenedor de elementos arrastrables en el sitio q nos queda
     $("#drag-elements").css({
-      "height": min_h,
-      "width": "98%", //resizer.getSceneConfig().size.w,
-      "top": y,
-      "left": 0, //$("#drop-target-1").position().left
+      "height": resizer.getSimpleSize(config.elements_container.size.h),
+      "width": resizer.getSimpleSize(config.elements_container.size.w),
+      "top": resizer.getSimpleSize(config.elements_container.pos.y),
+      "left": resizer.getSimpleSize(config.elements_container.pos.x),
       "border": "1px solid red"
     });
     //pos_dr = _.shuffle(pos_dr);
@@ -52863,7 +53012,10 @@ var Scene_1 = function Scene_1() {
 
   var drawAnswerElement = function drawAnswerElement(el, k, total, container, index, pos) {
     var elem = "<div id='" + k + "' class='resize-drag' data-x='" + resizer.getSimpleSize(pos[index].x) + "' data-y='" + resizer.getSimpleSize(pos[index].y) + "'></div>";
-    $(container).append(elem);
+    if (!$('#' + k) || !$('#' + k).length) {
+      $(container).append(elem);
+    }
+
     $('#' + k).css({
       "width": resizer.getSize(el.size).w,
       "height": resizer.getSize(el.size).h,
@@ -52878,6 +53030,7 @@ var Scene_1 = function Scene_1() {
 
   var destroy = function destroy() {
     interact('.resize-drag').unset();
+    interact('.question-resize-drag').unset();
     return new Promise(function (resolve, reject) {
       $('#container').empty();
       return resolve(elements_layout);
@@ -56859,7 +57012,7 @@ exports = module.exports = __webpack_require__(694)(undefined);
 
 
 // module
-exports.push([module.i, "x.loader_div {\r\n  z-index: 1000;\r\n  position: fixed !important;\r\n  position: absolute;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  background-color: #FFF;\r\n  height: 100%;\r\n  width: 100%;\r\n  overflow: hidden;\r\n  opacity: 1;\r\n  -webkit-transition: 1s opacity linear;\r\n  -moz-transition: 1s opacity linear;\r\n  -o-transition: 1s opacity linear;\r\n  -ms-transition: 1s opacity linearlinear;\r\n  transition: 1s opacity linear;\r\n}\r\n\r\n.loader_div div {\r\n  position: absolute;\r\n  width: 80px;\r\n  height: 80px;\r\n}\r\n\r\n.dial {\r\n  opacity: 0;\r\n}\r\n\r\n#main {\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  /*background-color: #FFF;*/\r\n  background-position: 10px 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n}\r\n\r\n#container {\r\n  padding: 0;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  float: left;\r\n  z-index: 55;\r\n  display: block;\r\n  background-color: #FFF;\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  margin-bottom: 0;\r\n  margin-top: 10px;\r\n  border: 1px solid #ccc;\r\n}\r\n\r\n#screenBlocker {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#infoWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#bubble {\r\n  margin: 0;\r\n  display: none;\r\n  position: relative;\r\n  z-index: 2042;\r\n  background-color: rgb(255, 239, 215);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: bold;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n}\r\n\r\n\r\n/*\r\n#bubble:after {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 239, 215);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n#bubble:before {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 200, 119);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n.instruction_note {\r\n  font-weight: normal;\r\n}\r\n*/\r\n\r\n#initWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2050;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0.4);\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#init_content {\r\n  margin: 0;\r\n  position: relative;\r\n  z-index: 2052;\r\n  background-color: rgb(255, 255, 255, 1);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: normal;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#animation_ok {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n  z-index: 944;\r\n}\r\n\r\n#animation_ko {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n}\r\n\r\n\r\n/*******   MENU   ******/\r\n\r\n#menu {\r\n  padding: 0;\r\n  position: absolute;\r\n  z-index: 155;\r\n  overflow: hidden;\r\n}\r\n\r\n.slider {\r\n  position: absolute;\r\n  z-index: 155;\r\n  -webkit-transition: .5s all ease-in;\r\n  -moz-transition: .5s all ease-in;\r\n  -o-transition: .5s all ease-in;\r\n  -ms-transition: .5s all ease-in;\r\n  transition: .5s all ease-in;\r\n  -webkit-backface-visibility: hidden;\r\n  -moz-backface-visibility: hidden;\r\n  -ms-backface-visibility: hidden;\r\n  backface-visibility: hidden;\r\n  -webkit-transform: translate3d(0, 0, 0);\r\n  -moz-transform: translate3d(0, 0, 0);\r\n  -ms-transform: translate3d(0, 0, 0);\r\n  -o-transform: translate3d(0, 0, 0);\r\n  transform: translate3d(0, 0, 0);\r\n}\r\n\r\n.rita_menu {\r\n  position: absolute;\r\n  float: left;\r\n  /*background-image: url(\"../images/rita1.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  z-index: 900;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n}\r\n\r\n.rita_menu #arrow {\r\n  position: absolute;\r\n  /*background-image: url(\"../images/arrow_right.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-position: center;\r\n  background-size: initial;\r\n  z-index: 950;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n#arrow.right {\r\n  -ms-transform: rotate(0deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(0deg);\r\n  /* Safari */\r\n  transform: rotate(0deg);\r\n}\r\n\r\n#arrow.left {\r\n  -ms-transform: rotate(180deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(180deg);\r\n  /* Safari */\r\n  transform: rotate(180deg);\r\n}\r\n\r\n.btns {\r\n  display: block;\r\n  position: absolute;\r\n  z-index: 1055;\r\n}\r\n\r\n.uihome,\r\n.uiredo,\r\n.uiback {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center left;\r\n  transform-origin: center left;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uinext {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center right;\r\n  transform-origin: center right;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uihome:hover,\r\n.uiredo:hover,\r\n.uiback:hover,\r\n.uinext:hover {\r\n  -ms-transform: scale(1.2, 1.2);\r\n  /* IE 9 */\r\n  -moz-transform: scale(1.2, 1.2);\r\n  -webkit-transform: scale(1.2, 1.2);\r\n  /* Safari */\r\n  transform: scale(1.2, 1.2);\r\n}\r\n\r\n\r\n/*\r\n.uihome {\r\n  background-image: url(\"../images/btn_home.png\");\r\n}\r\n\r\n.uiredo {\r\n  background-image: url(\"../images/btn_redo.png\");\r\n}\r\n\r\n.uiback {\r\n  background-image: url(\"../images/btn_back.png\");\r\n}\r\n\r\n.uinext {\r\n  background-image: url(\"../images/btn_next.png\");\r\n}\r\n*/\r\n\r\n\r\n/**** Click ****/\r\n\r\n.check_ok {\r\n  /*background-image: url(\"../images/check.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n}\r\n\r\n#ardilla_r {\r\n  /*background-image: url(\"../images/activity/ardilla_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#arbol_r {\r\n  /*background-image: url(\"../images/activity/arbol_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#agua_r {\r\n  /*background-image: url(\"../images/activity/agua_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#abeja_r {\r\n  /*background-image: url(\"../images/activity/abeja_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n\r\n/**** dNd ****/\r\n\r\n#drag-elements {\r\n  padding: 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n  z-index: 2135;\r\n  display: block;\r\n  margin: 0;\r\n  border-radius: 20px;\r\n  border: 5px solif #FFF;\r\n}\r\n\r\n#drag-elements>div {\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  position: absolute;\r\n  background-repeat: no-repeat;\r\n}\r\n\r\n.drop-target {\r\n  display: block;\r\n  text-align: left;\r\n  position: absolute;\r\n  border: 5px dotted #ccc;\r\n  border-radius: 20px;\r\n  z-index: 800;\r\n}\r\n\r\n#drop-target-1 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-2 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-1>div,\r\n#drop-target-2>div {\r\n  transition: all .5s;\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  transition: all .5s ease;\r\n}\r\n\r\n.gu-mirror {\r\n  position: fixed !important;\r\n  margin: 0 !important;\r\n  z-index: 9999 !important;\r\n  opacity: 0.8;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)\";\r\n  filter: alpha(opacity=80);\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n.gu-hide {\r\n  display: none !important;\r\n}\r\n\r\n.gu-unselectable {\r\n  -webkit-user-select: none !important;\r\n  -moz-user-select: none !important;\r\n  -ms-user-select: none !important;\r\n  user-select: none !important;\r\n}\r\n\r\n.gu-transit {\r\n  opacity: 0;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)\";\r\n  filter: alpha(opacity=0);\r\n}\r\n", ""]);
+exports.push([module.i, "x.loader_div {\r\n  z-index: 1000;\r\n  position: fixed !important;\r\n  position: absolute;\r\n  top: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  left: 0;\r\n  background-color: #FFF;\r\n  height: 100%;\r\n  width: 100%;\r\n  overflow: hidden;\r\n  opacity: 1;\r\n  -webkit-transition: 1s opacity linear;\r\n  -moz-transition: 1s opacity linear;\r\n  -o-transition: 1s opacity linear;\r\n  -ms-transition: 1s opacity linearlinear;\r\n  transition: 1s opacity linear;\r\n}\r\n\r\n.loader_div div {\r\n  position: absolute;\r\n  width: 80px;\r\n  height: 80px;\r\n}\r\n\r\n.dial {\r\n  opacity: 0;\r\n}\r\n\r\n#main {\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  /*background-color: #FFF;*/\r\n  background-position: 10px 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n}\r\n\r\n#container {\r\n  padding: 0;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  float: left;\r\n  z-index: 55;\r\n  display: block;\r\n  background-color: #FFF;\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  margin-bottom: 0;\r\n  margin-top: 10px;\r\n  border: 1px solid #ccc;\r\n}\r\n\r\n#screenBlocker {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#infoWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2040;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0);\r\n}\r\n\r\n#bubble {\r\n  margin: 0;\r\n  display: none;\r\n  position: relative;\r\n  z-index: 2042;\r\n  background-color: rgb(255, 239, 215);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: bold;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n}\r\n\r\n\r\n/*\r\n#bubble:after {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 239, 215);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n#bubble:before {\r\n  content: '';\r\n  position: absolute;\r\n  border-style: solid;\r\n  border-color: transparent rgb(255, 200, 119);\r\n  display: block;\r\n  width: 0;\r\n  z-index: 2045;\r\n}\r\n\r\n.instruction_note {\r\n  font-weight: normal;\r\n}\r\n*/\r\n\r\n#initWindow {\r\n  margin: 0 auto;\r\n  padding: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  z-index: 2050;\r\n  display: none;\r\n  background-color: rgba(255, 255, 255, 0.4);\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#init_content {\r\n  margin: 0;\r\n  position: relative;\r\n  z-index: 2052;\r\n  background-color: rgb(255, 255, 255, 1);\r\n  -moz-border-radius: 20px;\r\n  border-radius: 20px;\r\n  text-align: center;\r\n  border-style: solid;\r\n  border-color: rgb(255, 200, 119);\r\n  font-weight: normal;\r\n  -webkit-touch-callout: none;\r\n  /* iOS Safari */\r\n  -webkit-user-select: none;\r\n  /* Chrome/Safari/Opera */\r\n  -khtml-user-select: none;\r\n  /* Konqueror */\r\n  -moz-user-select: none;\r\n  /* Firefox */\r\n  -ms-user-select: none;\r\n  /* Internet Explorer/Edge */\r\n  user-select: none;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  outline: 0;\r\n}\r\n\r\n#animation_ok {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n  z-index: 944;\r\n}\r\n\r\n#animation_ko {\r\n  background-position-x: 0px;\r\n  -webkit-transform-origin: top left;\r\n  transform-origin: top left;\r\n}\r\n\r\n\r\n/*******   MENU   ******/\r\n\r\n#menu {\r\n  padding: 0;\r\n  position: absolute;\r\n  z-index: 155;\r\n  overflow: hidden;\r\n}\r\n\r\n.slider {\r\n  position: absolute;\r\n  z-index: 155;\r\n  -webkit-transition: .5s all ease-in;\r\n  -moz-transition: .5s all ease-in;\r\n  -o-transition: .5s all ease-in;\r\n  -ms-transition: .5s all ease-in;\r\n  transition: .5s all ease-in;\r\n  -webkit-backface-visibility: hidden;\r\n  -moz-backface-visibility: hidden;\r\n  -ms-backface-visibility: hidden;\r\n  backface-visibility: hidden;\r\n  -webkit-transform: translate3d(0, 0, 0);\r\n  -moz-transform: translate3d(0, 0, 0);\r\n  -ms-transform: translate3d(0, 0, 0);\r\n  -o-transform: translate3d(0, 0, 0);\r\n  transform: translate3d(0, 0, 0);\r\n}\r\n\r\n.rita_menu {\r\n  position: absolute;\r\n  float: left;\r\n  /*background-image: url(\"../images/rita1.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  z-index: 900;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n}\r\n\r\n.rita_menu #arrow {\r\n  position: absolute;\r\n  /*background-image: url(\"../images/arrow_right.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-position: center;\r\n  background-size: initial;\r\n  z-index: 950;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n#arrow.right {\r\n  -ms-transform: rotate(0deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(0deg);\r\n  /* Safari */\r\n  transform: rotate(0deg);\r\n}\r\n\r\n#arrow.left {\r\n  -ms-transform: rotate(180deg);\r\n  /* IE 9 */\r\n  -webkit-transform: rotate(180deg);\r\n  /* Safari */\r\n  transform: rotate(180deg);\r\n}\r\n\r\n.btns {\r\n  display: block;\r\n  position: absolute;\r\n  z-index: 1055;\r\n}\r\n\r\n.uihome,\r\n.uiredo,\r\n.uiback {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center left;\r\n  transform-origin: center left;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uinext {\r\n  display: block;\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  -webkit-transform-origin: center right;\r\n  transform-origin: center right;\r\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\r\n  -webkit-tap-highlight-color: transparent;\r\n  /* For some Androids */\r\n  -webkit-transition: .1s all ease;\r\n  -moz-transition: .1s all ease;\r\n  -o-transition: .1s all ease;\r\n  -ms-transition: .1s all ease;\r\n  transition: .1s all ease;\r\n}\r\n\r\n.uihome:hover,\r\n.uiredo:hover,\r\n.uiback:hover,\r\n.uinext:hover {\r\n  -ms-transform: scale(1.2, 1.2);\r\n  /* IE 9 */\r\n  -moz-transform: scale(1.2, 1.2);\r\n  -webkit-transform: scale(1.2, 1.2);\r\n  /* Safari */\r\n  transform: scale(1.2, 1.2);\r\n}\r\n\r\n\r\n/*\r\n.uihome {\r\n  background-image: url(\"../images/btn_home.png\");\r\n}\r\n\r\n.uiredo {\r\n  background-image: url(\"../images/btn_redo.png\");\r\n}\r\n\r\n.uiback {\r\n  background-image: url(\"../images/btn_back.png\");\r\n}\r\n\r\n.uinext {\r\n  background-image: url(\"../images/btn_next.png\");\r\n}\r\n*/\r\n\r\n\r\n/**** Click ****/\r\n\r\n.check_ok {\r\n  /*background-image: url(\"../images/check.png\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n}\r\n\r\n#ardilla_r {\r\n  /*background-image: url(\"../images/activity/ardilla_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#arbol_r {\r\n  /*background-image: url(\"../images/activity/arbol_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#agua_r {\r\n  /*background-image: url(\"../images/activity/agua_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n#abeja_r {\r\n  /*background-image: url(\"../images/activity/abeja_r.jpg\");*/\r\n  background-repeat: no-repeat;\r\n  background-size: contain;\r\n  position: absolute;\r\n  width: 100%;\r\n  height: auto;\r\n  bottom: 0;\r\n}\r\n\r\n\r\n/**** dNd ****/\r\n\r\n#drag-elements {\r\n  padding: 0;\r\n  overflow: visible;\r\n  position: absolute;\r\n  z-index: 2135;\r\n  display: block;\r\n  margin: 0;\r\n  border-radius: 20px;\r\n  border: 5px solif #FFF;\r\n}\r\n\r\n#drag-elements>div {\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  position: absolute;\r\n  background-repeat: no-repeat;\r\n}\r\n\r\n.drop-target {\r\n  display: block;\r\n  text-align: left;\r\n  position: absolute;\r\n  border: 5px dotted #ccc;\r\n  border-radius: 20px;\r\n  z-index: 800;\r\n}\r\n\r\n#drop-target-1 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-2 {\r\n  z-index: 2800;\r\n  position: absolute;\r\n}\r\n\r\n#drop-target-1>div,\r\n#drop-target-2>div {\r\n  transition: all .5s;\r\n  /*float: left;*/\r\n  display: inline-block;\r\n  margin: 2px;\r\n  transition: all .5s ease;\r\n}\r\n\r\n.gu-mirror {\r\n  position: fixed !important;\r\n  margin: 0 !important;\r\n  z-index: 9999 !important;\r\n  opacity: 0.8;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)\";\r\n  filter: alpha(opacity=80);\r\n  -webkit-transition: .2s all ease;\r\n  -moz-transition: .2s all ease;\r\n  -o-transition: .2s all ease;\r\n  -ms-transition: .2s all ease;\r\n  transition: .2s all ease;\r\n}\r\n\r\n.gu-hide {\r\n  display: none !important;\r\n}\r\n\r\n.gu-unselectable {\r\n  -webkit-user-select: none !important;\r\n  -moz-user-select: none !important;\r\n  -ms-user-select: none !important;\r\n  user-select: none !important;\r\n}\r\n\r\n.gu-transit {\r\n  opacity: 0;\r\n  -ms-filter: \"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)\";\r\n  filter: alpha(opacity=0);\r\n}\r\n\r\n.question-resize-drag:hover{\r\n  z-index: 10000;\r\n}\r\n\r\n.resize-drag:hover{\r\n  z-index: 10000;\r\n}\r\n", ""]);
 
 // exports
 
@@ -120492,15 +120645,52 @@ var getLabel = function getLabel(option) {
   return label;
 };
 
-var DropdownImage = function DropdownImage(props) {
-
+var DropDownQuestionModelImage = function DropDownQuestionModelImage(props) {
+  //  ESTO NO TIENE QUE SER UN handleChange
+  // ESTO TIENE QUE TENER SU PROPIA FUNCIÓN ESPECÍFICA QUE CAMBIE EL VALOR DE LOS DOS COMBOS
+  // y CAMBIE TAMBIEN EL TAMAÑO Y LA POSICIÓN DE LOS ELEMENTOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   var handleChange = function handleChange(evt, result) {
+    debugger;
     props.change(props.field, result.value);
     if (result.value === 'landscape' && props.parent_field) {
       props.change(props.parent_field, 'up');
+      props.change(['code', props.index, 'elements', 'question', 'size'], {
+        w: 950,
+        h: 100
+      });
+      props.change(['code', props.index, 'elements_container', 'size'], {
+        w: 950,
+        h: 450
+      });
+      props.change(['code', props.index, 'elements_container', 'pos'], {
+        x: 0,
+        y: 100
+      });
     }
     if (result.value === 'portrait' && props.parent_field) {
       props.change(props.parent_field, 'left');
+      props.change(['code', props.index, 'elements', 'question', 'size'], {
+        w: 100,
+        h: 550
+      });
+      props.change(['code', props.index, 'elements_container', 'size'], {
+        w: 850,
+        h: 550
+      });
+      props.change(['code', props.index, 'elements_container', 'pos'], {
+        x: 100,
+        y: 0
+      });
+    }
+    if (result.value === 'left') {
+      props.change(['code', props.index, 'elements_container', 'size'], {
+        w: 850,
+        h: 550
+      });
+      props.change(['code', props.index, 'elements_container', 'pos'], {
+        x: 100,
+        y: 0
+      });
     }
     return Promise.delay(200).then(function () {
       props.calculateLayout(props.index);
@@ -120531,7 +120721,7 @@ var DropdownImage = function DropdownImage(props) {
   );
 };
 
-exports.default = DropdownImage;
+exports.default = DropDownQuestionModelImage;
 
 /***/ })
 /******/ ]);

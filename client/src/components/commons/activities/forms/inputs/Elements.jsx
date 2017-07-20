@@ -34,6 +34,7 @@ const newModelElementClick = (opts) => {
     "x": 1,
     "y": 1
   };
+  // Por defecto, el modelo es horizontal, arriba y de 950 x 100
   element.layout_type = 'landscape'
   element.layout_position = 'top'
   mProps.handleCreateElement(element, opts.index, name);

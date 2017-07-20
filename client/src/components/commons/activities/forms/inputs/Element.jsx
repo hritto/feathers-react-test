@@ -4,8 +4,7 @@ import Helpers from '../click/helpers.js';
 import R from 'ramda';
 import MediaComponent from './MediaComponent.jsx';
 import CheckboxResolution from './CheckboxResolution.jsx';
-//import DropdownQuestionModel from './DropDownQuestionModel.jsx';
-import DropdownQuestionModel from './DropDownImage.jsx';
+import DropDownQuestionModelImage from './DropDownQuestionModelImage.jsx';
 
 let mProps = null;
 
@@ -106,7 +105,7 @@ const Element = (props) => { // el, el_key, scene_index
     fluid = true;
     meta = <Card.Meta key={el.type + _.uniqueId()} >Tipo: Pregunta/Modelo</Card.Meta>;
     dropdown_model_layout_type = (
-      <DropdownQuestionModel {...props}
+      <DropDownQuestionModelImage {...props}
         name={'layout_type' + _.uniqueId()}
         title='Tipo de layout'
         parent_field = {['code', scene_index, 'elements', el_key, 'layout_position']}
@@ -119,7 +118,7 @@ const Element = (props) => { // el, el_key, scene_index
       ]} />);
     if (el.layout_type !== 'other'){
       dropdown_model_layout_position = (
-        <DropdownQuestionModel {...props}
+        <DropDownQuestionModelImage {...props}
         name={'layout_position' + _.uniqueId()}
         title='Posición del modelo'
         image={getLayoutImagePosUrl(['code', scene_index, 'elements', el_key, 'layout_position'], props.state, el.layout_type)}
@@ -129,7 +128,7 @@ const Element = (props) => { // el, el_key, scene_index
 
   } else {
     //Tipos de actividades
-    if (props.activity_type === 0) { // Click
+    if (props.activity_type === 0) { // Estática
       meta = <Card.Meta>{'Tipo: ' + el_type}</Card.Meta>;
     }
     if (props.activity_type === 1) { // Click

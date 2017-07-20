@@ -146,17 +146,22 @@ class ClickForm extends Component {
       debugger;
       const elements = R.clone(self.state.code[index].elements);
       const has_question = R.filter(R.propEq('type', 'question_model'))(elements);
-      const area = Positioning.calculateArea(has_question);
-      const l = !_.isEmpty(has_question) ? 1 : 0;
+
       // Si tiene un tipo de layout libre, no hay que tocar las posiciones
-      if (has_question && has_question.layout_type === 'other'){
+      if (has_question && has_question.question.layout_type === 'other'){
         return resolve();
       }
-      const deck = Positioning.calculateDeck(_.size(elements) - l, area);
-      const positions = Positioning.calculateCardPositions(elements, deck.size, deck.col, deck.row, _.size(elements) - l, area);
+      const area_size = Positioning.calculateAreaSize(has_question);
+      const area_pos = Positioning.calculateAreaPosition(has_question);
+      const model_length = !_.isEmpty(has_question) ? 1 : 0;
+      const click_elements_count = _.size(elements) - model_length;
+      const deck = Positioning.calculateDeck(click_elements_count, area_size);
+      const positions = Positioning.calculateCardPositions(elements, deck.size, deck.col, deck.row, click_elements_count, area_size);
       let counter = 0;
       _.each(elements, function(elem, key){
-        if(elem.type !== 'question_model'){
+        if(elem.type === 'question_model'){
+
+        } else {
           elem.size = {
             w: deck.size,
             h: deck.size
@@ -170,6 +175,12 @@ class ClickForm extends Component {
       });
       self.setState((state) => {
         return R.set(R.lensPath(['code', index, 'elements']), elements, state);
+      });
+      self.setState((state) => {
+        return R.set(R.lensPath(['code', index, 'elements_container']), {
+          size: area_size,
+          pos: area_pos
+        }, state);
       });
     }).then(function() {
       return resolve();
