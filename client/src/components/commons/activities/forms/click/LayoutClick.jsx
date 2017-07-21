@@ -5,6 +5,7 @@ import common_config from '../../layout_click/common_config.js'
 import css from '../../../../../../assets/css/app.css';
 import R from 'ramda';
 import LayoutClickPreview from '../../layout_click/app.js';
+const Promise = require("bluebird");
 
 class LayoutClickForm extends Component {
   constructor(props) {
@@ -62,11 +63,12 @@ class LayoutClickForm extends Component {
       code: this.state.code,
       media: this.state.media
     };
-    console.log("App: ");
-    console.log(this.state.code);
+    let self = this;
     if (!this.app) {
-      this.app = new LayoutClickPreview(config, common_config, this.state.layout_active_index);
-      this.app.init();
+      return Promise.delay(500).then(function(){
+        self.app = new LayoutClickPreview(config, common_config, self.state.layout_active_index);
+        self.app.init();
+      });
     }
   }
 

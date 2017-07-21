@@ -1,6 +1,7 @@
 import React from 'react'
 import { Dropdown, Form, Input, Label, Image } from 'semantic-ui-react'
 import R from 'ramda'
+import LayoutConfig from './layout_click_config.js'
 const Promise = require("bluebird");
 
 const getLabel = (option) => {
@@ -31,53 +32,40 @@ const getLabel = (option) => {
   return label;
 };
 
+
 const DropDownQuestionModelImage = (props) => {
-  //  ESTO NO TIENE QUE SER UN handleChange
-  // ESTO TIENE QUE TENER SU PROPIA FUNCIÓN ESPECÍFICA QUE CAMBIE EL VALOR DE LOS DOS COMBOS
-  // y CAMBIE TAMBIEN EL TAMAÑO Y LA POSICIÓN DE LOS ELEMENTOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const handleChange = (evt, result) => {
-    debugger;
+    let config = null;
     props.change(props.field, result.value);
-    if(result.value === 'landscape' && props.parent_field){
-      props.change(props.parent_field, 'up');
-      props.change(['code', props.index, 'elements', 'question', 'size'], {
-        w: 950,
-        h: 100
-      });
-      props.change(['code', props.index, 'elements_container', 'size'], {
-        w: 950,
-        h: 450
-      });
-      props.change(['code', props.index, 'elements_container', 'pos'], {
-        x: 0,
-        y: 100
-      });
+    if(result.value === 'landscape' && props.child_field){
+      props.change(props.child_field, 'up');
+      config = LayoutConfig().landscapeConfigUp();
     }
-    if(result.value === 'portrait' && props.parent_field){
-      props.change(props.parent_field, 'left');
-      props.change(['code', props.index, 'elements', 'question', 'size'], {
-        w: 100,
-        h: 550
-      });
-      props.change(['code', props.index, 'elements_container', 'size'], {
-        w: 850,
-        h: 550
-      });
-      props.change(['code', props.index, 'elements_container', 'pos'], {
-        x: 100,
-        y: 0
-      });
+    if(result.value === 'portrait' && props.child_field){
+      props.change(props.child_field, 'left');
+      config = LayoutConfig().portraitConfigLeft();
+    }
+    if(result.value === 'up'){
+      config = LayoutConfig().landscapeConfigUp();
+    }
+    if(result.value === 'down'){
+      config = LayoutConfig().landscapeConfigDown();
     }
     if(result.value === 'left'){
-      props.change(['code', props.index, 'elements_container', 'size'], {
-        w: 850,
-        h: 550
-      });
-      props.change(['code', props.index, 'elements_container', 'pos'], {
-        x: 100,
-        y: 0
-      });
+      config = LayoutConfig().portraitConfigLeft();
     }
+    if(result.value === 'right'){
+      config = LayoutConfig().portraitConfigRight();
+    }
+    if(result.value === 'other'){
+      config = LayoutConfig().configFree();
+    }
+
+    props.change(['code', props.index, 'elements', 'question', 'size'], config.question.size);
+    props.change(['code', props.index, 'elements', 'question', 'pos'], config.question.pos);
+    props.change(['code', props.index, 'elements_container', 'size'], config.elements_container.size);
+    props.change(['code', props.index, 'elements_container', 'pos'], config.elements_container.pos);
+
     return Promise.delay(200).then(function(){
         props.calculateLayout(props.index);
     });

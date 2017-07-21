@@ -36,6 +36,7 @@ class ClickForm extends Component {
       combo_values: props.model.config.combo_values,
       media_tab: 'table',
       media_filter: {},
+      new_scene_type: null,
     });
 
     this.handleChange = this.handleChange.bind(this);
@@ -58,6 +59,8 @@ class ClickForm extends Component {
     this.setMediaTabs = this.setMediaTabs.bind(this);
     this.filterMedia = this.filterMedia.bind(this);
     this.addElementMedia = this.addElementMedia.bind(this);
+    this.handleAddScene = this.handleAddScene.bind(this);
+    this.sceneOrder = this.sceneOrder.bind(this);
   }
 
   _updateModel() {
@@ -75,6 +78,20 @@ class ClickForm extends Component {
     console.log(this.state);
   };
 
+  handleAddScene(){
+    debugger;
+    const a = this.state.new_scene_type;
+    if(a){
+      debugger;
+    }
+    return false;
+  };
+
+  sceneOrder(index, action){
+    debugger;
+    return false;
+  };
+
   _setErrors(opts) {
     let errors = [];
     if (R.type(opts) !== 'Array') {
@@ -89,7 +106,7 @@ class ClickForm extends Component {
   };
 
   _setActiveIndex(e, i) {
-    if (e.target.tagName === 'BUTTON') {
+    if (e.target.tagName === 'BUTTON' || e.target.tagName === "I") {
       return false;
     }
     let val = i;
@@ -143,13 +160,12 @@ class ClickForm extends Component {
   _calculateLayout(index) {
     const self = this;
     return new Promise(function(resolve, reject) {
-      debugger;
       const elements = R.clone(self.state.code[index].elements);
       const has_question = R.filter(R.propEq('type', 'question_model'))(elements);
 
       // Si tiene un tipo de layout libre, no hay que tocar las posiciones
       if (has_question && has_question.question.layout_type === 'other'){
-        return resolve();
+        //return resolve();
       }
       const area_size = Positioning.calculateAreaSize(has_question);
       const area_pos = Positioning.calculateAreaPosition(has_question);
@@ -182,33 +198,34 @@ class ClickForm extends Component {
           pos: area_pos
         }, state);
       });
-    }).then(function() {
       return resolve();
     });
   };
 
   handleDeleteElement(element_id, i) {
+    const self = this;
     this.setState((state) => {
-      const st = R.clone(state);
+      let st = R.clone(state);
       delete st.code[i].elements[element_id];
       return st;
     }, function() {
-      // Recalcular el layour
-      this._calculateLayout(i).then(function() {
-        this._updateModel();
+      // Recalcular el layout
+      self._calculateLayout(i).then(function() {
+        self._updateModel();
       });
     });
   };
 
   handleCreateElement(element, i, name) {
+    const self = this;
     this.setState((state) => {
       const st = R.clone(state);
       st.code[i].elements[name] = element;
       return st;
     }, function() {
-      // Recalcular el layour
-      this._calculateLayout(i).then(function() {
-        this._updateModel();
+      // Recalcular el layout
+      self._calculateLayout(i).then(function() {
+        self._updateModel();
       });
     });
   };
@@ -237,7 +254,8 @@ class ClickForm extends Component {
       media: this._setAddMedia,
       activity_type: code.type,
       media_tab: this.setMediaTabs,
-      calculateLayout: this._calculateLayout
+      calculateLayout: this._calculateLayout,
+      sceneOrder: this.sceneOrder
     };
     return FormPanel(p);
   };
@@ -393,6 +411,14 @@ class ClickForm extends Component {
           <Accordion panels={metadata_panel} styled fluid activeIndex={this.state.active_metadata} onTitleClick={this.setActiveMetadata.bind(this, this.state.active_metadata)}/>
           <Divider section/>
           <Accordion panels={panels} styled fluid activeIndex={this.state.active_index} onTitleClick={this._setActiveIndex}/> {media_form}
+          <Divider section/>
+          <DropdownSelection {...p}
+            name={'add_scene'}
+            title='Añadir escena'
+            options={activity_type_options}
+            field={['new_scene_type']} />
+          <Button type='button' content='Añadir'onClick={this.handleAddScene} secondary/>
+          <Divider section/>
           <Button content='Guardar' primary/><Button content='Cancelar' onClick={this.handleCancel} secondary/>
         </Form>
       </Segment>

@@ -54,7 +54,20 @@ const FormPanel = (props) => {
     key: `panel-${index}`,
     title: (<div style={{ display: 'inline' }} key={'container_' + index} >
       {'Escena ' + index}
-      <Button type="button" floated='right' color='blue' key={'button_' + index} content='Layout' disabled icon='arrow circle right' size='mini' labelPosition='right' />
+      <Popup
+        trigger={<Button icon type='button'
+          floated='right' color='blue' key={'button_up' + index} size='mini'
+          onClick={props.sceneOrder.bind(this, index, 'up')}>
+          <Icon name='arrow up' />
+         </Button>}
+        content='Subir un lugar el orden de esta escena' />
+      <Popup
+        trigger={<Button icon type='button'
+          floated='right' color='blue' key={'button_down' + index} size='mini'
+          onClick={props.sceneOrder.bind(this, index, 'down')}>
+          <Icon name='arrow down' />
+        </Button>}
+        content='Bajar un lugar el orden de esta escena' />
     </div>),
     content: '',
   }

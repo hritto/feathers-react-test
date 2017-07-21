@@ -72,7 +72,7 @@ const LayoutClickPreview = (opts, common_conf, s_index) => {
       setMedia(media);
       setTimeout(function () {
         initActivity();
-      }, 1000);
+      }, 500);
     }
   };
 

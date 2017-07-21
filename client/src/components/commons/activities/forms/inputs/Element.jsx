@@ -108,7 +108,7 @@ const Element = (props) => { // el, el_key, scene_index
       <DropDownQuestionModelImage {...props}
         name={'layout_type' + _.uniqueId()}
         title='Tipo de layout'
-        parent_field = {['code', scene_index, 'elements', el_key, 'layout_position']}
+        child_field = {['code', scene_index, 'elements', el_key, 'layout_position']}
         image={getLayoutImageUrl(['code', scene_index, 'elements', el_key, 'layout_type'], props.state)}
         field={['code', scene_index, 'elements', el_key, 'layout_type']}
         options={[

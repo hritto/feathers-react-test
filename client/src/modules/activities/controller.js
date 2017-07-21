@@ -166,25 +166,6 @@ const ActivitiesController = function () {
     model.set('state', 'initial', true);
   };
 
-  const handleSubmit = (data) => {
-    if (validateFields(data)) {
-      if (model.get('state') === 'update') {
-        doUpdate(data);
-      }
-      /*
-      if(model.get('state') === 'create'){
-        doCreate(data);
-      }
-      if(model.get('state') === 'delete'){
-        doDelete(data);
-      }
-      */
-    } else {
-      //TODO: mensaje de error de formulario
-      model.set('state', model.get('state'), true);
-    }
-  };
-
   const tabClick = (view) => {
     model.set('tab', view, true);
   };
@@ -319,7 +300,6 @@ const ActivitiesController = function () {
     itemClick: itemClick,
     closeModal: closeModal,
     handleCancel: handleCancel,
-    handleSubmit: handleSubmit,
     tabClick: tabClick,
     updateActivityCode: updateActivityCode,
     updateActivityMetadata: updateActivityMetadata,

@@ -99,6 +99,12 @@ const Scene_1 = () => {
           x = (parseFloat(target.getAttribute('data-x')) || 0),
           y = (parseFloat(target.getAttribute('data-y')) || 0);
 
+        // translate when resizing from top or left edges
+        x += event.deltaRect.left;
+        y += event.deltaRect.top;
+
+        target.style.left = x + 'px';
+        target.style.top = y + 'px';
         // update the element's style
         target.style.width = event.rect.width + 'px';
         target.style.height = event.rect.height + 'px';
@@ -106,11 +112,18 @@ const Scene_1 = () => {
           w: event.rect.width,
           h: event.rect.height
         };
+        elements_layout[target.id].pos = {
+          x: x,
+          y: y
+        };
+        // update the position attributes
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
       });
   };
 
   var getQuestionDragEnable = function(question){
-    if(question.layout_type === 'other'){
+    if(question.question.layout_type === 'other'){
       return true;
     }
     return false;
@@ -124,8 +137,8 @@ const Scene_1 = () => {
       top: true
     };
     if(question && !R.isEmpty(question)){
-      var question_layout = question.layout_type;
-      var question_position = question.layout_position;
+      var question_layout = question.question.layout_type;
+      var question_position = question.question.layout_position;
       if (!question_layout || question_layout === 'landscape'){
         edges.left = false;
         edges.right = false;
@@ -175,6 +188,11 @@ const Scene_1 = () => {
           x = (parseFloat(target.getAttribute('data-x')) || 0),
           y = (parseFloat(target.getAttribute('data-y')) || 0);
 
+        // translate when resizing from top or left edges
+        x += event.deltaRect.left;
+        y += event.deltaRect.top;
+        target.style.left = x + 'px';
+        target.style.top = y + 'px';
         // update the element's style
         target.style.width = event.rect.width + 'px';
         target.style.height = event.rect.height + 'px';
@@ -182,6 +200,13 @@ const Scene_1 = () => {
           w: event.rect.width,
           h: event.rect.height
         };
+        elements_layout[target.id].pos = {
+          y: x,
+          y: y
+        };
+        // update the position attributes
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
       });
   };
 
@@ -229,9 +254,11 @@ const Scene_1 = () => {
     if (target.id === 'question') {
       //Recalcular el tamaño del comtendor de clicks
       var question_config = R.filter(R.propEq('type', 'question_model'))(config.elements);
+      if(question_config.question.layout_type === 'other'){
+        return;
+      }
       var question_height = $("#question").outerHeight();
       var question_width = $("#question").outerWidth();
-      debugger;
       var container_size = getNewContainerSize(question_config, question_width, question_height);
       var container_pos = getNewContainerPos(question_config, question_width, question_height);
       config.elements_container = {
@@ -243,33 +270,33 @@ const Scene_1 = () => {
           x: container_pos.x,
           y: container_pos.y
         }
-      }
+      };
+      var area_size = Positioning.calculateAreaSize(question_config);
+      var area_pos = Positioning.calculateAreaPosition(question_config);
+      var model_length = !_.isEmpty(question_config) ? 1 : 0;
+      var click_elements_count = _.size(elements_layout) - model_length;
+      var deck = Positioning.calculateDeck(click_elements_count, area_size);
+      var positions = Positioning.calculateCardPositions(elements_layout, deck.size, deck.col, deck.row, click_elements_count, area_size);
+      var counter = 0;
+      _.each(elements_layout, function(elem, key){
+        if(elem.type !== 'question_model'){
+          elem.size = {
+            w: deck.size,
+            h: deck.size
+          };
+          elem.pos = {
+            x: positions.x[counter],
+            y: positions.y[counter]
+          };
+          counter++
+        }
+      });
+      //Quitar la interacción de los elementos
+      interact('.resize-drag').unset();
+      interact('.question-resize-drag').unset();
+      //Volver a pintar la escena
+      render();
     }
-    var area_size = Positioning.calculateAreaSize(question_config);
-    var area_pos = Positioning.calculateAreaPosition(question_config);
-    var model_length = !_.isEmpty(question_config) ? 1 : 0;
-    var click_elements_count = _.size(elements_layout) - model_length;
-    var deck = Positioning.calculateDeck(click_elements_count, area_size);
-    var positions = Positioning.calculateCardPositions(elements_layout, deck.size, deck.col, deck.row, click_elements_count, area_size);
-    var counter = 0;
-    _.each(elements_layout, function(elem, key){
-      if(elem.type !== 'question_model'){
-        elem.size = {
-          w: deck.size,
-          h: deck.size
-        };
-        elem.pos = {
-          x: positions.x[counter],
-          y: positions.y[counter]
-        };
-        counter++
-      }
-    });
-    //Quitar la interacción de los elementos
-    interact('.resize-drag').unset();
-    interact('.question-resize-drag').unset();
-    //Volver a pintar la escena
-    render();
   };
 
   function dragMoveListener(event) {
@@ -277,10 +304,6 @@ const Scene_1 = () => {
       // keep the dragged position in the data-x/data-y attributes
       x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
       y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-    if (target.id === 'question') {
-      return false;
-    }
 
     $('#' + target.id).css('left', x + 'px');
     $('#' + target.id).css('top', y + 'px');
@@ -374,7 +397,7 @@ const Scene_1 = () => {
       "width": resizer.getSize(el.size).w + "px",
       "height": resizer.getSize(el.size).h + "px",
       "vertical-align": "middle",
-      // "z-index": 12000
+      "z-index": 12000
     });
     if (el.text) {
       $("#" + k).append(txt);

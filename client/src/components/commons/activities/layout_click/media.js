@@ -57,7 +57,8 @@ const media = (options) => {
     var media_hash;
     var default_assets = {
       images: {
-        'no_image': 'no_image.png'
+        'no_image': 'no_image.png',
+        'empty': 'empty.png',
       },
       sounds: {}
     };
