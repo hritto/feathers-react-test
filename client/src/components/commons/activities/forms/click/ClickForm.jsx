@@ -84,12 +84,29 @@ class ClickForm extends Component {
     if(a){
       debugger;
     }
+
     return false;
   };
 
   sceneOrder(index, action){
-    debugger;
-    return false;
+    let old_order = R.clone(this.state.code);
+    let element_shifted = R.clone(this.state.code[index]);
+    let new_order = null;
+    //Quitamos el elemento
+    old_order.splice(index, 1);
+    if(action === 'up'){
+      //Volvemos a ponerlo un lugar más arriba
+      new_order = R.insert(index - 1, element_shifted, old_order);
+    } else {
+      //Volvemos a ponerlo un lugar más abajo
+      new_order = R.insert(index + 1, element_shifted, old_order);
+    }
+    this.setState((state) => {
+      const lens = R.lensProp('code');
+      return R.set(lens, new_order, state);
+    }, function(){
+      this._updateModel();
+    });
   };
 
   _setErrors(opts) {

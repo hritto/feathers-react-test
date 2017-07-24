@@ -34,6 +34,16 @@ let element_default = {
   "type": "clickable"
 }
 
+const isBtnOrderDisabled = (index, props, action) => {
+  if (index === 0 && action === 'up'){
+    return true;
+  }
+  if (index === (_.size(props.state.code) - 1) && action === 'down'){
+    return true;
+  }
+  return false;
+}
+
 const FormPanel = (props) => {
   p = [];
   main_props = props;
@@ -56,6 +66,7 @@ const FormPanel = (props) => {
       {'Escena ' + index}
       <Popup
         trigger={<Button icon type='button'
+          disabled = {isBtnOrderDisabled(index, props, 'up')}
           floated='right' color='blue' key={'button_up' + index} size='mini'
           onClick={props.sceneOrder.bind(this, index, 'up')}>
           <Icon name='arrow up' />
@@ -63,6 +74,7 @@ const FormPanel = (props) => {
         content='Subir un lugar el orden de esta escena' />
       <Popup
         trigger={<Button icon type='button'
+          disabled = {isBtnOrderDisabled(index, props, 'down')}
           floated='right' color='blue' key={'button_down' + index} size='mini'
           onClick={props.sceneOrder.bind(this, index, 'down')}>
           <Icon name='arrow down' />
