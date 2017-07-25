@@ -1,22 +1,21 @@
-const scene_config = function(){
+const scene_config_defaults = function(){
 
-  const getSceneConfig = () => {
+  const getSceneConfigStatic = () => {
     return {
-      "size": { //Tamaño del área de actividad
+      "size": {
         "w": 1000,
         "h": 560
       },
-      "menu_url": "../../index.html",
-      "clase": "pantalla_0",
-      "debug": false, //Este flag indica si estamos en modo debug. Si es true, el radio de render es 1 (no se ajusta)
-      "main_el": "main", //Fondo blanco
-      "scene_el": "container", //Contenedor de actividades
-      "main_back": null, //"back", //La imagen de fondo del escenario (de 1000 x 560)
-      "show_instruction": true, //Mostrar la instrucción automáticamente (en móviles, esta opción necesita show_intro = true)
-      "init_config": { //Configuración de la ventana inicial (pre inicio)
-        "show_intro": true, //Mostrar la ventana inicial al abrir
-        "background_image": null, //Si se desea, se puede poner una imagen de fondo
-        "background_color": '#FFF', //Si se desea, se puede poner una imagen de fondo
+      "menu_url": "",
+      "debug": true,
+      "main_el": "main",
+      "scene_el": "container",
+      "main_back": null,
+      "show_instruction": true,
+      "init_config": {
+        "show_intro": true,
+        "background_image": null,
+        "background_color": '#FFF',
         "size": {
           "w": 800,
           "h": 500
@@ -34,53 +33,90 @@ const scene_config = function(){
               "type": "image",
               "image": "entrar"
             }
-
           }
       },
-      "end_config": { //Configuración de la ventana final (post resolucion)
+      "end_config": {
         "size": {
           "w": 500,
           "h": 400
         },
         "show_end": false,
-        "background_image": null, //Si se desea, se puede poner una imagen de fondo
+        "background_image": null,
         "elements": {},
-
       },
-      "type": 3, // 0:dNd, 1:click, 2:paint, 3: pantalla estática que acaba sola con timer //
-      "buttons_visible": { //La configuracion de visiblidad de los botones para esta pantalla
+      "type": 0,
+      "buttons_visible": {
         "btn_home": true,
         "btn_redo": false,
         "btn_back": false,
         "btn_next": false,
       },
-      "elements": {
-        "image_2": {
-          "size": {
-            "w": 351,
-            "h": 212
-          },
-          "pos": {
-            "x": 320,
-            "y": 180
-          },
-          "type": "image",
-          "image": "inicio"
-        }
-      },
+      "elements": {},
       "timer": {
-        "time": 500
+        "time": 500,
+        "visible": false
       },
       "resolution": {},
       "instruction": {
-        "text": "Hacemos algo en equipo. Empiezan con A.",
-        "sound": "titulo0"
+        "text": "Instrucción...",
+        "sound": null
       }
     };
 
+    const getSceneConfigClick = () => {
+      return {
+        "size": {
+          "w": 1000,
+          "h": 560
+        },
+        "debug": true,
+        "menu_url": "../../index.html",
+        "clase": "pantalla_1",
+        "main_el": "main",
+        "scene_el": "container",
+        "main_back": null,
+        "show_instruction": true,
+        "init_config": {
+          "show_intro": false,
+          "background_image": null,
+          "background_color": '#FFF',
+          "size": {
+            "w": 800,
+            "h": 500
+          },
+          "elements": {},
+        },
+        "end_config": {
+          "size": {
+            "w": 500,
+            "h": 400
+          },
+          "show_end": false,
+          "background_image": null,
+          "elements": {},
+        },
+        "type": 1,
+        "multiple_answers": true,
+        "animate_answers": true,
+        "buttons_visible": {
+          "btn_home": true,
+          "btn_redo": false,
+          "btn_back": false,
+          "btn_next": false,
+          "btn_info": false,
+        },
+        "elements": {},
+        "resolution": {},
+        "instruction": {
+          "text": "Intrucción Click...",
+          "sound": null
+        }
+      };
+
   return {
-    getSceneConfig: getSceneConfig,
+    getSceneConfigStatic: getSceneConfigStatic,
+    getSceneConfigClick: getSceneConfigClick
   }
 }
 
-export default scene_config;
+export default scene_config_defaults;
