@@ -66,6 +66,13 @@ const FormPanel = (props) => {
       {'Escena ' + index}
       <Popup
         trigger={<Button icon type='button'
+          floated='right' color='blue' key={'button_clone' + index} size='mini'
+          onClick={props.duplicateScene.bind(this, index)}>
+          <Icon name='clone' />
+         </Button>}
+        content='Duplicar escena' />
+      <Popup
+        trigger={<Button icon type='button'
           disabled = {isBtnOrderDisabled(index, props, 'up')}
           floated='right' color='blue' key={'button_up' + index} size='mini'
           onClick={props.sceneOrder.bind(this, index, 'up')}>

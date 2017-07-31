@@ -8,7 +8,8 @@ import {
   Accordion,
   Form,
   Button,
-  Menu
+  Menu,
+  Label
 } from 'semantic-ui-react';
 import FormPanel from './FormPanel.jsx';
 import RibbonHeader from '../../../header.jsx';
@@ -17,9 +18,11 @@ import LayoutClickForm from './LayoutClick.jsx'
 import LayoutHelpers from '../../../positioning_helper.js';
 import SimpleInputText from '../inputs/TextSimple.jsx';
 import DropdownSelection from '../inputs/DropDown.jsx';
+import DropdownButton from '../inputs/DropDownButton.jsx';
 import CheckboxLabeled from '../inputs/CheckboxLabeled.jsx';
 import R from 'ramda';
 import * as Positioning from '../../../positioning_helper.js';
+import scene_config_defaults from './scene_config.js'
 
 class ClickForm extends Component {
   constructor(props) {
@@ -31,12 +34,13 @@ class ClickForm extends Component {
       media_name: '',
       media_description: '',
       error_messages: [], //Los errores de upload de medios
-      active_metadata: null,
+      active_metadata: 0, //Abierto por defecto
       metadata: props.model.selected_record,
       combo_values: props.model.config.combo_values,
       media_tab: 'table',
       media_filter: {},
       new_scene_type: null,
+      loading: false,
     });
 
     this.handleChange = this.handleChange.bind(this);
@@ -61,6 +65,14 @@ class ClickForm extends Component {
     this.addElementMedia = this.addElementMedia.bind(this);
     this.handleAddScene = this.handleAddScene.bind(this);
     this.sceneOrder = this.sceneOrder.bind(this);
+    this.handleDuplicateScene = this.handleDuplicateScene.bind(this);
+    this.setLoading = this.setLoading.bind(this);
+  }
+
+  setLoading(loading) {
+    this.setState((state) => {
+      return R.set(R.lensProp('loading'), loading, state);
+    });
   }
 
   _updateModel() {
@@ -78,14 +90,62 @@ class ClickForm extends Component {
     console.log(this.state);
   };
 
-  handleAddScene(){
-    debugger;
-    const a = this.state.new_scene_type;
-    if(a){
-      debugger;
+  handleAddScene(index){
+    /*
+    0: ESTÁTICA CON O SIN timer
+    1: Click
+    2: DragAndDrop
+    3: MEMORY
+    4: DIBUJO LIBRE
+    */
+    let scene_conf = null;
+    if(this.state.new_scene_type === null){
+      return;
     }
+    switch (this.state.new_scene_type) {
+    case 0:
+      scene_conf = scene_config_defaults().getSceneConfigStatic();
+      break;
+    case 1:
+      scene_conf = scene_config_defaults().getSceneConfigClick();
+      break;
+    default:
+      scene_conf = scene_config_defaults().getSceneConfigStatic();
+      break;
+    }
+    let code = R.clone(this.state.code);
+    code.push(scene_conf);
+    this.setState((state) => {
+      return R.set(R.lensProp('code'), code, state);
+    }, function(){
+      this._updateModel();
+    });
+    this.setState((state) => {
+      return R.set(R.lensProp('new_scene_type'), null, state);
+    });
 
     return false;
+  };
+
+  handleDuplicateScene(index){
+    /*
+    0: ESTÁTICA CON O SIN timer
+    1: Click
+    2: DragAndDrop
+    3: MEMORY
+    4: DIBUJO LIBRE
+    */
+    let scene_duplicated = R.clone(this.state.code[index]);
+    if(index === null){
+      return;
+    }
+    let code = R.clone(this.state.code);
+    code.push(scene_duplicated);
+    this.setState((state) => {
+      return R.set(R.lensProp('code'), code, state);
+    }, function(){
+      this._updateModel();
+    });
   };
 
   sceneOrder(index, action){
@@ -181,9 +241,9 @@ class ClickForm extends Component {
       const has_question = R.filter(R.propEq('type', 'question_model'))(elements);
 
       // Si tiene un tipo de layout libre, no hay que tocar las posiciones
-      if (has_question && has_question.question.layout_type === 'other'){
+      //if (has_question && has_question.question.layout_type === 'other'){
         //return resolve();
-      }
+      //}
       const area_size = Positioning.calculateAreaSize(has_question);
       const area_pos = Positioning.calculateAreaPosition(has_question);
       const model_length = !_.isEmpty(has_question) ? 1 : 0;
@@ -249,6 +309,7 @@ class ClickForm extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    this.setLoading(true);
     this._updateModel();
     this.props.controller.updateCode();
     return false;
@@ -272,7 +333,8 @@ class ClickForm extends Component {
       activity_type: code.type,
       media_tab: this.setMediaTabs,
       calculateLayout: this._calculateLayout,
-      sceneOrder: this.sceneOrder
+      sceneOrder: this.sceneOrder,
+      duplicateScene: this.handleDuplicateScene
     };
     return FormPanel(p);
   };
@@ -390,6 +452,7 @@ class ClickForm extends Component {
     const p = {
       props: this.props,
       change: this.handleChange,
+      handleAddScene: this.handleAddScene,
       state: this.state
     };
     // Panel de metadata de la actividad
@@ -401,9 +464,12 @@ class ClickForm extends Component {
     const metadata_panel = [
       {
         key: 'metadata',
-        title: 'Metadatos de la Actividad',
+        title: <Label as='h3' size='large'>
+            <Icon name='browser' />
+            Metadatos de la Actividad
+          </Label>,
         content: (
-          <div>
+          <div className='metadata_panel'>
             <SimpleInputText key={'name'} {...p} name={'activity_name'} title='Nombre de la actividad' field={['metadata', 'name']}/>
             <Form.Group>
               <DropdownSelection {...p} name={'level'} title='Nivel de la actividad' field={['metadata', 'level']} options={level_options}/>
@@ -424,17 +490,37 @@ class ClickForm extends Component {
 
     return (
       <Segment attached>
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} loading={this.state.loading}>
           <Accordion panels={metadata_panel} styled fluid activeIndex={this.state.active_metadata} onTitleClick={this.setActiveMetadata.bind(this, this.state.active_metadata)}/>
           <Divider section/>
-          <Accordion panels={panels} styled fluid activeIndex={this.state.active_index} onTitleClick={this._setActiveIndex}/> {media_form}
+          <Accordion panels={panels} styled fluid activeIndex={this.state.active_index} onTitleClick={this._setActiveIndex}/>
+          {media_form}
           <Divider section/>
-          <DropdownSelection {...p}
+          <DropdownButton {...p}
             name={'add_scene'}
             title='Añadir escena'
-            options={activity_type_options}
+            options={[{
+                key: '0',
+                value: 0,
+                text: 'Estática'
+              }, {
+                key: '1',
+                value: 1,
+                text: 'Click'
+              }, {
+                key: '2',
+                value: 2,
+                text: 'Arrastrar y soltar'
+              }, {
+                key: '3',
+                value: 3,
+                text: 'Memory'
+              }, {
+                key: '4',
+                value: 4,
+                text: 'Pintar'
+              }]}
             field={['new_scene_type']} />
-          <Button type='button' content='Añadir'onClick={this.handleAddScene} secondary/>
           <Divider section/>
           <Button content='Guardar' primary/><Button content='Cancelar' onClick={this.handleCancel} secondary/>
         </Form>

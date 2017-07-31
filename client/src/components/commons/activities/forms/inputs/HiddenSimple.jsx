@@ -2,9 +2,9 @@ import React from 'react'
 import { Form, Input } from 'semantic-ui-react'
 import R from 'ramda'
 
-const SimpleInputHidden = (props) => <Input key={'_'+props.campo}
+const SimpleInputHidden = (props) => <Input key={'_' + props.title}
         type='hidden'
-        name={props.campo}
-        value={props.state[props.campo]} />
+        name={props.name}
+        value={R.view(R.lensPath(props.field), props.state) || ''} />
 
 export default SimpleInputHidden

@@ -51,6 +51,16 @@ const scene_config_defaults = function(){
         "btn_back": false,
         "btn_next": false,
       },
+      "elements_container": {
+        size: {
+            w: 950,
+            h: 500
+        },
+        pos: {
+          x: 0,
+          y: 0
+        }
+      },
       "elements": {},
       "timer": {
         "time": 500,
@@ -62,6 +72,8 @@ const scene_config_defaults = function(){
         "sound": null
       }
     };
+
+  };
 
     const getSceneConfigClick = () => {
       return {
@@ -105,6 +117,16 @@ const scene_config_defaults = function(){
           "btn_next": false,
           "btn_info": false,
         },
+        "elements_container": {
+          size: {
+              w: 950,
+              h: 500
+          },
+          pos: {
+            x: 0,
+            y: 0
+          }
+        },
         "elements": {},
         "resolution": {},
         "instruction": {
@@ -112,11 +134,12 @@ const scene_config_defaults = function(){
           "sound": null
         }
       };
+  };
 
   return {
     getSceneConfigStatic: getSceneConfigStatic,
     getSceneConfigClick: getSceneConfigClick
-  }
-}
+  };
+};
 
 export default scene_config_defaults;

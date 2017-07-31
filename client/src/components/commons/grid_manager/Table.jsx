@@ -1,5 +1,5 @@
 import React from 'react'
-import { Icon, Label, Menu, Table, Image, Header } from 'semantic-ui-react'
+import { Icon, Label, Menu, Table, Image, Header, Message } from 'semantic-ui-react'
 import ButtonIcon from '../ButtonIcon.jsx';
 import Helpers from '../helpers.js';
 import R from 'ramda';
@@ -29,6 +29,17 @@ const _renderHeader = (record, opts, props) => {
       </Table.Header>
     )
 };
+
+
+const showMessage = (props) => {
+  if (!props.model.message){
+    return '';
+  }
+  return (
+  <Message>
+    {props.model.message}
+  </Message>
+)};
 
 const getCellContent = (config, content) => {
   switch (config.type) {
@@ -108,8 +119,10 @@ const TableLayout = (props) => {
   if(records.length){
     let head = _renderHeader(records, config, props);
     let body = _renderBody(records, config, props);
+    let message = showMessage(props);
     return (
       <div id={"table_"+props.title}>
+        {message}
         <Table celled selectable>
           {head}
           {body}

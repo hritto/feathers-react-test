@@ -99,3 +99,19 @@ h2.ribbon_header {
 .ui.form .fields {
 
 }
+
+.accordion {
+  background-color: #f9f9f9 !important;
+}
+
+.ui.styled.accordion .active.title {
+  background-color: #e1edef !important;
+}
+
+h3.ui.large.label {
+  background-color: transparent !important;
+}
+
+h3.ui.header {
+  font-size: 1.18rem !important;
+}

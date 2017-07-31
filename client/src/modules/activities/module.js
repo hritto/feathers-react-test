@@ -31,6 +31,7 @@ const Activities = function (sb) {
       total: 0,
       limit: 15,
     },
+    message: null,
     config: {
       combo_constructors: [{
         activity_type: function () {
