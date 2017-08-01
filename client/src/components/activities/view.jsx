@@ -20,7 +20,9 @@ const TabPanels = (props) => {
 }
 
 const newActivity = (props) => {
-  props.controller.addClick();
+  props.controller.itemClick({
+    action: 'create'
+  });
 };
 
 const ActivitiesView = (props) => {
@@ -34,7 +36,7 @@ const ActivitiesView = (props) => {
     cont = <TabPanels {...props} />
     btn = '';
   }
-  if (props.model.state === 'create') {
+  if (props.model.state === 'create' || props.model.state === 'delete') {
     modal = <ActivityFormModal {...props} />
   }
   return (

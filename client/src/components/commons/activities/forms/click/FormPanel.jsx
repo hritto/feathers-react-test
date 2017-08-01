@@ -152,7 +152,7 @@ const formClickTemplate = (props) => {
   if (R.type(back_image) === 'Object') {
     back_image = back_image.image;
   }
-
+  
   return (
     <div>
       <Form.Field>

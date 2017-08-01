@@ -67,6 +67,19 @@ class ClickForm extends Component {
     this.sceneOrder = this.sceneOrder.bind(this);
     this.handleDuplicateScene = this.handleDuplicateScene.bind(this);
     this.setLoading = this.setLoading.bind(this);
+    this.previewActivity = this.previewActivity.bind(this);
+  }
+
+  componentDidMount() {
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  previewActivity() {
+    let p = {
+      props: this.props,
+      state: this.state
+    };
+    this.props.controller.previewActivity(p);
   }
 
   setLoading(loading) {
@@ -311,7 +324,7 @@ class ClickForm extends Component {
     event.preventDefault();
     this.setLoading(true);
     this._updateModel();
-    this.props.controller.updateCode();
+    this.props.controller.doUpdate();
     return false;
   };
 
@@ -488,9 +501,15 @@ class ClickForm extends Component {
       }
     ];
 
+    const preview_btn = (<Button primary type='button'
+      key={'button_preview_activity'}
+      onClick={this.previewActivity.bind(this, this.props)}
+      content='Previsualizar Actividad' icon='unhide' labelPosition='left' />);
+
     return (
       <Segment attached>
         <Form onSubmit={this.handleSubmit} loading={this.state.loading}>
+          {preview_btn}
           <Accordion panels={metadata_panel} styled fluid activeIndex={this.state.active_metadata} onTitleClick={this.setActiveMetadata.bind(this, this.state.active_metadata)}/>
           <Divider section/>
           <Accordion panels={panels} styled fluid activeIndex={this.state.active_index} onTitleClick={this._setActiveIndex}/>

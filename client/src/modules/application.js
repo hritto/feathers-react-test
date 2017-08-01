@@ -80,6 +80,8 @@ App.application = () => {
     const subscribeEvents = () => {
       //Atender al evento click de los botones del menu
       subscriptions.navigation_menu_click = core.on("layout.navigation.menuClick", _.bind(onNavigationMenuClick));
+      subscriptions.start_module = core.on("application.startModule", _.bind(onStartModule));
+      subscriptions.stop_module = core.on("application.stopModule", _.bind(onStopModule));
       subscriptions.logout = core.on("application.logout", _.bind(onlogOut));
     };
 
@@ -91,6 +93,14 @@ App.application = () => {
       return core.scaleApp.moduleStop('Layout').then(function(){
 
       });
+    };
+
+    const onStartModule = (opts) => {
+      return core.promise.moduleStart(core, opts.module.modules[0], {instanceId: opts.module.instanceIds[0], options: opts});
+    };
+
+    const onStopModule = (opts) => {
+      return core.promise.moduleStop(core, opts.modules[0], {options: {el: opts.dom[0]}});
     };
 
     const onNavigationMenuClick = (options) => {

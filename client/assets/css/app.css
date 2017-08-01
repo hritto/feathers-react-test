@@ -1,4 +1,4 @@
-x.loader_div {
+.loader_div {
   z-index: 1000;
   position: fixed !important;
   position: absolute;
@@ -34,7 +34,7 @@ x.loader_div {
   /*background-color: #FFF;*/
   background-position: 10px 0;
   overflow: visible;
-  position: absolute;
+  position: relative;
 }
 
 #container {

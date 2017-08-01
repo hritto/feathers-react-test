@@ -11,6 +11,7 @@
   <script type="text/javascript" src="assets/js/resizer.js"></script>
   <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js"></script>
+  <script type="text/javascript" src="assets/js/jquery.animateSprite.js"></script>
 </head>
 
 <body>
@@ -18,9 +19,20 @@
     <div id="app">
 
     </div>
+    <div id='preview_modal'></div>
   </div>
   <script src="assets/js/serverUrl.js"></script>
   <script type="text/javascript" src="./dist/bundle.js"></script>
+  <script type="text/javascript">
+		$.fn.extend({
+			animateCss: function(animationName) {
+				var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+				$(this).addClass('animated ' + animationName).one(animationEnd, function() {
+					$(this).removeClass('animated ' + animationName);
+				});
+			}
+		});
+	</script>
 </body>
 
 </html>

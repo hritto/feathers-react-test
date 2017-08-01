@@ -3,6 +3,7 @@ const Layout = require('./layout/module.js');
 const Navigation = require('./navigation/module.js');
 const Users = require('./users/module.js');
 const Activities = require('./activities/module.js');
+const Preview = require('./preview/module.js');
 
 
 AppModules.init = (function() {
@@ -17,6 +18,7 @@ AppModules.init = (function() {
         core.register("Navigation", Navigation.module);
         core.register("Users", Users.module);
         core.register("Activities", Activities.module);
+        core.register("Preview", Preview.module);
     };
 
     var destroy = function(){

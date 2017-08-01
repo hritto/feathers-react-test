@@ -18,17 +18,7 @@ const ActivitiesController = function () {
       let combo_constructors = model.get(['config', 'combo_constructors']);
       if (combo_constructors && combo_constructors.length) {
         //Cargar los datos de los combos
-        return new Promise(function (resolve, reject) {
-          _.map(combo_constructors, function (fn, i, obj) {
-            let func = Object.keys(fn)[0];
-            return fn[func]().then(function (val) {
-              if (val && val.data) {
-                model.set(['config', 'combo_values', val.name], val.data, false);
-              }
-            });
-          });
-          return resolve();
-        }).then(function(){
+        return setComboConstructors(combo_constructors).then(function(){
           model.set('records', results.data, true);
         });
       } else {
@@ -54,6 +44,20 @@ const ActivitiesController = function () {
     */
   };
 
+  const setComboConstructors = (constructors) => {
+    return new Promise(function (resolve, reject) {
+      _.map(constructors, function (fn, i, obj) {
+        let func = Object.keys(fn)[0];
+        return fn[func]().then(function (val) {
+          if (val && val.data) {
+            model.set(['config', 'combo_values', val.name], val.data, false);
+          }
+        });
+      });
+      return resolve();
+    });
+  };
+
   const itemClick = (opts) => {
     if (opts.action === 'update') {
       updClick(opts);
@@ -69,25 +73,14 @@ const ActivitiesController = function () {
     }
   };
 
-  const addClick = () => {
-    model.set('state', 'create', false);
+  const addClick = (opts) => {
+    model.set('state', opts.action, false);
     let combo_constructors = model.get(['config','combo_constructors']);
     let selected_record = {};
     //ver si hay que cargar combos/datos
     if (combo_constructors && combo_constructors.length){
       //Cargar los datos de los combos
-      return new Promise(function(resolve, reject){
-        _.map(combo_constructors, function (fn, i, obj) {
-          let func = Object.keys(fn)[0];
-          //EL inicializados de los combos siempre es un promise
-          return fn[func]().then(function(val){
-            if(val && val.data){
-              model.set(['config','combo_values', val.name], val.data, false);
-            }
-          });
-        });
-        return resolve();
-      }).then(function(){
+      return setComboConstructors(combo_constructors).then(function(){
         setSelectedRecord(null, model.getVoidRecord(), true);
       });
     } else {
@@ -105,17 +98,7 @@ const ActivitiesController = function () {
     //ver si hay que cargar combos/datos
     if (combo_constructors && combo_constructors.length) {
       //Cargar los datos de los combos
-      return new Promise(function (resolve, reject) {
-        _.map(combo_constructors, function (fn, i, obj) {
-          let func = Object.keys(fn)[0];
-          return fn[func]().then(function (val) {
-            if (val && val.data) {
-              model.set(['config', 'combo_values', val.name], val.data, false);
-            }
-          });
-        });
-        return resolve();
-      }).then(function () {
+      return setComboConstructors(combo_constructors).then(function () {
         getRemoteRecord(opts);
       });
     } else {
@@ -158,6 +141,7 @@ const ActivitiesController = function () {
   const handleCancel = () => {
     model.resetFieldsState();
     model.set('state', 'initial', true);
+    window.dispatchEvent(new Event('resize'));
   };
 
   const tabClick = (view) => {
@@ -182,7 +166,7 @@ const ActivitiesController = function () {
     model.set(data.lens, data.value, data.dispatch);
   };
 
-  const createActivity = (metadata, code) => {
+  const doCreate = (metadata, code) => {
     let meta = {
       name: metadata.name,
       activity_type: metadata.activity_type,
@@ -208,30 +192,8 @@ const ActivitiesController = function () {
           feathersServices.activities.create(meta)
         ]).then(result => {
           //Recargar los datos
-          return feathersServices.activities.find().then(results => {
-            let combo_constructors = model.get(['config', 'combo_constructors']);
-            if (combo_constructors && combo_constructors.length) {
-              //Cargar los datos de los combos
-              return new Promise(function (resolve, reject) {
-                _.map(combo_constructors, function (fn, i, obj) {
-                  let func = Object.keys(fn)[0];
-                  return fn[func]().then(function (val) {
-                    if (val && val.data) {
-                      model.set(['config', 'combo_values', val.name], val.data, false);
-                    }
-                  });
-                });
-                return resolve();
-              }).then(function(){
-                model.set('records', results.data, true);
-                model.setSelectedRecord(null);
-                resetState();
-              });
-            } else {
-              model.set('records', results.data, true);
-              resetState();
-            }
-          });
+          let msg = 'La actividad se ha creado correctamente';
+          loadActivities(msg);
         });
       } else {
         model.set('message', 'Error occurred: no data');
@@ -243,7 +205,54 @@ const ActivitiesController = function () {
     });
   };
 
-  const updateCode = () => {
+  const doDelete = (selected_record) => {
+    if(!selected_record._id){
+      model.set('message', 'Error occurred: No data');
+      resetState();
+      return;
+    }
+    const activity_id = selected_record._id;
+    const code_id = selected_record.code_id;
+    return Promise.all([
+      feathersServices.activityCode.remove(code_id, {}),
+      feathersServices.activities.remove(activity_id, {}),
+    ]).then(results => {
+        if(results && results.length){
+          //Recargar los datos
+          let msg = 'La actividad se ha borrado correctamente';
+          loadActivities(msg);
+        } else {
+          model.set('message', 'Error occurred');
+          resetState();
+        }
+    }).catch(err => {
+      model.set('message', 'Error occurred:' + err);
+      resetState();
+    });
+
+  };
+
+
+  const loadActivities = (msg) => {
+    //Recargar los datos
+    return feathersServices.activities.find().then(results => {
+      let combo_constructors = model.get(['config', 'combo_constructors']);
+      if (combo_constructors && combo_constructors.length) {
+        //Cargar los datos de los combos
+        return setComboConstructors(combo_constructors).then(function(){
+          model.set('records', results.data, true);
+          setSelectedRecord(null, null, false);
+          resetState();
+        });
+      } else {
+        model.set('records', results.data, true);
+        resetState();
+      }
+      model.set('message', msg);
+    });
+  }
+
+  const doUpdate = () => {
     const selected_record = model.get('selected_record');
     if(!selected_record){
       return;
@@ -351,6 +360,24 @@ const ActivitiesController = function () {
     });
   };
 
+  const previewActivity = (opts) => {
+    sb.emit("application.startModule", {
+      index: 0,
+      module: {
+        title: "Preview",
+        icon: "game",
+        route: "preview",
+        permission: "preview",
+        modules: ["Preview"],
+        dom: ["preview_modal"],
+        config: [{}],
+        instanceIds: ["Preview"]
+      },
+      current: null,
+      options: opts
+    });
+  };
+
   const destroy = () => {
     model.destroy();
   };
@@ -364,13 +391,15 @@ const ActivitiesController = function () {
     updateActivityCode: updateActivityCode,
     updateActivityMetadata: updateActivityMetadata,
     setElementData: setElementData,
-    updateCode: updateCode,
-    createActivity: createActivity,
+    doUpdate: doUpdate,
+    doCreate: doCreate,
+    doDelete: doDelete,
     setMediaFilterRecords: setMediaFilterRecords,
     getMediaFilterRecords: getMediaFilterRecords,
     setMediaFilterPage: setMediaFilterPage,
     resetState: resetState,
     addClick: addClick,
+    previewActivity: previewActivity,
     destroy: destroy
   };
 };

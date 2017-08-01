@@ -28,13 +28,19 @@ class ActivityForm extends Component {
   };
 
   handleSubmit(event) {
-    let metadadata = R.clone(this.state.selected_record);
-    let activity_config = activity_config_default;
-    let code = scene_config_defaults().getSceneConfigStatic();
-    //Agregar la escena inicial por defecto
-    activity_config.code.push(code);
-    this.props.controller.createActivity(metadadata, activity_config);
     event.preventDefault();
+    if (this.props.model.state === 'create') {
+      let metadadata = R.clone(this.state.selected_record);
+      let activity_config = activity_config_default;
+      let code = scene_config_defaults().getSceneConfigStatic();
+      //Agregar la escena inicial por defecto
+      activity_config.code.push(code);
+      this.props.controller.doCreate(metadadata, activity_config);
+    }
+
+    if (this.props.model.state === 'delete') {
+      this.props.controller.doDelete(this.state.selected_record);
+    }
   }
 
   handleCancel(event) {
@@ -44,16 +50,15 @@ class ActivityForm extends Component {
 
   render() {
     let self = this;
-
     let fields = '';
     let form_view = '';
 
     if (this.props.model.state === 'delete') {
-      frase = '¿Está seguro de borrar la actividad?';
+      let frase = '¿Está seguro de borrar la actividad?';
       fields = <p>{frase}</p>
       form_view = <Segment attached><Form onSubmit={this.handleSubmit}>
         {fields}
-        <Button content='Enviar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
+        <Button content='Borrar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
       </Form></Segment>
     } else {
       const p = {
