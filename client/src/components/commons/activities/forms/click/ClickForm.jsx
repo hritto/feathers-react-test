@@ -503,13 +503,16 @@ class ClickForm extends Component {
 
     const preview_btn = (<Button primary type='button'
       key={'button_preview_activity'}
+      className='button_preview_activity'
       onClick={this.previewActivity.bind(this, this.props)}
+      floated='right'
       content='Previsualizar Actividad' icon='unhide' labelPosition='left' />);
 
     return (
       <Segment attached>
         <Form onSubmit={this.handleSubmit} loading={this.state.loading}>
           {preview_btn}
+          <div className='clear_both' />
           <Accordion panels={metadata_panel} styled fluid activeIndex={this.state.active_metadata} onTitleClick={this.setActiveMetadata.bind(this, this.state.active_metadata)}/>
           <Divider section/>
           <Accordion panels={panels} styled fluid activeIndex={this.state.active_index} onTitleClick={this._setActiveIndex}/>

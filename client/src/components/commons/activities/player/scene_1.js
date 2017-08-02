@@ -1,6 +1,7 @@
-import signals from 'signals';
+import * as _signals from 'signals';
 import endWindow from './end_window.js';
 import introWindow from './intro_window.js';
+import R from 'ramda';
 
 const Scene_1 = function() {
 
@@ -36,13 +37,15 @@ const Scene_1 = function() {
   var multiple_answers = null; //Si hay más de una respuesta por pantalla
 
   var animate_answers = null; //Si las respustas se animan (OK o KO)
+  var endActivityCallback = null;
 
-  var initialize = function(options, med, res, resizer_obj, layout_obj, _menu, endActivityCallback) {
+  var initialize = function(options, med, res, resizer_obj, layout_obj, _menu, endActivity) {
 
     config = options;
     media = med;
     res_config = res;
     resizer = resizer_obj;
+    endActivityCallback = endActivity;
 
     resolution = res;
     lib = media.getSoundLibrary();
@@ -155,13 +158,6 @@ const Scene_1 = function() {
       resolved_elements.push(e.target.id);
       //Todo OK, mostrar el check
       $('#' + e.target.id).append("<div class='check_ok'></div>");
-      //Agregar un elemento extra a la respuesta correcta
-      /*
-      $('#' + e.target.id).append("<div class='respuesta_txt' id='"+e.target.id+"_r'></div>");
-      $('#' + e.target.id + "_r").css({
-        "height": resizer.getSimpleSize(90) + "px",
-      });
-      */
       //mostrar la señal
       $('.check_ok').css({
         "width": resizer.getSimpleSize(60) + "px",
@@ -242,33 +238,85 @@ const Scene_1 = function() {
     });
   };
 
+  var getImageSize = function (iwidth, iheight, q_width, q_height) {
+    var config = {
+      w: null,
+      h: null
+    };
+
+    var ratio = q_height / iheight;
+
+    // if (iheight > q_height) {
+    config.h = iheight * ratio;
+    config.w = iwidth * ratio;
+    // }
+    return config;
+  };
+
   var drawQuestionElement = function(el, k, total, container, index) {
-    var elem = "<div id='" + k + "' class='drop-target drop-target" + index + "'><div class='q_text'>" + el.text + "</div></div>";
-    var img = media.getImage(el.image);
+
+    var elem = "<div id='" + k + "' class='drop-target drop-target" + index + "'></div>";
+    var img;
+    var image_size;
+    var image_pos;
+    var q_width = resizer.getSimpleSize(el.size.w);
+    var q_height = resizer.getSimpleSize(el.size.h);
+    var q_pos_x = resizer.getSimpleSize(el.pos.x);
+    var q_pos_y = resizer.getSimpleSize(el.pos.y);
+    var s;
+
+    if (R.type(el.image) !== 'Object') {
+      // Ajustar la imagen al contenedor
+      img = media.getImage(el.image);
+      s = getImageSize(img.width, img.height, q_width, q_height);
+      image_size = {
+        w: s.w,
+        h: s.h,
+      };
+      image_pos = {
+        x: (q_width - image_size.w) / 2,
+        y: (q_height - image_size.h) / 2,
+      };
+      el.image = {
+        image: el.image,
+        size: image_size,
+        pos: image_pos
+      }
+    } else {
+      img = media.getImage(el.image.image);
+    }
+
     $(container).append(elem);
 
     $('#' + k).css({
       "background-image": "url(" + img.src + ")",
-      "background-size": resizer.getSimpleSize(82) + "px",
-      "background-position": "right bottom",
+      "background-size": resizer.getSimpleSize(el.image.size.w) + "px " + resizer.getSimpleSize(el.image.size.h) + "px",
+      "background-position": "center",
       "background-repeat": "no-repeat",
       "left": resizer.getPosition(el.pos).x + "px",
       "top": resizer.getPosition(el.pos).y + "px",
       "width": resizer.getSize(el.size).w + "px",
       "height": resizer.getSize(el.size).h + "px",
       "vertical-align": "middle",
+      "z-index": 12000
     });
-
-    $('.q_text').css({
-      "width": "96%",
-      "height": "auto",
-      "text-align": "center",
-      "font-size": resizer.getSimpleSize(32) + "px",
-      "line-height": resizer.getSimpleSize(62) + "px",
-      "vertical-align": "middle",
-      "font-weight": "bold",
-      "margin-top": resizer.getSimpleSize(el.text_margin_top) + "px"
-    });
+    //Si tiene texto
+    if (el.text) {
+      var txt = "<div class='q_text'>" + el.text + "</div>";
+      $("#" + k).append(txt);
+      $('.q_text').css({
+        // modificado para contener solo una letra
+        "width": "75%",
+        "height": "auto",
+        "text-align": "center",
+        // modificado en diciembre
+        "font-size": resizer.getSimpleSize(65) + "px",
+        "line-height": resizer.getSimpleSize(70) + "px",
+        "vertical-align": "middle",
+        "font-weight": "bold",
+        "margin-top": resizer.getSimpleSize(el.text_margin_top) + "px"
+      });
+    }
 
     $('#question').on('click', function() {
       playQuestion(el.sound);
@@ -279,11 +327,11 @@ const Scene_1 = function() {
     $('#question').off('click');
     $('#screenBlocker').css('display', 'block');
     lib.play(sound);
-    signals.on.end = lib.on.end.add(_.bind(onEndSound));
+    _signals.end = lib.on.end.add(_.bind(onEndSound));
   };
 
   var onEndSound = function(data) {
-    signals.on.end.detach();
+    _signals.end.detach();
     $('#screenBlocker').css('display', 'none');
     $('#question').on('click', function() {
       playQuestion(data.id);
@@ -296,40 +344,32 @@ const Scene_1 = function() {
       max_h = 0,
       drop_y = 0,
       compensa_h = 0,
-      pos_dr = [];
-    $('#container').append('<div id="drag-elements"></div>');
+      pos_dr = [],
+      has_question = false;
+    if(!$('#drag-elements') || !$('#drag-elements').length){
+      $('#container').append('<div id="drag-elements"></div>');
+    }
     var drags = [];
-    _.each(els, function(value, key) {
+    _.each(els, function (value, key) {
       if (value.type === "clickable") {
         drags.push(value);
         pos_dr.push(value.pos);
+      } else {
+        has_question = true;
       }
     });
 
-    if(containers && containers.length){
-      //Calcular el espacio q nos queda para el contenedor de arrastrables
-      drop_y = $("#question").position().top + $("#question").height();
-      max_h = resizer.getActivitySceneConfig().size.h - (drop_y - 20);
-      min_h = resizer.getSize(drags[0].size).h + 10;
-      compensa_h = (max_h - min_h) / 2;
-      y = drop_y + compensa_h;
-    } else {
-      y = 0;
-      min_h = resizer.getActivitySceneConfig().size.h - 10;
-    }
-
-
-    //Posicionar el contenedor de elementos arrastrables en el sitio q nos queda
     $("#drag-elements").css({
-      "height": min_h,
-      "width": "98%", //resizer.getSceneConfig().size.w,
-      "top": y,
-      "left": 0 //$("#drop-target-1").position().left
+      "height": resizer.getSimpleSize(config.elements_container.size.h),
+      "width": resizer.getSimpleSize(config.elements_container.size.w),
+      "top": resizer.getSimpleSize(config.elements_container.pos.y),
+      "left": resizer.getSimpleSize(config.elements_container.pos.x),
+      "border": "1px solid red"
     });
     pos_dr = _.shuffle(pos_dr);
     var c = document.getElementById('drag-elements');
-    return new Promise(function(resolve, reject) {
-      _.each(drags, function(value, key) {
+    return new Promise(function (resolve, reject) {
+      _.each(drags, function (value, key) {
         drawAnswerElement(value, value.id, drags.length, c, key, pos_dr);
       });
       resolve();
@@ -337,19 +377,18 @@ const Scene_1 = function() {
   };
 
   var drawAnswerElement = function(el, k, total, container, index, pos) {
-    var elem_width = resizer.getSize(el.size).w;
-    var elem = "<div id='" + k + "'></div>";
-    $(container).append(elem);
+    $(container).append("<div id='" + k + "'></div>");
     $('#' + k).css({
-      "width": elem_width,
-      "height": elem_width,
+      "width": resizer.getSize(el.size).w,
+      "height": resizer.getSize(el.size).h,
       "background-image": "url(" + media.getImage(el.image).src + ")",
       "background-size": "contain",
+      "background-position": "center center",
       "left": resizer.getSimpleSize(pos[index].x) + "px",
       "top": resizer.getSimpleSize(pos[index].y) + "px",
+      "border": "1px solid red"
     });
     $('#' + k).on('click', checkClick);
-
   };
 
   var promiseEndOk = function(elem) {

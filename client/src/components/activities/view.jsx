@@ -30,6 +30,7 @@ const ActivitiesView = (props) => {
   let modal = '';
   let btn = (<Button primary type='button'
     key={'button_new_activity'}
+    className='button_new_activity'
     onClick={newActivity.bind(this, props)}
     content='Crear Nueva Actividad' icon='add circle' labelPosition='left' />);
   if (props.model.state === 'update') {

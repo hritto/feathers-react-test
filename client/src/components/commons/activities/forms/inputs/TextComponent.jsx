@@ -14,7 +14,6 @@ class InputText extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    debugger;
     return this.state.value !== nextState.value ? true : false;
   }
 

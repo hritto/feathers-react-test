@@ -1,4 +1,4 @@
-import signals from 'signals';
+import * as _signals from 'signals';
 import endWindow from './end_window.js';
 import introWindow from './intro_window.js';
 
@@ -29,16 +29,17 @@ const Scene_0 = function() {
       open: null,
       close: null
   };
+  var endActivityCallback = null;
 
 
-  var initialize = function(options, med, res, resizer_obj, layout_obj, _menu, endActivityCallback) {
-debugger;
+  var initialize = function(options, med, res, resizer_obj, layout_obj, _menu, endActivity) {
     config = options;
     media = med;
     resizer = resizer_obj;
     lib = media.getSoundLibrary();
     layout = layout_obj;
     menu = _menu;
+    endActivityCallback = endActivity;
 
     return promiseShowIntroScene().then(function() {
       // Crear la escena

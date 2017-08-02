@@ -28,7 +28,7 @@ class PreviewView extends Component {
   }
 
   render() {
-    return <Segment id='main_layout'>
+    return <Segment id='main_layout' className='main_back_container'>
       <div id="loader_div" className="loader_div">
         <div>
           <input type="text" defaultValue="0" className="dial" data-angleOffset="90" data-linecap="round" />

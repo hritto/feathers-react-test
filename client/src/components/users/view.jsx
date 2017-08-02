@@ -17,7 +17,12 @@ const UsersView = (props) => (
 
 const ButtonCreate = (props) => (
   <div>
-    <Button content='Crear nuevo usuario' icon='add circle' labelPosition='left' onClick={props.controller.itemClick.bind(this, {action: 'create'})} />
+    <Button content='Crear nuevo usuario'
+      icon='add circle'
+      key='new_user'
+      className='button_new_user' 
+      labelPosition='left'
+      onClick={props.controller.itemClick.bind(this, {action: 'create'})} />
   </div>
 )
 

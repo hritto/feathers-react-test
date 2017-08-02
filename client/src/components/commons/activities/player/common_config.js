@@ -121,7 +121,7 @@ const common_config = {
       "h": 434
     },
     "ok": [{
-        "image":"rita_1.png",
+        "image":"../assets/images/activities/commons/rita_1.png",
         "size": {
           "w": 330,
           "h": 230
@@ -129,7 +129,7 @@ const common_config = {
         "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27],
         "sound": "ok_1"
       },{
-      "image":"rita_2.png",
+      "image":"../assets/images/activities/commons/rita_2.png",
       "size": {
         "w": 330,
         "h": 230
@@ -137,7 +137,7 @@ const common_config = {
       "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
       "sound": "ok_4"
     },{
-      "image":"rita_3.png",
+      "image":"../assets/images/activities/commons/rita_3.png",
       "size": {
         "w": 330,
         "h": 230
@@ -145,7 +145,7 @@ const common_config = {
       "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
       "sound": "ok_3"
     },{
-      "image":"rita_4.png",
+      "image":"../assets/images/activities/commons/rita_4.png",
       "size": {
         "w": 330,
         "h": 230
@@ -154,7 +154,7 @@ const common_config = {
       "sound": "ok_4"
     }],
     "ko":[{
-      "image":"mal_1.png",
+      "image":"../assets/images/activities/commons/mal_1.png",
       "size": {
         "w": 301,
         "h": 230
@@ -162,7 +162,7 @@ const common_config = {
       "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
       "sound": "ko_1"
     },{
-      "image":"mal_2.png",
+      "image":"../assets/images/activities/commons/mal_2.png",
       "size": {
         "w": 301,
         "h": 230
@@ -170,7 +170,7 @@ const common_config = {
       "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
       "sound": "ko_2"
     },{
-      "image":"mal_3.png",
+      "image":"../assets/images/activities/commons/mal_3.png",
       "size": {
         "w": 301,
         "h": 230
@@ -178,7 +178,7 @@ const common_config = {
       "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35],
       "sound": "ko_1"
     },{
-      "image":"mal_4.png",
+      "image":"../assets/images/activities/commons/mal_4.png",
       "size": {
         "w": 301,
         "h": 230

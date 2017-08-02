@@ -1,5 +1,5 @@
-const Promise = require("bluebird");
-import signals from 'signals';
+//const Promise = require("bluebird");
+import * as _signals from 'signals';
 
 const Menu = function(opts, resizer_obj, ins, al, co, sc, ok_index, ko_index) {
   var config = opts;
@@ -23,7 +23,7 @@ const Menu = function(opts, resizer_obj, ins, al, co, sc, ok_index, ko_index) {
   var activity_type = null;
 
   //Suscripciones de audio
-  var on = {
+  var signals = {
       playing: null,
       end: null,
       pause: null,
@@ -31,8 +31,8 @@ const Menu = function(opts, resizer_obj, ins, al, co, sc, ok_index, ko_index) {
   };
   //Señales de menu
   var menu_signals = {
-      open: new signals.Signal(),
-      close: new signals.Signal()
+      open: new _signals.Signal(),
+      close: new _signals.Signal()
   };
 
   var initialize = function() {
@@ -267,7 +267,6 @@ const Menu = function(opts, resizer_obj, ins, al, co, sc, ok_index, ko_index) {
     var lib = media.getSoundLibrary();
     var $info = $('#infoWindow');
     var $bubble = $('#bubble');
-    debugger;
     if(intro){
       return new Promise(function(resolve, reject) {
         $bubble.html(intro);
@@ -275,7 +274,7 @@ const Menu = function(opts, resizer_obj, ins, al, co, sc, ok_index, ko_index) {
         $bubble.animateCss('bounceInDown');
         if (sound) {
           lib.stopAllSounds();
-          on.end = lib.on.end.add(_.bind(closeInstruction));
+          signals.end = lib.on.end.add(_.bind(closeInstruction));
           lib.play(sound);
         } else {
           return Promise.delay(3000).then(function(){
@@ -292,8 +291,8 @@ const Menu = function(opts, resizer_obj, ins, al, co, sc, ok_index, ko_index) {
   var closeInstruction = function(data){
 
     var $info = $('#infoWindow');
-    if(on.end && on.end.isBound()){
-      on.end.detach();
+    if(signals.end && signals.end.isBound()){
+      signals.end.detach();
     }
     sound = null;
     return Promise.delay(500).then(function(){
@@ -395,7 +394,7 @@ const Menu = function(opts, resizer_obj, ins, al, co, sc, ok_index, ko_index) {
 
   var destroy = function() {
     stopButtonsEvents();
-    on = {
+    signals = {
         playing: null,
         end: null,
         pause: null,
