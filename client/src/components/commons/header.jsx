@@ -1,5 +1,5 @@
 import React from 'react'
-import { Header, Icon } from 'semantic-ui-react'
+import { Header, Icon, Image } from 'semantic-ui-react'
 
 const RibbonHeader = (props) => {
   return (<Header as='h2' block inverted className='ribbon_header'>
@@ -8,6 +8,7 @@ const RibbonHeader = (props) => {
       {props.model.title}
     </Header.Content>
   </Header>
-)}
+  )
+}
 
 export default RibbonHeader

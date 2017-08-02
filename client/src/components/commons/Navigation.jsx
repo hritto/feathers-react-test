@@ -2,15 +2,21 @@ import React, { Component } from 'react'
 import { Segment, Button, Menu, Image, Icon, Header } from 'semantic-ui-react'
 import R from 'ramda';
 
+const colors = ["blue", "teal", "blue", "teal"];
+
 const item = (m, index, props) => {
   let current = props.model.current_item || 0;
-  return (<Menu.Item name={m.title}
-              key={m.title}
-              active={current === index}
-              onClick={props.controller.menuClick.bind(this, index)}>
-    <Icon name={m.icon} />
-    {m.title}
-  </Menu.Item>);
+  return (
+    <Menu.Item
+      name={m.title}
+      key={m.title}
+      active={current === index}
+      onClick={props.controller.menuClick.bind(this, index)}>
+      <Icon
+        color={colors[index]}
+        name={m.icon} />
+      {m.title}
+    </Menu.Item>);
 };
 
 const NavigationLayout = (props) => {

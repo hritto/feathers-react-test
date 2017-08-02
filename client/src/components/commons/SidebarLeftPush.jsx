@@ -6,10 +6,10 @@ const SidebarLeftPush = (props) => {
     <div>
       <Segment inverted className='no-margin' >
         <Header as='header' inverted>
-          <div className='no-margin' style={{float: 'right', cursor: 'pointer'}} onClick={props.controller.toggleVisibility.bind(this, props.model.visible)}>
-            <Icon size='small' name='align justify' inverted />
+          <div className='no-margin' style={{ float: 'right', cursor: 'pointer' }} onClick={props.controller.toggleVisibility.bind(this, props.model.visible)}>
+            <Icon size='small' name='align justify' inverted className='close_icon' />
           </div>
-          Header Content
+          <img className='header_logo' src='../assets/images/vivitbooks_logo.png' />
         </Header>
       </Segment>
       <Sidebar.Pushable as={Segment} className='no-margin' >

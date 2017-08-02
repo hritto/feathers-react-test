@@ -9,13 +9,13 @@ import ActivityFormModal from './ActivityFormModal.jsx'
 const TabPanels = (props) => {
   const content = <ClickForm {...props} />;
   return (
-    <Segment attached>
+    <div>
       <Menu tabular attached>
         <Menu.Item name='form' active={props.model.tab === 'form'} />
         <Menu.Item name='layout' active={props.model.tab === 'layout'} />
       </Menu>
       {content}
-    </Segment>
+    </div>
   )
 }
 
@@ -44,7 +44,7 @@ const ActivitiesView = (props) => {
     <div className="no-margin-absolute">
       <RibbonHeader {...props} />
       {modal}
-      <Segment>
+      <Segment attached>
         {btn}
         {cont}
       </Segment>

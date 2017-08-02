@@ -10,22 +10,23 @@ const button = (typ, props) => {
   };
 
   switch (typ) {
-  case 'update':
-    return <Button key={'btn_'+typ} icon='edit' size='tiny' onClick={props.props.controller.itemClick.bind(this, options)} />
-  case 'delete':
-    return <Button key={'btn_'+typ} icon='delete' size='tiny' onClick={props.props.controller.itemClick.bind(this, options)} />
+    case 'update':
+      return <Button key={'btn_' + typ} icon='edit' color='teal' size='tiny' onClick={props.props.controller.itemClick.bind(this, options)} />
+    case 'delete':
+      return <Button key={'btn_' + typ} icon='delete' color='red' size='tiny' onClick={props.props.controller.itemClick.bind(this, options)} />
   }
 };
 
 
 const ButtonIcon = (props) => {
-  let btns = ['update','delete'].map(function(elem){
+  let btns = ['update', 'delete'].map(function (elem) {
     return button(elem, props);
   })
   return (
-  <Button.Group style={{float: 'right'}}>
-    {btns}
-  </Button.Group>
-)}
+    <Button.Group style={{ float: 'right' }}>
+      {btns}
+    </Button.Group>
+  )
+}
 
 export default ButtonIcon

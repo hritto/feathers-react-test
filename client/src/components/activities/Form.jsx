@@ -74,24 +74,24 @@ class ActivityForm extends Component {
       const cognitive_process_options = config.combo_values.cognitive_process;
       const capacity_options = config.combo_values.capacity;
       const metadata_panel = (<div>
-              <SimpleInputText key={'name'} {...p} name={'activity_name'} title='Nombre de la actividad' field={['selected_record', 'name']}/>
-              <Form.Group>
-                <DropdownSelection {...p} name={'level'} title='Nivel de la actividad' field={['selected_record', 'level']} options={level_options}/>
-              </Form.Group>
-              <Form.Group>
-                <DropdownSelection {...p} name={'activity_type'} title='Tipo de actividad' field={['selected_record', 'activity_type']} options={activity_type_options}/>
-              </Form.Group>
-              <CheckboxLabeled {...p} name={'published'} title='Publicada:' field={['selected_record', 'published']}/>
-              <Form.Group widths='equal'>
-                <DropdownSelection {...p} name={'competence'} title='Competencia' field={['selected_record', 'competence']} options={competence_options}/>
-                <DropdownSelection {...p} name={'cognitive_process'} title='Proceso cognitivo' field={['selected_record', 'cognitive_process']} options={cognitive_process_options}/>
-                <DropdownSelection {...p} name={'capacity'} title='Capacidad' field={['selected_record', 'capacity']} options={capacity_options}/>
-              </Form.Group>
-            </div>);
-        form_view = <Segment attached><Form onSubmit={this.handleSubmit}>
-          {metadata_panel}
-          <Button content='Guardar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
-        </Form></Segment>
+        <SimpleInputText key={'name'} {...p} name={'activity_name'} title='Nombre de la actividad' field={['selected_record', 'name']} />
+        <Form.Group>
+          <DropdownSelection {...p} name={'level'} title='Nivel de la actividad' field={['selected_record', 'level']} options={level_options} />
+        </Form.Group>
+        <Form.Group>
+          <DropdownSelection {...p} name={'activity_type'} title='Tipo de actividad' field={['selected_record', 'activity_type']} options={activity_type_options} />
+        </Form.Group>
+        <CheckboxLabeled {...p} name={'published'} title='Publicada:' field={['selected_record', 'published']} />
+        <Form.Group widths='equal'>
+          <DropdownSelection {...p} name={'competence'} title='Competencia' field={['selected_record', 'competence']} options={competence_options} />
+          <DropdownSelection {...p} name={'cognitive_process'} title='Proceso cognitivo' field={['selected_record', 'cognitive_process']} options={cognitive_process_options} />
+          <DropdownSelection {...p} name={'capacity'} title='Capacidad' field={['selected_record', 'capacity']} options={capacity_options} />
+        </Form.Group>
+      </div>);
+      form_view = <Segment attached><Form onSubmit={this.handleSubmit}>
+        {metadata_panel}
+        <Button content='Guardar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
+      </Form></Segment>
 
     }
 
