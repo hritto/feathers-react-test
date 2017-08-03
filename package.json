@@ -57,6 +57,7 @@
     "serve-favicon": "^2.4.3",
     "signals": "^1.0.0",
     "socket.io-client": "^2.0.1",
+    "unzip2": "^0.2.5",
     "winston": "^2.3.1"
   },
   "devDependencies": {

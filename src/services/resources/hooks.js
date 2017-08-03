@@ -1,7 +1,7 @@
 const dauria = require('dauria');
 const Promise = require("bluebird");
 const fs = require('fs');
-const unzip = require('unzip');
+const unzip = require('unzip2');
 const path = require("path");
 //const yauzl = require("yauzl");
 
@@ -31,39 +31,95 @@ module.exports = {
     const file_name = hook.result.id;
     const input_dir = path.join(__dirname, '..', '..', '..', 'public', 'resources', file_name);
     const folder_name = file_name.substr(0, file_name.length - 4);
-    const ouput_dir = path.join(__dirname, '..', '..', '..', 'public', 'resources', folder_name);
-    // Una vez creado el fichero,
-    // guardamos los datos de la nueva imagen en la BBDD
-    Promise.all([
-      hook.app.service('resource-data').create({
-        url: ouput_dir,
-        mediatype: hook.data.mediatype,
-        name: hook.data.name,
-        description: hook.data.description,
-        level: hook.data.level,
-        resource_type: hook.data.resource_type,
-        published: hook.data.published,
-        competence: hook.data.competence,
-        cognitive_process: hook.data.cognitive_process,
-        capacity: hook.data.capacity,
-        original_name: hook.params.file.originalname,
-      }),
-    ]).then(results => {
-      if (results && results.length) {
-        fs.createReadStream(input_dir).pipe(unzip.Extract({ path: ouput_dir })).on('close', function (entry) {
-          // Borrar el zip original
-          // Cambiar el nombre al fichero
-          fs.unlink(input_dir, (err) => {
-            if (err) throw err;
-            console.log('successfully deleted');
-          });
-        });
-      }
-    }).catch(err => {
-      //TODO: mensaje de error de servidor
-      console.log('Error occurred:', err)
-    });
+    const output_dir = path.join(__dirname, '..', '..', '..', 'public', 'resources', folder_name);
+    let final_url = '';
+    // Una vez creado el fichero, los descomprimimos
+    fs.createReadStream(input_dir).pipe(unzip.Extract({
+      path: output_dir
+    })).on('close', function (entry) {
+      // Borrar el zip original
+      fs.unlink(input_dir, (err) => {
+        if (err) throw err;
+        console.log('successfully deleted');
+        fs.readdir(output_dir, function (err, files) {
+          if (err) {
+            throw err;
+          }
+          // buscar el index.html dentro del directorio
+          files.map(function (file) {
+            if (file === 'index.html') {
+              final_url = folder_name + "/" + file;
+              Promise.all([
+                hook.app.service('resource-data').create({
+                  url: final_url,
+                  mediatype: hook.data.mediatype,
+                  name: hook.data.name,
+                  description: hook.data.description,
+                  level: hook.data.level,
+                  resource_type: hook.data.resource_type,
+                  published: hook.data.published,
+                  competence: hook.data.competence,
+                  cognitive_process: hook.data.cognitive_process,
+                  capacity: hook.data.capacity,
+                  original_name: hook.params.file.originalname,
+                }),
+              ]).then(results => {
+                if (results && results.length) {
 
+                }
+              }).catch(err => {
+                //TODO: mensaje de error de servidor
+                console.log('Error occurred:', err)
+              });
+            }
+          });
+          // No hemos encontrado el index en el primer nivel
+          if (final_url === '') {
+            files.map(function (file2) {
+              if (file2 !== '__MACOSX') {
+                let inner_dir = path.join(output_dir, file2);
+                if (fs.statSync(inner_dir).isDirectory()) {
+                  fs.readdir(inner_dir, function (err, inner_files) {
+                    if (err) {
+                      throw err;
+                    }
+                    // buscar el index.html dentro del sub directorio
+                    inner_files.map(function (inner_file) {
+                      if (inner_file === 'index.html') {
+                        console.log("Founded index 2");
+                        final_url = folder_name + "/" + file2 + "/" + inner_file;
+                        Promise.all([
+                          hook.app.service('resource-data').create({
+                            url: final_url,
+                            mediatype: hook.data.mediatype,
+                            name: hook.data.name,
+                            description: hook.data.description,
+                            level: hook.data.level,
+                            resource_type: hook.data.resource_type,
+                            published: hook.data.published,
+                            competence: hook.data.competence,
+                            cognitive_process: hook.data.cognitive_process,
+                            capacity: hook.data.capacity,
+                            original_name: hook.params.file.originalname,
+                          }),
+                        ]).then(results => {
+                          if (results && results.length) {
+
+                          }
+                        }).catch(err => {
+                          //TODO: mensaje de error de servidor
+                          console.log('Error occurred:', err)
+                        });
+                      }
+                    });
+                  });
+                }
+              }
+            });
+          }
+        });
+      });
+    });
   },
   isZipFile: function (mime) {
     const zipFiles = ['zip'];
