@@ -4,7 +4,7 @@ const Navigation = require('./navigation/module.js');
 const Users = require('./users/module.js');
 const Activities = require('./activities/module.js');
 const Preview = require('./preview/module.js');
-
+const Resources = require('./resources/module.js');
 
 AppModules.init = (function() {
     "use strict";
@@ -19,6 +19,7 @@ AppModules.init = (function() {
         core.register("Users", Users.module);
         core.register("Activities", Activities.module);
         core.register("Preview", Preview.module);
+        core.register("Resources", Resources.module);
     };
 
     var destroy = function(){

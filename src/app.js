@@ -21,6 +21,7 @@ const appHooks = require('./app.hooks');
 
 const fs = require('fs-blob-store');
 const blobStorage = fs(__dirname + '/uploads');
+const blobStorageResources = fs(__dirname + '/resources');
 
 const app = feathers();
 

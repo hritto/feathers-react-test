@@ -32,6 +32,16 @@ const Navigation = function(sb) {
       dom: ["main_content"],
       config: [{}],
       instanceIds: ["activities"]
+    },
+    {
+      title: "Recursos",
+      icon: "cloud upload",
+      route: "resorces",
+      permission: "resorces",
+      modules: ["Resources"],
+      dom: ["main_content"],
+      config: [{}],
+      instanceIds: ["resources"]
     }],
     focus_index: 0, //Por defecto, el primer item del menu
     current_item: null

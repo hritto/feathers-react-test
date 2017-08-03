@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<head>
+<title></title>
+
+<link rel="stylesheet" type="text/css" href="css/reset-min.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script src="js/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/html5slider.js"></script>
+</head>
+
+<body>
+	<div class="container gradient">
+		<div class="player gradient">
+			<a class="button gradient" id="play" href="" title=""></a>
+			<input type="range" id="seek" value="0" max="10"/>
+		</div><!-- / player -->
+	</div><!-- / Container-->
+
+	<br><br><br><br>
+	<a href="#" onclick="playAudio('arrastra_nombre', this)">Reproducir Audio</a>
+
+	<a style='margin: 100px' href="#" onclick="playAudio('titulo', this)">Reproducir Audio</a>
+
+	<script type="text/javascript">
+			var container = $('.container');
+			var play = $('#play');
+			var pause = $('#pause');
+			var song;
+			var duration;
+			var time;
+			var played = false;
+			var playing;
+
+			var playAudio = function(audio_name, element){
+				var pos = $(element).position();
+				x = pos.left + parseInt($(element).css('marginLeft'), 10);
+				y = pos.top + parseInt($(element).css('marginTop'), 10);
+				var w = $(element).width();
+				if(playing){
+					song.pause();
+				}
+				song = new Audio('music/'+audio_name+'.ogg','music/'+audio_name+'.mp3');
+				duration = song.duration;
+				if (song.canPlayType('audio/mpeg')) {
+						song.type= 'audio/mpeg';
+						song.src= 'music/'+audio_name+'.mp3';
+				} else {
+						song.type= 'audio/ogg';
+						song.src= 'music/'+audio_name+'.ogg';
+				}
+				song.currentTime = 0.1;
+				container.css({
+					'top': y,
+					'left': x + w,
+					'display':'block',
+				});
+				if(time){
+					clearTimeout(time);
+				}
+				time = setTimeout(function(){
+					clearTimeout(time);
+					container.css({
+						'opacity': 1
+					});
+				}, 10);
+				song.play();
+				$("#seek").attr("max", parseInt(song.duration, 10));
+				$('#play').replaceWith('<a class="button gradient" id="pause" href="" title=""></a>');
+
+				play.off('click').on('click', function(e) {
+					e.preventDefault();
+					song.play();
+					$("#seek").attr("max", parseInt(song.duration, 10));
+					$(this).replaceWith('<a class="button gradient" id="pause" href="" title=""></a>');
+				});
+
+				pause.off('click').on('click', function(e) {
+					e.preventDefault();
+					song.pause(0);
+					$(this).replaceWith('<a class="button gradient" id="play" href="" title=""></a>');
+					container.css('opacity', 0);
+					time = setTimeout(function(){
+						clearTimeout(time);
+						container.css({
+							'display':'none'
+						});
+					}, 1000);
+				});
+
+				if(played){
+					song.removeEventListener('timeupdate', false);
+					song.removeEventListener('ended', false);
+				}
+
+				song.addEventListener('timeupdate',function (){
+					curtime = parseInt(song.currentTime, 10);
+					$("#seek").attr("max", parseInt(song.duration, 10));
+					$("#seek").val(curtime);
+				});
+
+				song.addEventListener('ended',function (e){
+					console.log("ended")
+					if(playing && e.target.src.indexOf(playing) > - 1){
+						$("#seek").val(0);
+						$('#play').replaceWith('<a class="button gradient" id="play" href="" title=""></a>');
+						song.pause(0);
+						container.css('opacity', 0);
+						time = setTimeout(function(){
+							clearTimeout(time);
+							container.css({
+								'display':'none'
+							});
+						}, 1000);
+					}
+
+					playing = false;
+				});
+				played = true;
+				playing = audio_name;
+			};
+	</script>
+
+</body>
+</html>
