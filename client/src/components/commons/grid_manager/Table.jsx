@@ -67,7 +67,6 @@ const _row = (record, opts, props) => {
     options = null,
     cells = R.map((column) => {
       display = '';
-      debugger;
       conf = R.find(R.propEq('name', column))(config) || {};
       if (conf.type !== 'hidden') {
         // El renderer es una función para formatear los valores de los campos cuando es necesario

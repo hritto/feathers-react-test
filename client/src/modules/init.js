@@ -5,6 +5,7 @@ const Users = require('./users/module.js');
 const Activities = require('./activities/module.js');
 const Preview = require('./preview/module.js');
 const Resources = require('./resources/module.js');
+const PreviewResource = require('./preview_resource/module.js');
 
 AppModules.init = (function() {
     "use strict";
@@ -20,6 +21,7 @@ AppModules.init = (function() {
         core.register("Activities", Activities.module);
         core.register("Preview", Preview.module);
         core.register("Resources", Resources.module);
+        core.register("PreviewResource", PreviewResource.module);
     };
 
     var destroy = function(){

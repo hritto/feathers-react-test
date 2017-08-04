@@ -11,19 +11,15 @@ const PreviewController = function () {
     options = opts;
     model = mdl;
     sb = opts.sb;
-    model.set('activity_code', opts.options.options.props.model.activity_code, true);
+    model.set('selected_record', opts.options.options.props.record, true);
   };
 
   const closeModal = () => {
     sb.emit("application.stopModule", {
-      title: "Preview",
-      icon: "game",
-      route: "preview",
-      permission: "preview",
-      modules: ["Preview"],
+      modules: ["PreviewResource"],
       dom: ["preview_modal"],
       config: [{}],
-      instanceIds: ["Preview"]
+      instanceIds: ["PreviewResource"]
     });
 
   };

@@ -22,7 +22,7 @@ const Resources = function (sb) {
     buttons: ['update', 'create', 'delete'],
     records: [],
     selected_record: null,
-    tab: 'form', // form, layout, preview
+    loading: false, // form, layout, preview
     message: null,
     config: {
       combo_constructors: [{
@@ -224,8 +224,11 @@ const Resources = function (sb) {
           label: 'Tipo de recurso',
           state: 'initial',
           renderer: function(value, opts){
-            const selected = R.find(R.propEq('key', value), opts);
-            return R.prop('text', selected);
+            const selected = R.find(R.propEq('value', parseInt(value)), opts);
+            if(selected){
+              return R.prop('text', selected);
+            }
+            return '';
           }
         },
         {
@@ -242,8 +245,11 @@ const Resources = function (sb) {
           label: 'Nivel',
           state: 'initial',
           renderer: function(value, opts){
-            const selected = R.find(R.propEq('key', value), opts);
-            return R.prop('text', selected);
+            const selected = R.find(R.propEq('value', parseInt(value)), opts);
+            if(selected){
+              return R.prop('text', selected);
+            }
+            return '';
           }
         },
         {
@@ -287,8 +293,11 @@ const Resources = function (sb) {
           label: 'Competencia',
           state: 'initial',
           renderer: function(value, opts){
-            const selected = R.find(R.propEq('value', value), opts);
-            return R.prop('text', selected || '');
+            const selected = R.find(R.propEq('value', parseInt(value)), opts);
+            if(selected){
+              return R.prop('text', selected);
+            }
+            return '';
           }
         },{
           name: 'cognitive_process',
@@ -304,8 +313,11 @@ const Resources = function (sb) {
           label: 'Proceso cognitivo',
           state: 'initial',
           renderer: function(value, opts){
-            const selected = R.find(R.propEq('value', value), opts);
-            return R.prop('text', selected || '');
+            const selected = R.find(R.propEq('value', parseInt(value)), opts);
+            if(selected){
+              return R.prop('text', selected);
+            }
+            return '';
           }
         },{
           name: 'capacity',
@@ -321,8 +333,11 @@ const Resources = function (sb) {
           label: 'Capacidad',
           state: 'initial',
           renderer: function(value, opts){
-            const selected = R.find(R.propEq('value', value), opts);
-            return R.prop('text', selected || '');
+            const selected = R.find(R.propEq('value', parseInt(value)), opts);
+            if(selected){
+              return R.prop('text', selected);
+            }
+            return '';
           }
         },{
           name: 'original_name',

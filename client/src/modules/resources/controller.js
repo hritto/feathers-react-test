@@ -204,13 +204,18 @@ const ResourcesController = function () {
         return setComboConstructors(combo_constructors).then(function(){
           model.set('records', results.data, true);
           setSelectedRecord(null, null, false);
+          if(msg){
+            model.set('message', msg, true);
+          }
           resetState();
         });
       } else {
         model.set('records', results.data, true);
+        if(msg){
+          model.set('message', msg, true);
+        }
         resetState();
       }
-      model.set('message', msg);
     });
   }
 
@@ -250,6 +255,11 @@ const ResourcesController = function () {
     });
   };
 
+  const resourceUploaded = function(){
+    let message = 'El recurso se ha cargado correctamente';
+    loadResources(message);
+  };
+
   const resetState = () => {
     model.set('selected_record', null, false);
     model.set('state', 'initial', true);
@@ -273,7 +283,7 @@ const ResourcesController = function () {
         modules: ["PreviewResource"],
         dom: ["preview_modal"],
         config: [{}],
-        instanceIds: ["Preview_resource"]
+        instanceIds: ["PreviewResource"]
       },
       current: null,
       options: opts
@@ -296,6 +306,7 @@ const ResourcesController = function () {
     resetState: resetState,
     addClick: addClick,
     previewResource: previewResource,
+    resourceUploaded: resourceUploaded,
     destroy: destroy
   };
 };

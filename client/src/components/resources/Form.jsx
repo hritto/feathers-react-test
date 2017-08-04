@@ -37,11 +37,14 @@ class ResourceForm extends Component {
     if (this.props.model.state === 'create') {
       let metadadata = R.clone(this.state.selected_record);
       myDropzone.processQueue();
-      //this.props.controller.doCreate(metadadata);
     }
 
     if (this.props.model.state === 'delete') {
       this.props.controller.doDelete(this.state.selected_record);
+    }
+
+    if (this.props.model.state === 'update') {
+      this.props.controller.doUpdate(this.state.selected_record);
     }
   }
 
@@ -144,9 +147,15 @@ class ResourceForm extends Component {
         }
 
         // Callback de la creación de imágenes en el servidor
-        feathers_uploadService.uploadService.removeListener('created').on('created', function (file) {
-            //Notificar al form que se ha subido el nuevo recurso?????
-
+        feathers_uploadService.uploadResourceService.removeListener('created').on('created', function (file) {
+            //Notificar que se ha subido el nuevo recurso
+            self.setState((state) => {
+              return R.set(R.lensProp('loading'), true, state);
+            });
+            // TODO: recibir notificación de la descompresión!!!!!!!
+            return Promise.delay(2000).then(function () {
+                self.props.controller.resourceUploaded();
+            });
         });
 
         dropZ = <DropzoneComponent config={componentConfig}
@@ -156,7 +165,7 @@ class ResourceForm extends Component {
 
 
 
-      form_view = <Segment attached><Form onSubmit={this.handleSubmit}>
+      form_view = <Segment attached><Form onSubmit={this.handleSubmit} loading={this.state.loading}>
         {metadata_panel}
         {dropZ}
         <Button content='Guardar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />

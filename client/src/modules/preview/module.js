@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
 import PreviewController from './controller.js';
-import PreviewModal from '../../components/activities/PreviewModal.jsx';
+import PreviewModal from '../../components/resources/PreviewModal.jsx';
 import R from 'ramda'
 
 if (module.hot) {

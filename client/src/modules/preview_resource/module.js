@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
 import PreviewController from './controller.js';
-import PreviewModal from '../../components/activities/PreviewModal.jsx';
+import PreviewModal from '../../components/resources/PreviewModal.jsx';
 import R from 'ramda'
 
 if (module.hot) {
@@ -11,16 +11,15 @@ if (module.hot) {
 
 const Preview = function (sb) {
   'use strict';
-
   //Estado ---> Model
   let appState = {
-    title: "Preview",
-    icon: "game",
-    route: "preview",
-    permission: "preview",
+    title: "Preview_resource",
+    icon: "cloud upload",
+    route: "preview_resource",
+    permission: "preview_resource",
     state: "initial", //initial, update, create, delete
     buttons: [],
-    activity_code: null,
+    selected_record: null,
     message: null,
     config: {}
   };
@@ -42,7 +41,7 @@ const Preview = function (sb) {
   };
 
   const onRender = (props) => {
-    if(props.model.activity_code){
+    if(props.model.selected_record){
       props.controller = _controller;
       ReactDOM.render( <PreviewModal { ...props } />,
         document.getElementById(options.module.dom[0])

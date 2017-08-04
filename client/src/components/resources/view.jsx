@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Header, Icon, Menu, Segment, Button, Modal } from 'semantic-ui-react';
-import TableLayout from '../commons/grid_manager/Table.jsx';
+import TableLayout from './Table.jsx';
 import RibbonHeader from '../commons/header.jsx';
 import ResourceFormModal from './ResourceFormModal.jsx'
 
