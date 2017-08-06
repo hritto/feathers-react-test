@@ -31,26 +31,26 @@ const Resources = function (sb) {
             resolve({
               name: 'resource_type',
               data: [{
-                  key: '0',
-                  value: 0,
-                  text: 'Actividad interactiva'
-                }, {
-                  key: '1',
-                  value: 1,
-                  text: 'Audio'
-                }, {
-                  key: '2',
-                  value: 2,
-                  text: 'Vídeo'
-                }, {
-                  key: '3',
-                  value: 3,
-                  text: 'Presentación HTML'
-                }, {
-                  key: '4',
-                  value: 4,
-                  text: 'Galería de imágenes'
-                }]
+                key: '0',
+                value: 0,
+                text: 'Actividad interactiva'
+              }, {
+                key: '1',
+                value: 1,
+                text: 'Audio'
+              }, {
+                key: '2',
+                value: 2,
+                text: 'Vídeo'
+              }, {
+                key: '3',
+                value: 3,
+                text: 'Presentación HTML'
+              }, {
+                key: '4',
+                value: 4,
+                text: 'Galería de imágenes'
+              }]
             });
           });
         }
@@ -113,24 +113,23 @@ const Resources = function (sb) {
           return new Promise(function (resolve, reject) {
             resolve({
               name: 'cognitive_process',
-              data: [
-                {
-                  key: '0',
-                  value: 0,
-                  text: 'Proceso 1'
-                }, {
-                  key: '1',
-                  value: 1,
-                  text: 'Proceso 2'
-                }, {
-                  key: '2',
-                  value: 2,
-                  text: 'Proceso 3'
-                }, {
-                  key: '3',
-                  value: 3,
-                  text: 'Proceso 4'
-                }]
+              data: [{
+                key: '0',
+                value: 0,
+                text: 'Proceso 1'
+              }, {
+                key: '1',
+                value: 1,
+                text: 'Proceso 2'
+              }, {
+                key: '2',
+                value: 2,
+                text: 'Proceso 3'
+              }, {
+                key: '3',
+                value: 3,
+                text: 'Proceso 4'
+              }]
             });
           });
         }
@@ -223,9 +222,9 @@ const Resources = function (sb) {
           form_visible: true,
           label: 'Tipo de recurso',
           state: 'initial',
-          renderer: function(value, opts){
+          renderer: function (value, opts) {
             const selected = R.find(R.propEq('value', parseInt(value)), opts);
-            if(selected){
+            if (selected) {
               return R.prop('text', selected);
             }
             return '';
@@ -244,9 +243,9 @@ const Resources = function (sb) {
           form_visible: true,
           label: 'Nivel',
           state: 'initial',
-          renderer: function(value, opts){
+          renderer: function (value, opts) {
             const selected = R.find(R.propEq('value', parseInt(value)), opts);
-            if(selected){
+            if (selected) {
               return R.prop('text', selected);
             }
             return '';
@@ -277,7 +276,7 @@ const Resources = function (sb) {
           constructor: null,
           wrapped: false,
           form_visible: false,
-          label: '',
+          label: 'url',
           state: 'initial',
         }, {
           name: 'competence',
@@ -292,14 +291,14 @@ const Resources = function (sb) {
           form_visible: true,
           label: 'Competencia',
           state: 'initial',
-          renderer: function(value, opts){
+          renderer: function (value, opts) {
             const selected = R.find(R.propEq('value', parseInt(value)), opts);
-            if(selected){
+            if (selected) {
               return R.prop('text', selected);
             }
             return '';
           }
-        },{
+        }, {
           name: 'cognitive_process',
           type: 'combo',
           visibility: true,
@@ -312,14 +311,14 @@ const Resources = function (sb) {
           form_visible: true,
           label: 'Proceso cognitivo',
           state: 'initial',
-          renderer: function(value, opts){
+          renderer: function (value, opts) {
             const selected = R.find(R.propEq('value', parseInt(value)), opts);
-            if(selected){
+            if (selected) {
               return R.prop('text', selected);
             }
             return '';
           }
-        },{
+        }, {
           name: 'capacity',
           type: 'combo',
           visibility: true,
@@ -332,14 +331,14 @@ const Resources = function (sb) {
           form_visible: true,
           label: 'Capacidad',
           state: 'initial',
-          renderer: function(value, opts){
+          renderer: function (value, opts) {
             const selected = R.find(R.propEq('value', parseInt(value)), opts);
-            if(selected){
+            if (selected) {
               return R.prop('text', selected);
             }
             return '';
           }
-        },{
+        }, {
           name: 'original_name',
           type: 'text',
           visibility: true,
@@ -351,6 +350,20 @@ const Resources = function (sb) {
           wrapped: false,
           form_visible: true,
           label: 'Nombre original',
+          state: 'initial',
+          renderer: null
+        }, {
+          name: 'folder_name',
+          type: 'hidden',
+          visibility: false,
+          flex: 0,
+          filter: false,
+          validation: {},
+          message: '',
+          constructor: null,
+          wrapped: false,
+          form_visible: true,
+          label: 'Original_folder',
           state: 'initial',
           renderer: null
         }
@@ -375,7 +388,9 @@ const Resources = function (sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    ReactDOM.render( <ResourcesView { ...props } />,
+    ReactDOM.render( < ResourcesView { ...props
+      }
+      />,
       document.getElementById(options.el)
     );
   };

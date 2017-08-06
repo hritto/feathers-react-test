@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<elements>
+	<element type="drag" id="0" place_objects="top"> 
+		<control>logo,notas,otravez,siguiente,comprobar,audio</control>
+		<intentos>2</intentos>
+		<audio_titulo></audio_titulo>
+		<audio_pantalla></audio_pantalla>
+		
+		<titulo>Del plano al volumen</titulo>
+		<headercolor>#005ea8</headercolor>
+		<colortitulo>#FFFFFF</colortitulo>
+		<fuentetitulo>Verdana, Tahoma, Geneva, sans-serif</fuentetitulo>
+		<tamanotitulo>26</tamanotitulo>
+		
+		<enunciado>Clasifica estas obras según hayas sido realizadas en modo plano, con volumen o de forma digital.</enunciado>
+		<colortexto>#005ea8</colortexto>
+		<fuentetexto>Verdana</fuentetexto>
+		<justificaciontexto>justify</justificaciontexto>
+		<tamanotexto>20</tamanotexto>
+		
+		<imagenes></imagenes>
+		
+		<aleatorios>0</aleatorios>
+				
+<!-- DRAG -->
+	<drag_and_drop>
+			<drag_one2one>0</drag_one2one> <!--Si es 0 dejar poner más de un elemento por caja, si es 1 te restringe a un solo elemento por caja -->	
+			<drag_erase>1</drag_erase> <!--Si es 0 añade el texto arrastrado al texto destino, si es 1 sustituye el contenido-->		
+			<drags_solo_uno>0</drags_solo_uno><!-- Si es 1, muestra solo una opción de Drag a la vez -->
+	
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>
+				<imagen>d1.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>	
+				<imagen>d2.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>	
+				<imagen>v1.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>	
+				<imagen>v2.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>	
+				<imagen>v3.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>	
+				<imagen>v4.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>	
+				<imagen>p1.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>	
+				<imagen>p2.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>	
+				<imagen>p3.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+
+			<drag_item posH="0" posV="0" w="150" h="150" BgColor="#dfe4f2" opaBG="1" opaFont="1" Color="#000000" FontSize="16" L-Height="50">
+				<palabra></palabra>	
+				<imagen>p4.png</imagen>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			
+	<!-- DROP -->
+		
+			<dropArea BGImg="" posH="" posV="50" w="" h=""  BgColor="" opaBG="" fontColor=""  fontSize="16"  fontFamily=""  textAlign="center" >		
+				<![CDATA[
+				<article>
+				<div class='columnas'>
+					<section class="boxContent">
+						<p class="grupoTitle" style="font-size:27px">Volumen</p>
+						<div class="caja">[#v1.png*v2.png*v3.png*v4.png##l#0,0]</div>
+					</section>
+
+					<section class="boxContent">
+						<p class="grupoTitle" style="font-size:27px">Plano</p>
+						<div class="caja">[#p1.png*p2.png*p3.png*p4.png##l#0,0]</div>
+					</section>
+					
+					<section class="boxContent">
+						<p class="grupoTitle" style="font-size:27px">Digital</p>
+						<div class="caja">[#d1.png*d2.png##l#0,0]</div>
+					</section>
+
+
+				</article>
+				]]>
+			</dropArea>
+		
+		</drag_and_drop>
+	</element>
+</elements>

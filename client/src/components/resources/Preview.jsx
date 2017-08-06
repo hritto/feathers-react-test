@@ -11,7 +11,7 @@ class PreviewView extends Component {
   }
 
   shouldComponentUpdate() {
-   return false;
+    return false;
   }
 
   componentDidMount() {
@@ -21,7 +21,7 @@ class PreviewView extends Component {
     };
     let self = this;
     if (!this.app) {
-      return Promise.delay(500).then(function(){
+      return Promise.delay(500).then(function () {
         self.ifr.onload = () => {
           //self.ifr.contentWindow.postMessage('hello', "*");
         }
@@ -29,9 +29,11 @@ class PreviewView extends Component {
     }
   }
 
+  //sandbox="allow-scripts" ?
+
   render() {
     return <Segment id='main_layout'>
-      <iframe src={"./resources/"+this.state.url} sandbox="allow-scripts" width='100%' height='100%'  ref={(f) => this.ifr = f }  />
+      <iframe src={"./resources/" + this.state.url} width='100%' height='100%' ref={(f) => this.ifr = f} />
     </Segment>
   }
 };

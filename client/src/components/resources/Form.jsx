@@ -60,7 +60,7 @@ class ResourceForm extends Component {
     let fields = '';
     let form_view = '';
     let dropZ = '';
-
+    console.log(this.state);
     if (this.props.model.state === 'delete') {
       let frase = '¿Está seguro de borrar el recurso?';
       fields = <p>{frase}</p>
@@ -98,69 +98,69 @@ class ResourceForm extends Component {
         </Form.Group>
       </div>);
 
-      if(this.props.model.state === 'create'){
+      if (this.props.model.state === 'create') {
         let iconFiletypes = ['.zip'];
         let acceptedFiles = ".zip";
         let dictDefaultMessage = 'Arrastra aquí el fichero comprimido a subir o haz click para seleccionarlo.';
         let mediatype = 'zip';
         const componentConfig = {
-            iconFiletypes: iconFiletypes,
-            showFiletypeIcon: true,
-            postUrl: '/resources',
+          iconFiletypes: iconFiletypes,
+          showFiletypeIcon: true,
+          postUrl: '/resources',
         };
         const djsConfig = {
-            paramName: "uri",
-            uploadMultiple: false,
-            maxFiles: 1,
-            acceptedFiles: acceptedFiles,
-            dictDefaultMessage: dictDefaultMessage,
-            autoProcessQueue: false,
-            params: {
-                mediatype: mediatype,
-                name: this.state.selected_record.name,
-                description: this.state.selected_record.description,
-                level: this.state.selected_record.level,
-                resource_type: this.state.selected_record.resource_type,
-                published: this.state.selected_record.published,
-                competence: this.state.selected_record.competence,
-                cognitive_process: this.state.selected_record.cognitive_process,
-                capacity: this.state.selected_record.capacity,
-            }
+          paramName: "uri",
+          uploadMultiple: false,
+          maxFiles: 1,
+          acceptedFiles: acceptedFiles,
+          dictDefaultMessage: dictDefaultMessage,
+          autoProcessQueue: false,
+          params: {
+            mediatype: mediatype,
+            name: this.state.selected_record.name,
+            description: this.state.selected_record.description,
+            level: this.state.selected_record.level,
+            resource_type: this.state.selected_record.resource_type,
+            published: this.state.selected_record.published,
+            competence: this.state.selected_record.competence,
+            cognitive_process: this.state.selected_record.cognitive_process,
+            capacity: this.state.selected_record.capacity,
+          }
         }
         const eventHandlers = {
-            init: function (dz) {
-                dz.on('uploadprogress', function (file, progress) {
-                    // console.log('progresss', progress);
-                });
-                myDropzone = dz;
-            },
-            addedfile: function (file) {
-                if (myDropzone.files && myDropzone.files.length > 1) {
-                    myDropzone.removeFile(myDropzone.files[0]);
-                }
-            },
-            complete: function (file) {
-                return Promise.delay(2000).then(function () {
-                    myDropzone.removeFile(file);
-                });
+          init: function (dz) {
+            dz.on('uploadprogress', function (file, progress) {
+              // console.log('progresss', progress);
+            });
+            myDropzone = dz;
+          },
+          addedfile: function (file) {
+            if (myDropzone.files && myDropzone.files.length > 1) {
+              myDropzone.removeFile(myDropzone.files[0]);
             }
+          },
+          complete: function (file) {
+            return Promise.delay(2000).then(function () {
+              myDropzone.removeFile(file);
+            });
+          }
         }
 
         // Callback de la creación de imágenes en el servidor
         feathers_uploadService.uploadResourceService.removeListener('created').on('created', function (file) {
-            //Notificar que se ha subido el nuevo recurso
-            self.setState((state) => {
-              return R.set(R.lensProp('loading'), true, state);
-            });
-            // TODO: recibir notificación de la descompresión!!!!!!!
-            return Promise.delay(2000).then(function () {
-                self.props.controller.resourceUploaded();
-            });
+          //Notificar que se ha subido el nuevo recurso
+          self.setState((state) => {
+            return R.set(R.lensProp('loading'), true, state);
+          });
+          // TODO: recibir notificación de la descompresión!!!!!!!
+          return Promise.delay(2000).then(function () {
+            self.props.controller.resourceUploaded();
+          });
         });
 
         dropZ = <DropzoneComponent config={componentConfig}
-            eventHandlers={eventHandlers}
-            djsConfig={djsConfig} />
+          eventHandlers={eventHandlers}
+          djsConfig={djsConfig} />
       }
 
 

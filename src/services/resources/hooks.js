@@ -23,6 +23,7 @@ module.exports = {
         competence: hook.data.competence,
         cognitive_process: hook.data.cognitive_process,
         capacity: hook.data.capacity,
+        original_name: hook.params.file.originalname,
       };
     }
   },
@@ -37,13 +38,14 @@ module.exports = {
       mediatype: hook.data.mediatype,
       name: hook.data.name,
       description: hook.data.description,
-      level: hook.data.level,
-      resource_type: hook.data.resource_type,
+      level: parseInt(hook.data.level, 10),
+      resource_type: parseInt(hook.data.resource_type, 10),
       published: hook.data.published,
-      competence: hook.data.competence,
-      cognitive_process: hook.data.cognitive_process,
-      capacity: hook.data.capacity,
-      original_name: hook.params.file.originalname,
+      competence: parseInt(hook.data.competence, 10),
+      cognitive_process: parseInt(hook.data.cognitive_process, 10),
+      capacity: parseInt(hook.data.capacity, 10),
+      original_name: hook.data.original_name,
+      folder_name: folder_name
     };
     // Una vez creado el fichero, los descomprimimos
     fs.createReadStream(input_dir).pipe(unzip.Extract({
@@ -97,7 +99,7 @@ module.exports = {
             });
           }
           if (data_options.url === '') {
-            
+
           }
         });
       });

@@ -18,30 +18,13 @@ const ResourcesController = function () {
       let combo_constructors = model.get(['config', 'combo_constructors']);
       if (combo_constructors && combo_constructors.length) {
         //Cargar los datos de los combos
-        return setComboConstructors(combo_constructors).then(function(){
+        return setComboConstructors(combo_constructors).then(function () {
           model.set('records', results.data, true);
         });
       } else {
         model.set('records', results.data, true);
       }
     });
-
-    /*
-    //Seed
-    var act_data = {
-      name: 'Actividad Test',
-      activity_type:'click',
-      level: 1,
-      published: true,
-      code_id: '6IZHe1gFlVfWvBbn'
-    };
-    Promise.all([
-        feathersServices.activities.create(act_data),
-      ]).then(results => {
-          console.log('created Jane Doe item\n', results[0]);
-          return feathersServices.activities.find().then(results => console.log('find all items\n', results));
-      }).catch(err => console.log('Error occurred:', err));
-    */
   };
 
   const setComboConstructors = (constructors) => {
@@ -75,12 +58,12 @@ const ResourcesController = function () {
 
   const addClick = (opts) => {
     model.set('state', opts.action, false);
-    let combo_constructors = model.get(['config','combo_constructors']);
+    let combo_constructors = model.get(['config', 'combo_constructors']);
     let selected_record = {};
     //ver si hay que cargar combos/datos
-    if (combo_constructors && combo_constructors.length){
+    if (combo_constructors && combo_constructors.length) {
       //Cargar los datos de los combos
-      return setComboConstructors(combo_constructors).then(function(){
+      return setComboConstructors(combo_constructors).then(function () {
         setSelectedRecord(null, model.getVoidRecord(), true);
       });
     } else {
@@ -141,10 +124,11 @@ const ResourcesController = function () {
   };
 
   const doCreate = (metadata, code) => {
+    //No existe...
     let meta = {
       name: metadata.name,
       description: metadata.description,
-      activity_type: metadata.resource_type,
+      resource_type: metadata.resource_type,
       level: metadata.level,
       published: metadata.published,
       capacity: metadata.capacity,
@@ -155,7 +139,7 @@ const ResourcesController = function () {
     return Promise.all([
       feathersServices.resources.create(meta)
     ]).then(result => {
-      if(result && result.length){
+      if (result && result.length) {
         //Recargar los datos
         let msg = 'El recurso se ha creado correctamente';
         loadResources(msg);
@@ -170,7 +154,7 @@ const ResourcesController = function () {
   };
 
   const doDelete = (selected_record) => {
-    if(!selected_record._id){
+    if (!selected_record._id) {
       model.set('message', 'Error occurred: No data');
       resetState();
       return;
@@ -179,14 +163,14 @@ const ResourcesController = function () {
     return Promise.all([
       feathersServices.resources.remove(resource_id, {}),
     ]).then(results => {
-        if(results && results.length){
-          //Recargar los datos
-          let msg = 'El recurso se ha borrado correctamente';
-          loadResources(msg);
-        } else {
-          model.set('message', 'Error occurred');
-          resetState();
-        }
+      if (results && results.length) {
+        //Recargar los datos
+        let msg = 'El recurso se ha borrado correctamente';
+        loadResources(msg);
+      } else {
+        model.set('message', 'Error occurred');
+        resetState();
+      }
     }).catch(err => {
       model.set('message', 'Error occurred:' + err);
       resetState();
@@ -201,17 +185,17 @@ const ResourcesController = function () {
       let combo_constructors = model.get(['config', 'combo_constructors']);
       if (combo_constructors && combo_constructors.length) {
         //Cargar los datos de los combos
-        return setComboConstructors(combo_constructors).then(function(){
+        return setComboConstructors(combo_constructors).then(function () {
           model.set('records', results.data, true);
           setSelectedRecord(null, null, false);
-          if(msg){
+          if (msg) {
             model.set('message', msg, true);
           }
           resetState();
         });
       } else {
         model.set('records', results.data, true);
-        if(msg){
+        if (msg) {
           model.set('message', msg, true);
         }
         resetState();
@@ -219,43 +203,45 @@ const ResourcesController = function () {
     });
   }
 
-  const doUpdate = () => {
-    const selected_record = model.get('selected_record');
-    if(!selected_record){
+  const doUpdate = (record) => {
+    const selected_record = record;
+    if (!selected_record) {
       return;
     }
+
     let resource_id = selected_record._id;
     let metadata = {
       name: selected_record.name,
       description: selected_record.description,
-      activity_type: selected_record.resource_type,
+      resource_type: selected_record.resource_type,
       level: selected_record.level,
       published: selected_record.published,
       capacity: selected_record.capacity,
       cognitive_process: selected_record.cognitive_process,
       competence: selected_record.competence,
-      url: selected_record.url
+      url: selected_record.url,
+      original_name: selected_record.original_name,
+      folder_name: selected_record.folder_name,
     };
 
     return Promise.all([
       feathersServices.resources.update(resource_id, metadata, {}),
     ]).then(results => {
-        if(results && results.length){
-          let index = R.findIndex(R.propEq('_id', results[1]._id))(model.get('records')); //=> 1
-          model.setRecord(index, results[1]);
-          model.set('message', 'El recurso se ha actualizado correctamente');
-          resetState();
-        } else {
-          model.set('message', 'Error occurred: no data');
-          resetState();
-        }
+      if (results && results.length) {
+        let message = 'El recurso se ha actualizado correctamente';
+        loadResources(message);
+        resetState();
+      } else {
+        model.set('message', 'Error occurred: no data');
+        resetState();
+      }
     }).catch(err => {
       model.set('message', 'Error occurred:' + err);
       resetState();
     });
   };
 
-  const resourceUploaded = function(){
+  const resourceUploaded = function () {
     let message = 'El recurso se ha cargado correctamente';
     loadResources(message);
   };
@@ -264,7 +250,7 @@ const ResourcesController = function () {
     model.set('selected_record', null, false);
     model.set('state', 'initial', true);
     window.dispatchEvent(new Event('resize'));
-    if (model.get('message') && model.get('message') !== ''){
+    if (model.get('message') && model.get('message') !== '') {
       setTimeout(() => {
         model.set('message', '', true);
       }, 4000);

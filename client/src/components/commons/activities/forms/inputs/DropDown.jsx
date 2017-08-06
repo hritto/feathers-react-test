@@ -6,6 +6,9 @@ const DropdownSelection = (props) => {
   const handleChange = (evt, result) => {
     props.change(props.field, result.value);
   }
+
+  console.log(R.view(R.lensPath(props.field), props.state))
+
   return (
     <Form.Field>
       <label>{props.title}</label>
