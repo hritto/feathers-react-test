@@ -3,6 +3,8 @@ import _sa from 'scaleapp';
 import Promise from 'bluebird';
 import _SaInit from '../core-plugins/init';
 import _SaModulesInit from './init';
+import feathers_uploadService from './common/feathers_client_io';
+import CommonJS from './common/current_user.js';
 
 (function() {
   'use strict';
@@ -53,6 +55,13 @@ App.application = () => {
       logout: null
     };
 
+    const login = (credentials) => {
+      if(credentials){
+        loadApp();
+      }
+      showLogin();
+    };
+
     const initialize = (opts) => {
       core = new _sa.Core();
       // Inicializar los plugins del Core
@@ -63,7 +72,27 @@ App.application = () => {
 
       // Atender a eventos de modulos
       subscribeEvents();
+      const credentials = CommonJS.CurrentUser.getUserData();
+      debugger;
+      login(credentials)
+    };
 
+
+    const showLogin = (error = {}) => {
+      if(document.querySelectorAll('.login').length) {
+        document.querySelector('.heading').insertAdjacentHTML('beforeend', `<p>There was an error: ${error.message}</p>`);
+      } else {
+        core.promise.moduleStart(core, "Login", {
+            options: {
+                el: 'app'
+            }
+        })
+
+      }
+    };
+
+
+    const loadApp = () => {
       core.promise.moduleStart(core, "Layout", {
           options: {
               el: 'app'

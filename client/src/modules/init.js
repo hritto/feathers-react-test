@@ -1,5 +1,6 @@
 const AppModules = AppModules || {};
 const Layout = require('./layout/module.js');
+const Login = require('./login/module.js');
 const Navigation = require('./navigation/module.js');
 const Users = require('./users/module.js');
 const Activities = require('./activities/module.js');
@@ -16,6 +17,7 @@ AppModules.init = (function() {
     var initialize = function(core) {
         // Registrar los modulos en el application
         core.register("Layout", Layout.module);
+        core.register("Login", Login.module);
         core.register("Navigation", Navigation.module);
         core.register("Users", Users.module);
         core.register("Activities", Activities.module);

@@ -23,6 +23,8 @@ const fs = require('fs-blob-store');
 const blobStorage = fs(__dirname + '/uploads');
 const blobStorageResources = fs(__dirname + '/resources');
 
+const authentication = require('./authentication');
+
 const app = feathers();
 
 // Load app configuration
@@ -41,6 +43,9 @@ app.use('/', feathers.static(app.get('public')));
 app.configure(hooks());
 app.configure(rest());
 app.configure(socketio());
+
+
+app.configure(authentication);
 
 
 // Set up our services (see `services/index.js`)
