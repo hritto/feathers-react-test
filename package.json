@@ -49,6 +49,7 @@
     "fs-blob-store": "^5.2.1",
     "helmet": "^3.6.1",
     "interactjs": "^1.2.9",
+    "isemail": "^3.0.0",
     "multer": "^1.3.0",
     "nedb": "^1.8.0",
     "ramda": "^0.24.1",

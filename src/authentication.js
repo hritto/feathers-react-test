@@ -2,17 +2,14 @@ const authentication = require('feathers-authentication');
 const jwt = require('feathers-authentication-jwt');
 const local = require('feathers-authentication-local');
 
-
-
 module.exports = function () {
   const app = this;
   const config = app.get('authentication');
-  config.strategies.push('local');
-console.log(config)
+
   // Set up authentication with the secret
   app.configure(authentication(config));
   app.configure(jwt());
-  app.configure(local(config.local)); // to add
+  app.configure(local(config.local));
 
   // The `authentication` service is used to create a JWT.
   // The before `create` hook registers strategies that can be used
@@ -20,11 +17,20 @@ console.log(config)
   app.service('authentication').hooks({
     before: {
       create: [
-        authentication.hooks.authenticate(config.strategies)
+        authentication.hooks.authenticate(config.strategies),
       ],
       remove: [
         authentication.hooks.authenticate('jwt')
       ]
+    },
+    after: {
+      create: [hook => {
+        hook.result.user = hook.params.user;
+
+        // Don't expose sensitive information.
+        //delete hook.result.user.password;
+      }]
+
     }
   });
 };

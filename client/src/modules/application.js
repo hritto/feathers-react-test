@@ -3,8 +3,9 @@ import _sa from 'scaleapp';
 import Promise from 'bluebird';
 import _SaInit from '../core-plugins/init';
 import _SaModulesInit from './init';
-import feathers_uploadService from './common/feathers_client_io';
 import CommonJS from './common/current_user.js';
+import client from './common/client.js';
+
 
 (function() {
   'use strict';
@@ -46,6 +47,7 @@ import CommonJS from './common/current_user.js';
 
 App.application = () => {
     'use strict';
+
     let core = null;
     let modules = null;
     let module_config = null;
@@ -55,11 +57,28 @@ App.application = () => {
       logout: null
     };
 
-    const login = (credentials) => {
-      if(credentials){
-        loadApp();
-      }
-      showLogin();
+    const login = () => {
+      client.authenticate().then((response) => {
+        if(response && response.accessToken){
+          CommonJS.CurrentUser.setUserData(response.user);
+          //El usuario está registrado
+          if(core.promise.isModuleRunning('Login')){
+            return core.promise.moduleStop(core, "Login", {
+                options: {
+                    el: 'app'
+                }
+            }).then(function(){
+              loadApp();
+            });
+          } else {
+            loadApp();
+          }
+        } else {
+          showLogin();
+        }
+      }).catch((e) => {
+        showLogin(e);
+      });
     };
 
     const initialize = (opts) => {
@@ -68,13 +87,12 @@ App.application = () => {
       _SaInit.module.initialize(core);
       // Inicializar modulos
       _SaModulesInit.module.init.initialize(core);
+
       core.boot();
 
       // Atender a eventos de modulos
       subscribeEvents();
-      const credentials = CommonJS.CurrentUser.getUserData();
-      debugger;
-      login(credentials)
+      login();
     };
 
 
@@ -93,6 +111,7 @@ App.application = () => {
 
 
     const loadApp = () => {
+      //Iniciar la aplicacion de administracion
       core.promise.moduleStart(core, "Layout", {
           options: {
               el: 'app'
@@ -111,6 +130,7 @@ App.application = () => {
       subscriptions.navigation_menu_click = core.on("layout.navigation.menuClick", _.bind(onNavigationMenuClick));
       subscriptions.start_module = core.on("application.startModule", _.bind(onStartModule));
       subscriptions.stop_module = core.on("application.stopModule", _.bind(onStopModule));
+      subscriptions.login = core.on("application.login", _.bind(login));
       subscriptions.logout = core.on("application.logout", _.bind(onlogOut));
     };
 

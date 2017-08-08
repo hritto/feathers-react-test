@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import client from './client.js';
+import client from '../../modules/common/client.js';
 
 export default class LoginView extends Component {
   constructor(props) {
@@ -14,28 +14,36 @@ export default class LoginView extends Component {
 
   login() {
     const { email, password } = this.state;
-debugger;
+
     client.authenticate({
       strategy: 'local',
       email, password
     }).then(token => {
-      console.log("*****************")
-      debugger;
+      this.props.controller.setCurrentUser(token, this.state);
     }).catch((error) => {
       console.log("*****************")
-      debugger;
       this.setState({ error })
     });
   }
 
   signup() {
     const { email, password } = this.state;
-
-    return client.service('users')
-      .create({ email, password })
+    const users = client.service('/users');
+    return users.create(
+      {
+        "name":"Test",
+        "surname":"User",
+        "email":"test@test.com",
+        "gender":"female",
+        "role":"editor",
+        "active":1,
+        "password":"123456",
+        "photo":"/assets/images/avatar/avatar_45.png"
+      })
       .then((token) => {
-        debugger;
         this.login()
+      }).catch((e) => {
+        console.log(e);
       });
   }
 
@@ -63,9 +71,9 @@ debugger;
               Log in
             </button>
 
-            <button type="button" className="button button-primary block signup" onClick={() => this.signup()}>
+            {/*<button type="button" className="button button-primary block signup" onClick={() => this.signup()}>
               Signup
-            </button>
+            </button>*/}
 
           </form>
         </div>

@@ -1,5 +1,5 @@
 let corePlugins = corePlugins || {};
-const _sa = require("scaleapp");
+import * as _sa from "scaleapp";
 const Promise = require("bluebird");
 const _SaPromises = require("./scaleapp-promises.js");
 const _SaUtils = require("./scaleapp-util.js");
@@ -11,7 +11,6 @@ corePlugins.init = (function() {
         core.use(_sa.plugins.ls);
         core.use(_SaPromises.module);
         core.use(_SaUtils.module);
-
     };
 
     return {

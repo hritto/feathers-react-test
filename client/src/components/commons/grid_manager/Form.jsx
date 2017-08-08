@@ -9,7 +9,7 @@ import SimpleTextArea from './inputs/TextAreaSimple.jsx';
 import AvatarSelector from '../AvatarSelector.jsx';
 import SimpleAvatar from './inputs/SimpleAvatar.jsx';
 import DropzoneComponent from 'react-dropzone-component';
-import uploadService from '../../../modules/common/feathers_client_io.js'
+import client from '../../../modules/common/client.js';
 import R from 'ramda';
 import Helpers from '../helpers.js';
 import Promise from 'bluebird';
@@ -58,6 +58,7 @@ class FormGroup extends Component {
 
   componentDidMount() {
     let self = this;
+    const uploadService = client.service('/uploads');
 
     // Callback de la creación de imágenes en el servidor
     uploadService.removeListener('created').on('created', function (file) {

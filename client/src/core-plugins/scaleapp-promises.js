@@ -35,9 +35,10 @@ corePlugins.ScaleAppPromises = function(core, options) {
     };
 
     const isModuleRunning = (module) => {
-        return _.findIndex(core.lsInstances(), function(instance) {
-            return instance === module;
-        }) >= 0;
+      var i = _.find(core._instances, function(instance, key) {
+          return key === module;
+      });
+        return _.size(i) > 0;
     };
 
     const moduleEmit = (start_event, end_event, data) => {

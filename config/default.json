@@ -8,9 +8,10 @@
   },
   "nedb": "../data",
   "authentication": {
-    "secret": "e32b23da06dd910b22d76972be058e6c3dde19b81922232ca812bb03a21f561bc4072349bd33af8235a6b47e910ff9fed6363dbdb56320c90227685f8eebfb9c6a43927540e9dbd0a0514f1f257478b194e0855b5a55813405f3b0faa1749389adab66d26700a43e8dacdf9f6e9e265636afae21893f66663f7178ed5ad9da7c1dec092bf16843c065cafb4424eeab8054a01d4a23db4248cff268bd0208bcf149564137b6426ed41780f51143519c69b75addfe69093d3be08d4548da3a0815c630437229330a9c61b0f2a74f94cdcbbecdf952512e3cfce425de909d881ee4b9e99bf1962ef6a5a22be84a2c2f12a90de0c7a0aa028cbc545a27b8742d4200",
+    "secret": "301b38f386fb016d67e48bb806ffc640bd06d415a9568190920561f7e443166e4c9f92bdadee80dce2acd8a1c78883172b82e370966f356d81c7eaab44f24b463dcc1b5bd3e97e485f133403f99b8f5f751b1c968270e3cff16f311675b594c9cf230928568a716f002947c86d117b904c87d4789b8c24f8be64912f1690566a2bcf4ca627cdec54246a51366cc1eeae8160ef829c9cdaf3e17fc91113230a8c26add1f8e8272b63954776567d6f153133a2319ee7b0bbf323efee0108fd43900370a64ec19a9575f490c71d62f4f0b3db0e3fe6641c27ed0284dba5dc7218f8fd421e4bd2e9b75cc3a673b8d1de9c2af8ee98976c53d247cc36d36a6903ecbd",
     "strategies": [
-      "jwt"
+      "jwt",
+      "local"
     ],
     "path": "/authentication",
     "service": "users",
@@ -23,6 +24,12 @@
       "issuer": "feathers",
       "algorithm": "HS256",
       "expiresIn": "1d"
+    },
+    "local": {
+      "entity": "user",
+      "service": "users",
+      "usernameField": "email",
+      "passwordField": "password"
     }
   }
 }

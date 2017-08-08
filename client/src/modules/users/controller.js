@@ -2,24 +2,38 @@ const Promise = require("bluebird");
 import ResponsiveHelper from '../common/responsive_helpers.js';
 import Validators from '../common/validators.js';
 import R from 'ramda'
-import feathersServices from '../common/feathers_client';
+import client from '../common/client';
 
 
 const UsersController = function() {
   let options = null;
   let model = null;
   let sb = null;
-/*
-  const feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
-  const users = feathersClient.service('/users');
-  const media = feathersClient.service('/media');
-*/
+  const users = client.service('/users');
+  const media = client.service('/media');
+
   const initialize = (opts, mdl) => {
     options = opts;
     model = mdl;
     sb = opts.sb;
     ResponsiveHelper();
-    return feathersServices.users.find().then(results => {
+
+    /*
+    return users.create({
+      "name":"John Carter",
+      "surname":"From Mars",
+      "gender":"male",
+      "active":1,
+      "email":"test@test.com",
+      "password":"123456",
+      "role":"admin",
+      "photo":"bd2a6a355d98ea2240a61680dd834ef1116da46dde7f55e499789eeea9ad60d9.png"
+    }).then(results => {
+      model.set('records', results.data, true);
+    });
+    */
+
+    return users.find().then(results => {
       model.set('records', results.data, true);
     });
   };
@@ -58,7 +72,7 @@ const UsersController = function() {
         return resolve();
       }).then(function(){
         setSelectedRecord(opts, model.getVoidRecord(), false);
-        return feathersServices.media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
+        return media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
           model.set('avatars', results.data, false);
           model.set('state', opts.action, true);
         });
@@ -99,9 +113,9 @@ const UsersController = function() {
   };
 
   const getRemoteRecord = (opts) => {
-    return feathersServices.users.find({ query: { _id: opts.id } }).then(results => {
+    return users.find({ query: { _id: opts.id } }).then(results => {
       setSelectedRecord(opts, results.data[0], true);
-      return feathersServices.media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
+      return media.find({ query: { mediatype: "avatar", "$limit": 100, } }).then(results => {
         model.set('avatars', results.data, false);
         model.set('state', opts.action, true);
       });
@@ -163,7 +177,7 @@ const UsersController = function() {
       delete data.active_tab;
     }
     return Promise.all([
-      feathersServices.users.update(data._id, data, {}),
+      users.update(data._id, data, {}),
     ]).then(results => {
         if(results && results.length){
           let index = R.findIndex(R.propEq('_id', results[0]._id))(model.get('records')); //=> 1
@@ -184,7 +198,7 @@ const UsersController = function() {
     Promise.all([
       users.remove(data._id, { query: { _id: data._id }})
     ]).then(results => {
-        return feathersServices.users.find().then(results => {
+        return users.find().then(results => {
           model.set('records', results.data, true);
           resetState();
         });
@@ -193,7 +207,6 @@ const UsersController = function() {
       console.log('Error occurred:', err)
       resetState();
     });
-
   };
 
   const doCreate = (data) => {
@@ -202,9 +215,9 @@ const UsersController = function() {
       delete data.active_tab;
     }
     Promise.all([
-      feathersServices.users.create(data),
+      users.create(data),
     ]).then(results => {
-        return feathersServices.users.find().then(results => {
+        return users.find().then(results => {
           model.set('records', results.data, true);
           resetState();
         });

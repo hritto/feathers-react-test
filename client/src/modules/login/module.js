@@ -42,7 +42,8 @@ const Login = function(sb) {
   };
 
   const destroy = (done) => {
-
+    ReactDOM.unmountComponentAtNode(document.getElementById(options.el));
+    done();
   };
 
   return {
