@@ -25,10 +25,17 @@ module.exports = function () {
     },
     after: {
       create: [hook => {
-        hook.result.user = hook.params.user;
+        hook.result.user = {
+          name: hook.params.user.name,
+          surname: hook.params.user.surname,
+          email: hook.params.user.email,
+          role: hook.params.user.role,
+          photo: hook.params.user.photo,
+          _id: hook.params.user._id,
+        };
 
         // Don't expose sensitive information.
-        //delete hook.result.user.password;
+        // delete hook.result.user.password;
       }]
 
     }

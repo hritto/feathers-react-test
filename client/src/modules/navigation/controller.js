@@ -1,6 +1,7 @@
 const Promise = require("bluebird");
+import client from '../common/client.js';
 
-const NavigationController = function() {
+const NavigationController = function () {
   let options = null;
   let model = null;
   let sb = null;
@@ -18,11 +19,11 @@ const NavigationController = function() {
     let current = config[current_item];
     let opts = {
       index: index,
-      module:next,
+      module: next,
       current: current
     };
 
-    if(current.route === next.route){
+    if (current.route === next.route) {
       return;
     } else {
       sb.emit("layout.navigation.menuClick", opts);
@@ -31,6 +32,11 @@ const NavigationController = function() {
     model.set('current_item', index, true);
   }
 
+  const logoutClick = () => {
+    client.logout();
+    window.location.reload();
+  };
+
   const destroy = () => {
     model.destroy();
   };
@@ -38,6 +44,7 @@ const NavigationController = function() {
   return {
     initialize: initialize,
     menuClick: menuClick,
+    logoutClick: logoutClick,
     destroy: destroy,
   };
 };

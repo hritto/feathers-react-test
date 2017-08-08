@@ -14,14 +14,14 @@ export default class LoginView extends Component {
 
   login() {
     const { email, password } = this.state;
-
-    client.authenticate({
+    this.props.controller.userAuthenticate({
       strategy: 'local',
       email, password
     }).then(token => {
       this.props.controller.setCurrentUser(token, this.state);
     }).catch((error) => {
-      console.log("*****************")
+      debugger;
+      console.log(error)
       this.setState({ error })
     });
   }
@@ -31,14 +31,14 @@ export default class LoginView extends Component {
     const users = client.service('/users');
     return users.create(
       {
-        "name":"Test",
-        "surname":"User",
-        "email":"test@test.com",
-        "gender":"female",
-        "role":"editor",
-        "active":1,
-        "password":"123456",
-        "photo":"/assets/images/avatar/avatar_45.png"
+        "name": "Test",
+        "surname": "User",
+        "email": "test@test.com",
+        "gender": "female",
+        "role": "editor",
+        "active": 1,
+        "password": "123456",
+        "photo": "/assets/images/avatar/avatar_45.png"
       })
       .then((token) => {
         this.login()

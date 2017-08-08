@@ -4,85 +4,85 @@ const Promise = require("bluebird");
 const _ = require('lodash');
 
 
-corePlugins.ScaleAppPromises = function(core, options) {
-    'use strict';
+corePlugins.ScaleAppPromises = function (core, options) {
+  'use strict';
 
-    /* Inicializar el plugin
-     */
-    const onPluginInit = (instanceSandbox, options) => {};
+  /* Inicializar el plugin
+   */
+  const onPluginInit = (instanceSandbox, options) => {};
 
-    /* Liberar medios
-     */
-    const onPluginDestroy = () => {};
+  /* Liberar medios
+   */
+  const onPluginDestroy = () => {};
 
-    const moduleStart = (core, module, options) => {
-        return new Promise(function(resolve, reject) {
-            core.start(module, options,
-                function() {
-                    resolve();
-                }
-            );
-        });
-    };
+  const moduleStart = (core, module, options) => {
+    return new Promise(function (resolve, reject) {
+      core.start(module, options,
+        function () {
+          return resolve();
+        }
+      );
+    });
+  };
 
-    const moduleStop = (core, module, options) => {
-        return new Promise(function(resolve, error) {
-            console.log("detener " + module);
-            core.stop(module, function() {
-                resolve();
-            });
-        });
-    };
-
-    const isModuleRunning = (module) => {
-      var i = _.find(core._instances, function(instance, key) {
-          return key === module;
+  const moduleStop = (core, module, options) => {
+    return new Promise(function (resolve, error) {
+      console.log("detener " + module);
+      core.stop(module, function () {
+        return resolve();
       });
-        return _.size(i) > 0;
-    };
+    });
+  };
 
-    const moduleEmit = (start_event, end_event, data) => {
-        return new Promise(function(resolve, reject) {
-            var subscription;
+  const isModuleRunning = (module) => {
+    var i = _.find(core._instances, function (instance, key) {
+      return key === module;
+    });
+    return _.size(i) > 0;
+  };
 
-            // Subscribirse a cuando el stage haya terminado de mostrar el cast
-            subscription = core.on(end_event, function(eventData) {
-                subscription.detach();
-                resolve(eventData);
-            });
+  const moduleEmit = (start_event, end_event, data) => {
+    return new Promise(function (resolve, reject) {
+      var subscription;
 
-            //Esconder la liga (evento)
-            core.emit(start_event, data);
-        });
-    };
+      // Subscribirse a cuando el stage haya terminado de mostrar el cast
+      subscription = core.on(end_event, function (eventData) {
+        subscription.detach();
+        resolve(eventData);
+      });
+
+      //Esconder la liga (evento)
+      core.emit(start_event, data);
+    });
+  };
 
 
-    // Extender el core
-    _.extend(core, {
-        promise: {
-            moduleStart: moduleStart,
-            moduleStop: moduleStop,
-            isModuleRunning: isModuleRunning,
-            moduleEmit: moduleEmit
-        }
-    }, this);
+  // Extender el core
+  _.extend(core, {
+    promise: {
+      moduleStart: moduleStart,
+      moduleStop: moduleStop,
+      isModuleRunning: isModuleRunning,
+      moduleEmit: moduleEmit
+    }
+  }, this);
 
-    // Extender el sandbox
-    _.extend(core.Sandbox.prototype, {
-        promise: {
-            moduleStart: moduleStart,
-            moduleStop: moduleStop,
-            isModuleRunning: isModuleRunning,
-            moduleEmit: moduleEmit
-        }
-    }, this);
+  // Extender el sandbox
+  _.extend(core.Sandbox.prototype, {
+    promise: {
+      moduleStart: moduleStart,
+      moduleStop: moduleStop,
+      isModuleRunning: isModuleRunning,
+      moduleEmit: moduleEmit
+    }
+  }, this);
 
-    return {
-        init: onPluginInit,
-        destroy: onPluginDestroy
-    };
+  return {
+    init: onPluginInit,
+    destroy: onPluginDestroy
+  };
 };
 
 module.exports = {
-    module: corePlugins.ScaleAppPromises
+  module: corePlugins.ScaleAppPromises
 };

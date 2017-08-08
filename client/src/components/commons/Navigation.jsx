@@ -23,6 +23,16 @@ const NavigationLayout = (props) => {
   const mapIndexed = R.addIndex(R.map);
   let items = props.model.config || [];
   let menu = mapIndexed(item, items, props);
+  menu.push(<Menu.Item
+    name='logout'
+    key='logout'
+    active={false}
+    onClick={props.controller.logoutClick.bind(this)}>
+    <Icon
+      color='red'
+      name='power' />
+    Salir
+  </Menu.Item>)
   return (
     <div>
       {menu}
