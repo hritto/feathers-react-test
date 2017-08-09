@@ -472,7 +472,6 @@ const Scene_1 = () => {
       "top": resizer.getSimpleSize(pos[index].y) + "px",
       "border": "1px solid red"
     });
-
   };
 
   var destroy = function () {

@@ -3,7 +3,7 @@ import endWindow from './end_window.js';
 import introWindow from './intro_window.js';
 import R from 'ramda';
 
-const Scene_1 = function() {
+const Scene_1 = function () {
 
   var config = null;
   var el = null;
@@ -39,7 +39,7 @@ const Scene_1 = function() {
   var animate_answers = null; //Si las respustas se animan (OK o KO)
   var endActivityCallback = null;
 
-  var initialize = function(options, med, res, resizer_obj, layout_obj, _menu, endActivity) {
+  var initialize = function (options, med, res, resizer_obj, layout_obj, _menu, endActivity) {
 
     config = options;
     media = med;
@@ -55,12 +55,12 @@ const Scene_1 = function() {
     animate_answers = config.animate_answers;
 
 
-    return render().then(function() {
+    return render().then(function () {
       // Crear la escena
-      return promiseShowIntroScene().then(function() {
+      return promiseShowIntroScene().then(function () {
         //Se ha terminado de renderizar la escena
         //Abrir el menu
-        if(config.show_instruction){
+        if (config.show_instruction) {
           menu.open();
         }
         return Promise.resolve();
@@ -68,7 +68,7 @@ const Scene_1 = function() {
     });
   };
 
-  var promiseShowIntroScene = function() {
+  var promiseShowIntroScene = function () {
     //CONFIGURACIÓN DE LA PANTALLA INICIAL (COMENZAR)
     var init_options;
     if (!menu.getAudioEnabled() && config.show_instruction && is_mobile() && config.init_config.show_intro) { //La ventana inicial solo se muestra en dispositivos móviles
@@ -76,8 +76,8 @@ const Scene_1 = function() {
       init_options = config.init_config;
       intro_object = new introWindow(media, lib, resizer);
 
-      return new Promise(function(resolve, reject) {
-        intro_object.init(init_options).then(function() {
+      return new Promise(function (resolve, reject) {
+        intro_object.init(init_options).then(function () {
           //Ya se puede activar el audio
           menu.setAudioEnabled(true);
           intro_object.destroy();
@@ -90,15 +90,15 @@ const Scene_1 = function() {
     }
   };
 
-  var get = function(id) {
+  var get = function (id) {
     return document.getElementById(id);
   };
 
   // Funcion que renderiza la escena, despues de cargar las imagenes
-  var render = function() {
+  var render = function () {
 
     //dibujar la escena
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       //Dibujar el fondo, si tiene
       if (config.main_back) {
         var img = media.getImage(config.main_back);
@@ -111,7 +111,7 @@ const Scene_1 = function() {
       }
 
       //Ver si necesita botones visibles
-      _.each(config.buttons_visible, function(value, key) {
+      _.each(config.buttons_visible, function (value, key) {
         $('#' + key).css({
           "display": value ? "block" : "none"
         });
@@ -123,29 +123,29 @@ const Scene_1 = function() {
       menu.startButtonsEvents(active_buttons);
 
       //Dibujar los contenedores
-      return drawQuestion(config.elements).then(function() {
+      return drawQuestion(config.elements).then(function () {
         //Dibujar los arrastrables
         return drawAnswers(config.elements);
-      }).then(function() {
-        return Promise.delay(100).then(function() {
+      }).then(function () {
+        return Promise.delay(100).then(function () {
           resolve();
         })
       });
     });
   };
 
-  var getSound = function(id){
-    var s = _.find(config.elements, function(value, key){
+  var getSound = function (id) {
+    var s = _.find(config.elements, function (value, key) {
       return value.id === id;
     })
-    if(s && s.sound){
+    if (s && s.sound) {
       return s.sound;
     }
     return false;
   };
 
   //RESOLUCIÓN
-  var checkClick = function(e) {
+  var checkClick = function (e) {
     //Controlar que en cada contenedor haya la cantidad correcta de elementos
     //En este caso basta contarlos, puesto que no es posible poner elementos equivocados en el contenedor
     var ok = false;
@@ -165,20 +165,20 @@ const Scene_1 = function() {
         "top": resizer.getSimpleSize(-10) + "px",
         "right": resizer.getSimpleSize(-10) + "px"
       });
-      if(animate_answers){
+      if (animate_answers) {
         $('#' + e.target.id).animateCss('bounce');
       }
 
       sound = getSound(e.target.id);
-      if(sound){ //Si la respuesta tiene un sonido especial
+      if (sound) { //Si la respuesta tiene un sonido especial
         lib.play(sound); //Hacer sonar la respuesta
       } else { //Hacer sonar el sonido de OK por defecto
         lib.play("success");
       }
-      return Promise.delay(2000).then(function() {
+      return Promise.delay(2000).then(function () {
         //Si hay varias respuestas, ver si ya se han respondido todas las necesarias
-        if(multiple_answers){
-          if(checkResolutionCompete()){
+        if (multiple_answers) {
+          if (checkResolutionCompete()) {
             promiseEndOk();
           } else {
             $('#screenBlocker').css('display', 'none');
@@ -189,49 +189,49 @@ const Scene_1 = function() {
       });
     } else {
       //Error
-      if(animate_answers){
+      if (animate_answers) {
         $('#' + e.target.id).animateCss("shake");
       }
       error_counter++;
       if (error_counter < 3) {
         lib.play("fail");
-        return Promise.delay(2000).then(function() {
+        return Promise.delay(2000).then(function () {
           $('#screenBlocker').css('display', 'none');
         });
       } else {
         error_counter = 0;
         //Mostrar cartel
         lib.play("fail");
-        return promiseShowResults('signal_ko').then(function() {
+        return promiseShowResults('signal_ko').then(function () {
           return Promise.resolve();
         });
       }
     }
   };
 
-  var checkResolutionCompete = function(){
+  var checkResolutionCompete = function () {
     var els_ok = [];
-    _.each(resolution, function(val, key){
-      if(val){
+    _.each(resolution, function (val, key) {
+      if (val) {
         els_ok.push(key);
       }
     });
-    if(els_ok.length === resolved_elements.length){
+    if (els_ok.length === resolved_elements.length) {
       return true;
     }
     return false;
   }
 
-  var drawQuestion = function(els) {
+  var drawQuestion = function (els) {
     var container = document.getElementById('container');
-    _.each(els, function(value, key) {
+    _.each(els, function (value, key) {
       if (value.type === "question_model") {
         containers.push(value);
       }
     });
 
-    return new Promise(function(resolve, reject) {
-      _.each(containers, function(value, key) {
+    return new Promise(function (resolve, reject) {
+      _.each(containers, function (value, key) {
         drawQuestionElement(value, value.id, containers.length, container, key);
       });
       resolve();
@@ -253,7 +253,7 @@ const Scene_1 = function() {
     return config;
   };
 
-  var drawQuestionElement = function(el, k, total, container, index) {
+  var drawQuestionElement = function (el, k, total, container, index) {
 
     var elem = "<div id='" + k + "' class='drop-target drop-target" + index + "'></div>";
     var img;
@@ -318,27 +318,27 @@ const Scene_1 = function() {
       });
     }
 
-    $('#question').on('click', function() {
+    $('#question').on('click', function () {
       playQuestion(el.sound);
     });
   };
 
-  var playQuestion = function(sound) {
+  var playQuestion = function (sound) {
     $('#question').off('click');
     $('#screenBlocker').css('display', 'block');
     lib.play(sound);
     _signals.end = lib.on.end.add(_.bind(onEndSound));
   };
 
-  var onEndSound = function(data) {
+  var onEndSound = function (data) {
     _signals.end.detach();
     $('#screenBlocker').css('display', 'none');
-    $('#question').on('click', function() {
+    $('#question').on('click', function () {
       playQuestion(data.id);
     });
   };
 
-  var drawAnswers = function(els) {
+  var drawAnswers = function (els) {
     var y = 0,
       min_h = 0,
       max_h = 0,
@@ -346,7 +346,7 @@ const Scene_1 = function() {
       compensa_h = 0,
       pos_dr = [],
       has_question = false;
-    if(!$('#drag-elements') || !$('#drag-elements').length){
+    if (!$('#drag-elements') || !$('#drag-elements').length) {
       $('#container').append('<div id="drag-elements"></div>');
     }
     var drags = [];
@@ -364,9 +364,8 @@ const Scene_1 = function() {
       "width": resizer.getSimpleSize(config.elements_container.size.w),
       "top": resizer.getSimpleSize(config.elements_container.pos.y),
       "left": resizer.getSimpleSize(config.elements_container.pos.x),
-      "border": "1px solid red"
     });
-    pos_dr = _.shuffle(pos_dr);
+    //pos_dr = _.shuffle(pos_dr);
     var c = document.getElementById('drag-elements');
     return new Promise(function (resolve, reject) {
       _.each(drags, function (value, key) {
@@ -376,8 +375,9 @@ const Scene_1 = function() {
     });
   };
 
-  var drawAnswerElement = function(el, k, total, container, index, pos) {
+  var drawAnswerElement = function (el, k, total, container, index, pos) {
     $(container).append("<div id='" + k + "'></div>");
+
     $('#' + k).css({
       "width": resizer.getSize(el.size).w,
       "height": resizer.getSize(el.size).h,
@@ -386,16 +386,16 @@ const Scene_1 = function() {
       "background-position": "center center",
       "left": resizer.getSimpleSize(pos[index].x) + "px",
       "top": resizer.getSimpleSize(pos[index].y) + "px",
-      "border": "1px solid red"
     });
+
     $('#' + k).on('click', checkClick);
   };
 
-  var promiseEndOk = function(elem) {
-    return new Promise(function(resolve, reject) {
-      Promise.delay(100).then(function() {
-        return promiseShowResults('signal_ok').then(function() {
-          return Promise.delay(1000).then(function() {
+  var promiseEndOk = function (elem) {
+    return new Promise(function (resolve, reject) {
+      Promise.delay(100).then(function () {
+        return promiseShowResults('signal_ok').then(function () {
+          return Promise.delay(1000).then(function () {
             return showEndActivity();
           });
         });
@@ -403,7 +403,7 @@ const Scene_1 = function() {
     });
   };
 
-  var promiseShowResults = function(elem) {
+  var promiseShowResults = function (elem) {
     var audio = menu.getAudioOk();
     var animation = 'ok';
     var animation_elem = '#animation_ok';
@@ -413,24 +413,24 @@ const Scene_1 = function() {
       animation = 'ko'
       animation_elem = '#animation_ko';
     }
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       // Hay que mostrar la ventana de evaluacion
       $('#screenBlocker').css('display', 'block');
       $('#' + elem).css({
         'display': 'block'
       });
       $('#' + elem).animateCss('bounceInDown');
-      $('#' + elem).on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+      $('#' + elem).on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function () {
         $('#' + elem).off('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend');
         lib.play(audio);
         $(animation_elem).animateSprite('play', animation);
         $(animation_elem).animateSprite('restart');
 
-        return Promise.delay(3000).then(function() {
+        return Promise.delay(3000).then(function () {
           $('#' + elem).removeClass();
           $(animation_elem).animateSprite('frame', 1);
           $('#' + elem).animateCss('fadeOutUp');
-          $('#' + elem).on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+          $('#' + elem).on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function () {
             $('#' + elem).off('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend');
             $('#' + elem).css('display', 'none');
 
@@ -447,12 +447,12 @@ const Scene_1 = function() {
   };
 
 
-  var showEndActivity = function() {
+  var showEndActivity = function () {
     // Marcar el fin de la actividad
     end = true;
 
-    return destroy().then(function() {
-      return promiseShowEndScene().then(function() {
+    return destroy().then(function () {
+      return promiseShowEndScene().then(function () {
         //Avisar a la aplicación que se ha acabado la actividad
         endActivityCallback();
       });
@@ -460,15 +460,15 @@ const Scene_1 = function() {
   };
 
 
-  var promiseShowEndScene = function() {
+  var promiseShowEndScene = function () {
     //CONFIGURACIÓN DE LA PANTALLA INICIAL (COMENZAR)
     var end_options, end_object;
     if (config.end_config && config.end_config.show_end) {
       //Hay que mostrar la pantalla FINAL
       end_options = config.end_config;
       end_object = new endWindow(media, lib, resizer);
-      return new Promise(function(resolve, reject) {
-        end_object.init(end_options).then(function() {
+      return new Promise(function (resolve, reject) {
+        end_object.init(end_options).then(function () {
           end_object.destroy();
           end_object = null;
           return resolve();
@@ -480,7 +480,7 @@ const Scene_1 = function() {
 
   };
 
-  var is_mobile = function() {
+  var is_mobile = function () {
     var agents = ['android', 'webos', 'iphone', 'ipad', 'blackberry'];
     for (var i in agents) {
       if (navigator.userAgent.toLowerCase().search(agents[i]) > 0) {
@@ -490,7 +490,7 @@ const Scene_1 = function() {
     return false;
   };
 
-  var destroy = function() {
+  var destroy = function () {
     $('#container').empty();
     resolution = null;
     return Promise.resolve();
