@@ -4,7 +4,7 @@ import R from 'ramda';
 import CommonJS from '../../modules/common/current_user.js';
 import Helpers from './helpers.js';
 
-const colors = ["blue", "teal", "blue", "teal"];
+const colors = ["blue", "blue", "blue", "blue", "teal"];
 
 const item = (m, index, props) => {
   let current = props.model.current_item || 0;
