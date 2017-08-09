@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import {Form, Message, Grid, Button, Segment, Header, Container, Icon, Input} from 'semantic-ui-react';
 import client from '../../modules/common/client.js';
 
 export default class LoginView extends Component {
@@ -20,7 +20,6 @@ export default class LoginView extends Component {
     }).then(token => {
       this.props.controller.setCurrentUser(token, this.state);
     }).catch((error) => {
-      debugger;
       console.log(error)
       this.setState({ error })
     });
@@ -47,37 +46,79 @@ export default class LoginView extends Component {
       });
   }
 
+  componentDidMount() {
+    $('.login_form').animateCss('fadeIn');
+  }
+
 
   render() {
-    return <main className="login container">
-      <div className="row">
-        <div className="col-12 col-6-tablet push-3-tablet text-center heading">
-          <h1 className="font-100">Log in or signup</h1>
-          <p>{this.state.error && this.state.error.message}</p>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col-12 col-6-tablet push-3-tablet col-4-desktop push-4-desktop">
-          <form className="form">
-            <fieldset>
-              <input className="block" type="email" name="email" placeholder="email" onChange={ev => this.updateField('email', ev)} />
-            </fieldset>
+    return (
+    <div className='login_form'>
+      <Segment inverted className='no-margin' >
+        <Header as='header' inverted>
+        {/*<img className='header_logo' src='../assets/images/vivitbooks_logo.png' />*/}
+        Header Content
+        </Header>
+      </Segment>
+      <Container className='segment_spacer'></Container>
+      <Grid centered columns={1} textAlign="center" relaxed>
+        <Grid.Row textAlign="left">
+    			<Grid.Column tablet={10} mobile={16} computer={6}>
+            <Segment attached style={{padding:0}}>
+              <Header as='h2' block className='top_a'>
+                <Icon name='user' />
+                <Header.Content style={{textAlign:'left'}}>
+                  Login
+                  <Header.Subheader>
+                    Introduzca sus credenciales
+                  </Header.Subheader>
+                </Header.Content>
+              </Header>
+            </Segment>
 
-            <fieldset>
-              <input className="block" type="password" name="password" placeholder="password" onChange={ev => this.updateField('password', ev)} />
-            </fieldset>
+            <Segment attached>
+      				<Form>
+      					<Message
+      						error
+      						header={'Invalid credentials'}
+      						content={'Your credentials are invalid.'} />
+                <Form.Field>
+                  <label style={{textAlign:'left'}}>Usuario / Email</label>
+                  <Input icon placeholder="Usuario / Email"
+        						name="username"
+        						onChange={ev => this.updateField('email', ev)}>
+                    <input />
+                    <Icon name='user' />
+                  </Input>
+                </Form.Field>
+                <Form.Field>
+                  <label style={{textAlign:'left'}}>Contraseña</label>
+                  <Input icon placeholder="Contraseña"
+        						name="password"
+                    type="password"
+        						onChange={ev => this.updateField('password', ev)}>
+                    <input />
+                    <Icon name='lock' />
+                  </Input>
+                </Form.Field>
+                </Form>
+              </Segment>
 
-            <button type="button" className="button button-primary block signup" onClick={() => this.login()}>
-              Log in
-            </button>
-
-            {/*<button type="button" className="button button-primary block signup" onClick={() => this.signup()}>
-              Signup
-            </button>*/}
-
-          </form>
-        </div>
-      </div>
-    </main>;
+              <Segment attached style={{padding:0}}>
+                <Header as='h2' block className='bottom_a'>
+                  <Header.Content>
+                    <Button type="button" primary onClick={() => this.login()}>
+                      Entrar
+                    </Button>
+                    {/*<button type="button" className="button button-primary block signup" onClick={() => this.signup()}>
+                      Signup
+                    </button>*/}
+                  </Header.Content>
+                </Header>
+              </Segment>
+    			</Grid.Column>
+    		</Grid.Row>
+  	  </Grid>
+    </div>);
   }
 }

@@ -4,7 +4,7 @@ import { Container, Header, Icon, Menu, Segment, Button, Modal } from 'semantic-
 import R from 'ramda';
 
 
-class PreviewView extends Component {
+class PreviewResourceView extends Component {
   constructor(props) {
     super(props);
     this.state = this.props.model.selected_record;
@@ -38,4 +38,4 @@ class PreviewView extends Component {
   }
 };
 
-export default PreviewView;
+export default PreviewResourceView;

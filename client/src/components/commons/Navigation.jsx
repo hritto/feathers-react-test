@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import { Segment, Button, Menu, Image, Icon, Header } from 'semantic-ui-react'
+import { Segment, Button, Menu, Image, Icon, Header, Label } from 'semantic-ui-react'
 import R from 'ramda';
+import CommonJS from '../../modules/common/current_user.js';
+import Helpers from './helpers.js';
 
 const colors = ["blue", "teal", "blue", "teal"];
 
@@ -19,10 +21,22 @@ const item = (m, index, props) => {
     </Menu.Item>);
 };
 
+const MenuHeader = (data) => (
+  <div className="login-info" key="user_data">
+    <span>
+      <a href="javascript:void(0);" id="show-shortcut">
+        <img src={Helpers.imageParser(data.photo)} alt="me" className="online" />
+        <span>{' '+data.name+' '+data.surname}</span>
+      </a>
+    </span>
+  </div>);
+
+
 const NavigationLayout = (props) => {
   const mapIndexed = R.addIndex(R.map);
   let items = props.model.config || [];
   let menu = mapIndexed(item, items, props);
+  let header = MenuHeader(CommonJS.CurrentUser.getUserData());
   menu.push(<Menu.Item
     name='logout'
     key='logout'
@@ -33,6 +47,8 @@ const NavigationLayout = (props) => {
       name='power' />
     Salir
   </Menu.Item>)
+  menu.unshift(header);
+
   return (
     <div>
       {menu}

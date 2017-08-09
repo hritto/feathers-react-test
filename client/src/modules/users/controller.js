@@ -177,7 +177,7 @@ const UsersController = function() {
       delete data.active_tab;
     }
     return Promise.all([
-      users.update(data._id, data, {}),
+      users.patch(data._id, data, {}),
     ]).then(results => {
         if(results && results.length){
           let index = R.findIndex(R.propEq('_id', results[0]._id))(model.get('records')); //=> 1

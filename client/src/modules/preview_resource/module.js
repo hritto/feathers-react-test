@@ -1,15 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
-import PreviewController from './controller.js';
-import PreviewModal from '../../components/resources/PreviewModal.jsx';
+import PreviewResourceController from './controller.js';
+import PreviewResourceModal from '../../components/resources/PreviewModal.jsx';
 import R from 'ramda'
 
 if (module.hot) {
   module.hot.accept();
 }
 
-const Preview = function (sb) {
+const Preview_Resource = function (sb) {
   'use strict';
   //Estado ---> Model
   let appState = {
@@ -24,9 +24,11 @@ const Preview = function (sb) {
     config: {}
   };
 
+  debugger;
+
   let options = null;
   let _model = Model(appState);
-  let _controller = PreviewController();
+  let _controller = PreviewResourceController();
   const _sb = sb;
 
   const initialize = (opts, done) => {
@@ -43,7 +45,7 @@ const Preview = function (sb) {
   const onRender = (props) => {
     if(props.model.selected_record){
       props.controller = _controller;
-      ReactDOM.render( <PreviewModal { ...props } />,
+      ReactDOM.render( <PreviewResourceModal { ...props } />,
         document.getElementById(options.module.dom[0])
       );
     }
@@ -61,5 +63,5 @@ const Preview = function (sb) {
 };
 
 module.exports = {
-  module: Preview
+  module: Preview_Resource
 };

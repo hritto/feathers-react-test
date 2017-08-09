@@ -1,13 +1,13 @@
 import React from 'react'
 import { Button, Header, Image, Modal, Menu, Item, Segment, Icon } from 'semantic-ui-react'
 import R from 'ramda';
-import PreviewView from './Preview.jsx';
+import PreviewResourceView from './Preview.jsx';
 
 const close = (props) => {
   props.controller.closeModal();
 };
 
-const PreviewModal = (props) => {
+const PreviewResourceModal = (props) => {
     let txt_action = 'Preview';
     return (
         <Modal
@@ -18,9 +18,9 @@ const PreviewModal = (props) => {
           closeOnRootNodeClick={false}>
           <Modal.Header>{txt_action}</Modal.Header>
           <Modal.Content>
-            <PreviewView {...props} />
+            <PreviewResourceView {...props} />
           </Modal.Content>
         </Modal>);
 };
 
-export default PreviewModal;
+export default PreviewResourceModal;

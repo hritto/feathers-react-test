@@ -69,6 +69,7 @@ App.application = () => {
                 }
             }).then(function(){
               loadApp();
+              return Promise.resolve();
             });
           } else {
             loadApp();
@@ -104,7 +105,9 @@ App.application = () => {
             options: {
                 el: 'app'
             }
-        })
+        }).then(function(){
+          return Promise.resolve();
+        });
 
       }
     };
@@ -121,6 +124,8 @@ App.application = () => {
             options: {
                 el: 'menu_items'
             }
+        }).then(function(){
+          return Promise.resolve();
         });
       });
     };

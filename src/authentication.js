@@ -24,6 +24,7 @@ module.exports = function () {
       ]
     },
     after: {
+      // Don't expose sensitive information.
       create: [hook => {
         hook.result.user = {
           name: hook.params.user.name,
@@ -33,11 +34,7 @@ module.exports = function () {
           photo: hook.params.user.photo,
           _id: hook.params.user._id,
         };
-
-        // Don't expose sensitive information.
-        // delete hook.result.user.password;
       }]
-
     }
   });
 };

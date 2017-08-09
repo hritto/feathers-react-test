@@ -1,7 +1,7 @@
 const Promise = require("bluebird");
 import R from 'ramda'
 
-const PreviewController = function () {
+const PreviewResourceController = function () {
   let options = null;
   let model = null;
   let sb = null;
@@ -42,4 +42,4 @@ const PreviewController = function () {
   };
 };
 
-export default PreviewController;
+export default PreviewResourceController;
