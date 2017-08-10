@@ -2,13 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
 import LoginController from './controller.js';
-import LoginView2 from '../../components/commons/LoginViewSemantic.jsx';
+import LoginViewSemantic from '../../components/commons/LoginViewSemantic.jsx';
 
 if (module.hot) {
   module.hot.accept();
 }
 
-const Login = function(sb) {
+const Login = function (sb) {
   'use strict';
 
   //Estado ---> Model
@@ -36,7 +36,9 @@ const Login = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    ReactDOM.render( <LoginViewSemantic {...props} />,
+    ReactDOM.render( < LoginViewSemantic { ...props
+      }
+      />,
       document.getElementById(options.el)
     );
   };
