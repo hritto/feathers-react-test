@@ -7,7 +7,7 @@ import CheckboxLabeled from '../commons/activities/forms/inputs/CheckboxLabeled.
 import DropdownSelection from '../commons/activities/forms/inputs/DropDown.jsx';
 import SimpleTextArea from '../commons/activities/forms/inputs/TextAreaSimple.jsx';
 import DropzoneComponent from 'react-dropzone-component';
-import feathers_uploadService from '../../modules/common/feathers_client_io.js'
+import client from '../../modules/common/client.js'
 import R from 'ramda';
 import Promise from 'bluebird';
 
@@ -197,9 +197,9 @@ class ResourceForm extends Component {
             });
           }
         }
-
+        const upload_service = client.service('/resources')
         // Callback de la creación de imágenes en el servidor
-        feathers_uploadService.uploadResourceService.removeListener('created').on('created', function (file) {
+        upload_service.removeListener('created').on('created', function (file) {
           //Notificar que se ha subido el nuevo recurso
           self.setState((state) => {
             return R.set(R.lensProp('loading'), true, state);

@@ -5,7 +5,7 @@ import SimpleTextArea from './TextAreaSimple.jsx';
 import DropzoneComponent from 'react-dropzone-component';
 import R from 'ramda';
 import Promise from 'bluebird';
-import feathers_uploadService from '../../../../../modules/common/feathers_client_io.js'
+import client from '../../../../../modules/common/client.js'
 
 
 let myDropzone = null;
@@ -93,7 +93,8 @@ const MediaUpload = (props) => {
     }
 
     // Callback de la creación de imágenes en el servidor
-    feathers_uploadService.uploadService.removeListener('created').on('created', function (file) {
+    const upload_service = client.service('/uploads')
+    upload_service.removeListener('created').on('created', function (file) {
         //Notificar al form que se ha subido la nueva imagen
         //y agregarla al estado del formulario
         props.addMedia({
