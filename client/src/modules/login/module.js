@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Model from '../common/model.js';
 import LoginController from './controller.js';
-import LoginView from '../../components/commons/LoginView.jsx';
+import LoginView2 from '../../components/commons/LoginViewSemantic.jsx';
 
 if (module.hot) {
   module.hot.accept();
@@ -36,7 +36,7 @@ const Login = function(sb) {
 
   const onRender = (props) => {
     props.controller = _controller;
-    ReactDOM.render( <LoginView {...props} />,
+    ReactDOM.render( <LoginViewSemantic {...props} />,
       document.getElementById(options.el)
     );
   };

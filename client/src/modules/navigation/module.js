@@ -42,6 +42,16 @@ const Navigation = function(sb) {
       dom: ["main_content"],
       config: [{}],
       instanceIds: ["resources"]
+    },
+    {
+      title: "Planes de trabajo ",
+      icon: "write square",
+      route: "workplans",
+      permission: "workplans",
+      modules: ["WorkPlans"],
+      dom: ["main_content"],
+      config: [{}],
+      instanceIds: ["workplans"]
     }],
     focus_index: 0, //Por defecto, el primer item del menu
     current_item: null

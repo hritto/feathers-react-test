@@ -1,7 +1,5 @@
-const Promise = require("bluebird");
 import React, { Component } from 'react';
 import { Container, Header, Icon, Menu, Segment, Embed } from 'semantic-ui-react';
-import R from 'ramda';
 
 class PreviewResourceView extends Component {
   constructor(props) {
@@ -34,7 +32,6 @@ class PreviewResourceView extends Component {
       return <Embed
         autoplay={true}
         brandedUI={false}
-        color='white'
         hd={false}
         icon='right circle arrow'
         id={this.state.url}
@@ -44,7 +41,6 @@ class PreviewResourceView extends Component {
       return <Embed
         autoplay={true}
         brandedUI={false}
-        color='white'
         hd={false}
         icon='right circle arrow'
         id={this.state.url}
@@ -57,7 +53,7 @@ class PreviewResourceView extends Component {
     return this.getElementPreview();
   }
 
-  /* sandbox="allow-scripts"
+  /* sandbox="allow-scripts" ?
   Pintar el iframe, en caso de no usar SemanticUI Embed
   render() {
     return <Segment id='main_layout'>

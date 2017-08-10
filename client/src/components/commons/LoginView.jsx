@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {Form, Message, Grid, Button, Segment, Header, Container, Icon, Input} from 'semantic-ui-react';
+//import {Form, Message, Grid, Button, Segment, Header, Container, Icon, Input} from 'semantic-ui-react';
+import { Button, Form, Grid, Header, Image, Message, Segment } from 'semantic-ui-react'
 import client from '../../modules/common/client.js';
 
 export default class LoginView extends Component {

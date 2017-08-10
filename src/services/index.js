@@ -5,6 +5,7 @@ const activities = require('./activities/activities.service.js');
 const activityCode = require('./activity-code/activity-code.service.js');
 const resources = require('./resources/resources.service.js');
 const resourceData = require('./resource-data/resource-data.service.js');
+const workplans = require('./workplans/workplans.service.js');
 module.exports = function () {
   const app = this; // eslint-disable-line no-unused-vars
   app.configure(users);
@@ -14,4 +15,5 @@ module.exports = function () {
   app.configure(activityCode);
   app.configure(resources);
   app.configure(resourceData);
+  app.configure(workplans);
 };
