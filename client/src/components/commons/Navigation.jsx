@@ -25,7 +25,7 @@ const MenuHeader = (data) => (
   <div className="login-info" key="user_data">
     <span>
       <a href="javascript:void(0);" id="show-shortcut">
-        <img src={Helpers.imageParser(data.photo)} alt="me" className="online" />
+        <img src={Helpers.imageParser(data.photo)} alt="Yo" className="online" />
         <span>{' '+data.name+' '+data.surname}</span>
       </a>
     </span>

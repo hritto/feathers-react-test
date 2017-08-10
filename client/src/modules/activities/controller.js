@@ -1,20 +1,25 @@
 const Promise = require("bluebird");
 import ResponsiveHelper from '../common/responsive_helpers.js';
-import feathersServices from '../common/feathers_client';
+import client from '../common/client.js';
 import R from 'ramda'
 
 const ActivitiesController = function () {
   let options = null;
   let model = null;
   let sb = null;
-
+  let activities = null;
+  let activityCode = null;
+  let media = null;
 
   const initialize = (opts, mdl) => {
     options = opts;
     model = mdl;
     sb = opts.sb;
+    activities = client.service('/activities');
+    activityCode = client.service('/activity-code');
+    media = client.service('/media');
     ResponsiveHelper();
-    return feathersServices.activities.find().then(results => {
+    return activities.find().then(results => {
       let combo_constructors = model.get(['config', 'combo_constructors']);
       if (combo_constructors && combo_constructors.length) {
         //Cargar los datos de los combos
@@ -36,10 +41,10 @@ const ActivitiesController = function () {
       code_id: '6IZHe1gFlVfWvBbn'
     };
     Promise.all([
-        feathersServices.activities.create(act_data),
+        activities.create(act_data),
       ]).then(results => {
           console.log('created Jane Doe item\n', results[0]);
-          return feathersServices.activities.find().then(results => console.log('find all items\n', results));
+          return activities.find().then(results => console.log('find all items\n', results));
       }).catch(err => console.log('Error occurred:', err));
     */
   };
@@ -107,13 +112,13 @@ const ActivitiesController = function () {
   };
 
   const getRemoteRecord = (opts) => {
-    return feathersServices.activities.find({
+    return activities.find({
       query: {
         _id: opts.id
       }
     }).then(results => {
       setSelectedRecord(opts, results.data[0], true);
-      return feathersServices.activityCode.find({
+      return activityCode.find({
         query: {
           _id: results.data[0].code_id
         }
@@ -184,12 +189,12 @@ const ActivitiesController = function () {
       code: JSON.stringify(code)
     };
     return Promise.all([
-      feathersServices.activityCode.create(code)
+      activityCode.create(code)
     ]).then(data => {
       if(data && data.length){
         meta.code_id = data[0]._id;
         return Promise.all([
-          feathersServices.activities.create(meta)
+          activities.create(meta)
         ]).then(result => {
           //Recargar los datos
           let msg = 'La actividad se ha creado correctamente';
@@ -214,8 +219,8 @@ const ActivitiesController = function () {
     const activity_id = selected_record._id;
     const code_id = selected_record.code_id;
     return Promise.all([
-      feathersServices.activityCode.remove(code_id, {}),
-      feathersServices.activities.remove(activity_id, {}),
+      activityCode.remove(code_id, {}),
+      activities.remove(activity_id, {}),
     ]).then(results => {
         if(results && results.length){
           //Recargar los datos
@@ -235,7 +240,7 @@ const ActivitiesController = function () {
 
   const loadActivities = (msg) => {
     //Recargar los datos
-    return feathersServices.activities.find().then(results => {
+    return activities.find().then(results => {
       let combo_constructors = model.get(['config', 'combo_constructors']);
       if (combo_constructors && combo_constructors.length) {
         //Cargar los datos de los combos
@@ -277,8 +282,8 @@ const ActivitiesController = function () {
     }
     const id = selected_record.code_id;
     return Promise.all([
-      feathersServices.activityCode.update(id, data, {}),
-      feathersServices.activities.update(activity_id, metadata, {}),
+      activityCode.update(id, data, {}),
+      activities.update(activity_id, metadata, {}),
     ]).then(results => {
         if(results && results.length){
           const obj = JSON.parse(results[0].code);
@@ -345,7 +350,7 @@ const ActivitiesController = function () {
       };
     }
 
-    return feathersServices.media.find(query).then(results => {
+    return media.find(query).then(results => {
       if(results && results.data){
         model.set('media_filter_records', results.data, false);
         model.set('media_filter_pagination', {

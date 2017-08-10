@@ -34,9 +34,14 @@ class ResourceForm extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    let metadadata = R.clone(this.state.selected_record);
     if (this.props.model.state === 'create') {
-      let metadadata = R.clone(this.state.selected_record);
-      myDropzone.processQueue();
+      if( this.isUploadResource(this.state.selected_record.resource_type) ) {
+        myDropzone.processQueue();
+      } else {
+        //Realizar el create de los tipos no upload!
+        this.props.controller.doCreate(metadadata);
+      }
     }
 
     if (this.props.model.state === 'delete') {
@@ -53,14 +58,87 @@ class ResourceForm extends Component {
     event.preventDefault();
   }
 
+  /*
+  RESOURCES TYPES
+    key: '0',
+    value: 0,
+    text: 'Actividad interactiva'
 
+    key: '1',
+    value: 1,
+    text: 'Audio'
+
+    key: '2',
+    value: 2,
+    text: 'Vídeo: YouTube'
+
+    key: '3',
+    value: 3,
+    text: 'Vídeo: Vimeo'
+
+    key: '4',
+    value: 4,
+    text: 'Presentación HTML'
+
+    key: '5',
+    value: 5,
+    text: 'Galería de imágenes'
+  */
+
+  isUploadResource(t) {
+    const tipo = parseInt(t, 10);
+    return tipo === 0 || tipo === 1 || tipo === 4 || tipo === 5;
+  }
+
+  getDropZoneConfig(t) {
+    const tipo = parseInt(t, 10);
+    if(!tipo){
+      return {};
+    }
+    let iconFiletypes = ['.zip'];
+
+    return {
+      iconFiletypes: iconFiletypes,
+      showFiletypeIcon: true,
+      postUrl: '/resources',
+    };
+  }
+
+  getDJSConfig(config) {
+
+    let options = config || {};
+    let acceptedFiles = ".zip";
+    let dictDefaultMessage = 'Arrastra aquí el fichero comprimido a subir o haz click para seleccionarlo.';
+    let mediatype = 'zip';
+
+    return {
+      paramName: "uri",
+      uploadMultiple: false,
+      maxFiles: 1,
+      acceptedFiles: acceptedFiles,
+      dictDefaultMessage: dictDefaultMessage,
+      autoProcessQueue: false,
+      params: {
+        mediatype: mediatype,
+        name: this.state.selected_record.name,
+        description: this.state.selected_record.description,
+        level: this.state.selected_record.level,
+        resource_type: this.state.selected_record.resource_type,
+        published: this.state.selected_record.published,
+        competence: this.state.selected_record.competence,
+        cognitive_process: this.state.selected_record.cognitive_process,
+        capacity: this.state.selected_record.capacity,
+      }
+    }
+  }
 
   render() {
     let self = this;
     let fields = '';
     let form_view = '';
     let dropZ = '';
-    console.log(this.state);
+    let id_url_field = '';
+
     if (this.props.model.state === 'delete') {
       let frase = '¿Está seguro de borrar el recurso?';
       fields = <p>{frase}</p>
@@ -98,35 +176,9 @@ class ResourceForm extends Component {
         </Form.Group>
       </div>);
 
-      if (this.props.model.state === 'create') {
-        let iconFiletypes = ['.zip'];
-        let acceptedFiles = ".zip";
-        let dictDefaultMessage = 'Arrastra aquí el fichero comprimido a subir o haz click para seleccionarlo.';
-        let mediatype = 'zip';
-        const componentConfig = {
-          iconFiletypes: iconFiletypes,
-          showFiletypeIcon: true,
-          postUrl: '/resources',
-        };
-        const djsConfig = {
-          paramName: "uri",
-          uploadMultiple: false,
-          maxFiles: 1,
-          acceptedFiles: acceptedFiles,
-          dictDefaultMessage: dictDefaultMessage,
-          autoProcessQueue: false,
-          params: {
-            mediatype: mediatype,
-            name: this.state.selected_record.name,
-            description: this.state.selected_record.description,
-            level: this.state.selected_record.level,
-            resource_type: this.state.selected_record.resource_type,
-            published: this.state.selected_record.published,
-            competence: this.state.selected_record.competence,
-            cognitive_process: this.state.selected_record.cognitive_process,
-            capacity: this.state.selected_record.capacity,
-          }
-        }
+      if (this.props.model.state === 'create' && this.isUploadResource(this.state.selected_record.resource_type)) {
+        const componentConfig = this.getDropZoneConfig(this.state.selected_record.resource_type);
+        const djsConfig = this.getDJSConfig(componentConfig);
         const eventHandlers = {
           init: function (dz) {
             dz.on('uploadprogress', function (file, progress) {
@@ -161,6 +213,8 @@ class ResourceForm extends Component {
         dropZ = <DropzoneComponent config={componentConfig}
           eventHandlers={eventHandlers}
           djsConfig={djsConfig} />
+      } else {
+        id_url_field = <SimpleInputText key={'url'} {...p} name={'url'} title='Id del recurso' field={['selected_record', 'url']} />
       }
 
 
@@ -168,6 +222,7 @@ class ResourceForm extends Component {
       form_view = <Segment attached><Form onSubmit={this.handleSubmit} loading={this.state.loading}>
         {metadata_panel}
         {dropZ}
+        {id_url_field}
         <Button content='Guardar' primary /><Button content='Cancelar' onClick={this.handleCancel} secondary />
       </Form></Segment>
 

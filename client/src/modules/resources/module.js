@@ -41,14 +41,18 @@ const Resources = function (sb) {
               }, {
                 key: '2',
                 value: 2,
-                text: 'Vídeo'
+                text: 'Vídeo: YouTube'
               }, {
                 key: '3',
                 value: 3,
-                text: 'Presentación HTML'
+                text: 'Vídeo: Vimeo'
               }, {
                 key: '4',
                 value: 4,
+                text: 'Presentación HTML'
+              }, {
+                key: '5',
+                value: 5,
                 text: 'Galería de imágenes'
               }]
             });

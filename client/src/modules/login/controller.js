@@ -1,6 +1,5 @@
 const Promise = require("bluebird");
 import CommonJS from '../common/current_user.js';
-//import feathersServices from '../common/feathers_client';
 import client from '../common/client.js';
 
 const LoginController = function () {

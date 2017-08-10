@@ -1,20 +1,21 @@
 const Promise = require("bluebird");
 import ResponsiveHelper from '../common/responsive_helpers.js';
-import feathersServices from '../common/feathers_client';
+import client from '../common/client.js';
 import R from 'ramda'
 
 const ResourcesController = function () {
   let options = null;
   let model = null;
   let sb = null;
-
+  let resources_data = null;
 
   const initialize = (opts, mdl) => {
     options = opts;
     model = mdl;
     sb = opts.sb;
+    resources_data = client.service('/resource-data');
     ResponsiveHelper();
-    return feathersServices.resources.find().then(results => {
+    return resources_data.find().then(results => {
       let combo_constructors = model.get(['config', 'combo_constructors']);
       if (combo_constructors && combo_constructors.length) {
         //Cargar los datos de los combos
@@ -90,7 +91,7 @@ const ResourcesController = function () {
   };
 
   const getRemoteRecord = (opts) => {
-    return feathersServices.resources.find({
+    return resources_data.find({
       query: {
         _id: opts.id
       }
@@ -123,28 +124,30 @@ const ResourcesController = function () {
     model.set('tab', view, true);
   };
 
-  const doCreate = (metadata, code) => {
-    //No existe...
+  const doCreate = (selected_record) => {
+    // Guarda los datos del recurso cuando no es un upload...
     let meta = {
-      name: metadata.name,
-      description: metadata.description,
-      resource_type: metadata.resource_type,
-      level: metadata.level,
-      published: metadata.published,
-      capacity: metadata.capacity,
-      cognitive_process: metadata.cognitive_process,
-      competence: metadata.competence,
-      url: null
+      name: selected_record.name,
+      description: selected_record.description,
+      resource_type: selected_record.resource_type,
+      level: selected_record.level,
+      published: selected_record.published,
+      capacity: selected_record.capacity,
+      cognitive_process: selected_record.cognitive_process,
+      competence: selected_record.competence,
+      url: selected_record.url,
+      original_name: '',
+      folder_name: '',
     };
     return Promise.all([
-      feathersServices.resources.create(meta)
+      resources_data.create(meta)
     ]).then(result => {
       if (result && result.length) {
         //Recargar los datos
         let msg = 'El recurso se ha creado correctamente';
         loadResources(msg);
       } else {
-        model.set('message', 'Error occurred:' + err);
+        model.set('message', 'Error occurred');
         resetState();
       }
     }).catch(err => {
@@ -161,7 +164,7 @@ const ResourcesController = function () {
     }
     const resource_id = selected_record._id;
     return Promise.all([
-      feathersServices.resources.remove(resource_id, {}),
+      resources_data.remove(resource_id, {}),
     ]).then(results => {
       if (results && results.length) {
         //Recargar los datos
@@ -181,7 +184,7 @@ const ResourcesController = function () {
 
   const loadResources = (msg) => {
     //Recargar los datos
-    return feathersServices.resources.find().then(results => {
+    return resources_data.find().then(results => {
       let combo_constructors = model.get(['config', 'combo_constructors']);
       if (combo_constructors && combo_constructors.length) {
         //Cargar los datos de los combos
@@ -225,7 +228,7 @@ const ResourcesController = function () {
     };
 
     return Promise.all([
-      feathersServices.resources.update(resource_id, metadata, {}),
+      resources_data.update(resource_id, metadata, {}),
     ]).then(results => {
       if (results && results.length) {
         let message = 'El recurso se ha actualizado correctamente';

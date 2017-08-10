@@ -24,8 +24,6 @@ const Preview_Resource = function (sb) {
     config: {}
   };
 
-  debugger;
-
   let options = null;
   let _model = Model(appState);
   let _controller = PreviewResourceController();
