@@ -24,6 +24,7 @@ const WorkPlans = function (sb) {
     selected_record: null,
     loading: false, // form, layout, preview
     message: null,
+    active_index: null,
     config: {
       combo_constructors: [{
         level: function () {

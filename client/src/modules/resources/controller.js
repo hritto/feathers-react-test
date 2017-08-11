@@ -228,7 +228,7 @@ const ResourcesController = function () {
     };
 
     return Promise.all([
-      resources_data.update(resource_id, metadata, {}),
+      resources_data.patch(resource_id, metadata, {}),
     ]).then(results => {
       if (results && results.length) {
         let message = 'El recurso se ha actualizado correctamente';

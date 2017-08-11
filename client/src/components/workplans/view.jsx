@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Header, Icon, Menu, Segment, Button, Modal } from 'semantic-ui-react';
-import TableLayout from './Table.jsx';
+import ExpandableLayout from './ExpandableView.jsx';
 import RibbonHeader from '../commons/header.jsx';
 import WorkPlanFormModal from './WorkPlanFormModal.jsx'
 
@@ -11,7 +11,7 @@ const newWorkPlan = (props) => {
 };
 
 const WorkPlansView = (props) => {
-  let cont = <TableLayout {...props} />
+  let cont = <ExpandableLayout {...props} />
   let modal = '';
   let btn = (<Button primary type='button'
     key={'button_new_activity'}

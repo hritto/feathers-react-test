@@ -8,12 +8,14 @@ const WorkPlansController = function () {
   let model = null;
   let sb = null;
   let workplansService = null;
+  const feathersClient = feathers().configure(feathers.rest(serverUrl).fetch(fetch));
 
   const initialize = (opts, mdl) => {
     options = opts;
     model = mdl;
     sb = opts.sb;
-    workplansService = client.service('/workplans');
+    workplansService = feathersClient.service('/workplans');
+
     ResponsiveHelper();
     return workplansService.find().then(results => {
       let combo_constructors = model.get(['config', 'combo_constructors']);
@@ -220,7 +222,7 @@ const WorkPlansController = function () {
     };
 
     return Promise.all([
-      workplansService.update(resource_id, metadata, {}),
+      workplansService.patch(resource_id, metadata, {}),
     ]).then(results => {
       if (results && results.length) {
         let message = 'El plan se ha actualizado correctamente';
@@ -271,6 +273,14 @@ const WorkPlansController = function () {
     });
   };
 
+  const getActiveIndex = () => {
+    return model.get('active_index');
+  };
+
+  const setActiveIndex = (index) => {
+    model.set('active_index', index, true);
+  };
+
   const destroy = () => {
     model.destroy();
   };
@@ -288,6 +298,8 @@ const WorkPlansController = function () {
     addClick: addClick,
     previewResource: previewResource,
     resourceUploaded: resourceUploaded,
+    getActiveIndex: getActiveIndex,
+    setActiveIndex: setActiveIndex,
     destroy: destroy
   };
 };
