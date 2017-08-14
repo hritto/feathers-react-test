@@ -14,7 +14,7 @@ const WorkPlans = function (sb) {
 
   //Estado ---> Model
   let appState = {
-    title: "Planes de trabajo ",
+    title: "Planes de trabajo",
     icon: "write square",
     route: "workplans",
     permission: "workplans",

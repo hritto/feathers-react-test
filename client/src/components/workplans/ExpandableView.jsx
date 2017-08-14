@@ -58,7 +58,7 @@ const _renderHeader = (record, opts, props) => {
       }
       width = conf.flex + '%';
 
-      return <Table.HeaderCell style={{display: display, width: width}} key={'th_'+conf.label}>{conf.label}</Table.HeaderCell>;
+      return <Table.HeaderCell style={{display: display, width: width}} key={'th_'+_.uniqueId('head')}>{conf.label}</Table.HeaderCell>;
     }, columns);
     // El extra para los botones
     header.push(<Table.HeaderCell style={{width: '1%'}} key={'th_btns'}></Table.HeaderCell>)
@@ -83,6 +83,9 @@ const _panel = (record, opts, props, index) => {
   let cells = R.map((column) => {
     display = '';
     conf = R.find(R.propEq('name', column))(config) || {};
+    if (column === 'items'){
+      return;
+    }
     if (conf.type !== 'hidden') {
       // El renderer es una función para formatear los valores de los campos cuando es necesario
       content = getCellContent(conf, record[column]);
@@ -100,13 +103,14 @@ const _panel = (record, opts, props, index) => {
           content = conf.renderer(record[column]);
       }
     }
-    //return <span style={{display: display}} key={conf.name + '_' + record._id}>{content}</span>;
     return <Table.Cell style={{display: display, width: width}} key={conf.name+'_'+record._id}>{content}</Table.Cell>;
   }, columns);
 
   //Renderizar solo la escena abierta
   if (parseInt(props.model.active_index, 10) === index) {
-    //El primer item es la información del Plan
+    //La primera tabla es la información del Plan
+    //const btns = getPlanBtns();
+    cells.push(<Table.Cell style={{width: '1%'}} key={'btns_'+index+ '_' +record._id}>{'btns'}</Table.Cell>)
     const records = props.model.records || [];
     const head = _renderHeader(records, props.model.config, props);
     const table = <Table celled attached='top'>
@@ -115,6 +119,8 @@ const _panel = (record, opts, props, index) => {
           <Table.Row key={'row_'+record._id}>{cells}</Table.Row>
         </tbody>
       </Table>
+
+    //Los elementos del plan??
 
     return {
       key: `panel-${index}`,

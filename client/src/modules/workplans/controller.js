@@ -143,7 +143,7 @@ const WorkPlansController = function () {
       if (result && result.length) {
         //Recargar los datos
         let msg = 'El plan se ha creado correctamente';
-        loadResources(msg);
+        loadPlans(msg);
       } else {
         model.set('message', 'Error occurred');
         resetState();
@@ -160,14 +160,14 @@ const WorkPlansController = function () {
       resetState();
       return;
     }
-    const resource_id = selected_record._id;
+    const plan_id = selected_record._id;
     return Promise.all([
-      workplansService.remove(resource_id, {}),
+      workplansService.remove(plan_id, {}),
     ]).then(results => {
       if (results && results.length) {
         //Recargar los datos
         let msg = 'El plan se ha borrado correctamente';
-        loadResources(msg);
+        loadPlans(msg);
       } else {
         model.set('message', 'Error occurred');
         resetState();
@@ -180,7 +180,7 @@ const WorkPlansController = function () {
   };
 
 
-  const loadResources = (msg) => {
+  const loadPlans = (msg) => {
     //Recargar los datos
     return workplansService.find().then(results => {
       let combo_constructors = model.get(['config', 'combo_constructors']);
@@ -210,7 +210,7 @@ const WorkPlansController = function () {
       return;
     }
 
-    let resource_id = selected_record._id;
+    let plan_id = selected_record._id;
     let metadata = {
       name: selected_record.name,
       description: selected_record.description,
@@ -222,11 +222,11 @@ const WorkPlansController = function () {
     };
 
     return Promise.all([
-      workplansService.patch(resource_id, metadata, {}),
+      workplansService.patch(plan_id, metadata, {}),
     ]).then(results => {
       if (results && results.length) {
         let message = 'El plan se ha actualizado correctamente';
-        loadResources(message);
+        loadPlans(message);
         resetState();
       } else {
         model.set('message', 'Error occurred: no data');
@@ -236,11 +236,6 @@ const WorkPlansController = function () {
       model.set('message', 'Error occurred:' + err);
       resetState();
     });
-  };
-
-  const resourceUploaded = function () {
-    let message = 'El plan se ha cargado correctamente';
-    loadResources(message);
   };
 
   const resetState = () => {
@@ -255,18 +250,18 @@ const WorkPlansController = function () {
   };
 
 
-  const previewResource = (opts) => {
+  const previewPlan = (opts) => {
     sb.emit("application.startModule", {
       index: 0,
       module: {
-        title: "Preview_resource",
-        icon: "cloud upload",
-        route: "preview_resource",
-        permission: "preview_resource",
-        modules: ["PreviewResource"],
+        title: "Planes de trabajo",
+        icon: "write square",
+        route: "workplans",
+        permission: "workplans",
+        modules: ["PreviewPlan"],
         dom: ["preview_modal"],
         config: [{}],
-        instanceIds: ["PreviewResource"]
+        instanceIds: ["PreviewPlan"]
       },
       current: null,
       options: opts
@@ -296,8 +291,7 @@ const WorkPlansController = function () {
     doDelete: doDelete,
     resetState: resetState,
     addClick: addClick,
-    previewResource: previewResource,
-    resourceUploaded: resourceUploaded,
+    previewPlan: previewPlan,
     getActiveIndex: getActiveIndex,
     setActiveIndex: setActiveIndex,
     destroy: destroy
