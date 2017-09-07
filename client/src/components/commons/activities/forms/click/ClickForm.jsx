@@ -100,7 +100,7 @@ class ClickForm extends Component {
       cognitive_process: this.state.metadata.cognitive_process,
       competence: this.state.metadata.competence
     });
-    console.log(this.state);
+    //console.log(this.state);
   };
 
   handleAddScene(index) {

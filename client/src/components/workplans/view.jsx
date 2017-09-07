@@ -3,6 +3,7 @@ import { Container, Header, Icon, Menu, Segment, Button, Modal } from 'semantic-
 import ExpandableLayout from './ExpandableView.jsx';
 import RibbonHeader from '../commons/header.jsx';
 import WorkPlanFormModal from './WorkPlanFormModal.jsx'
+import WorkPlanItemFormModal from './WorkPlanItemFormModal.jsx'
 
 const newWorkPlan = (props) => {
   props.controller.itemClick({
@@ -20,6 +21,10 @@ const WorkPlansView = (props) => {
     content='Crear Nuevo Plan de trabajo' icon='add circle' labelPosition='left' />);
   if (props.model.state === 'update' || props.model.state === 'create' || props.model.state === 'delete') {
     modal = <WorkPlanFormModal {...props} />
+  }
+
+  if (props.model.state === 'add_plan_item') {
+    modal = <WorkPlanItemFormModal {...props} />
   }
   return (
     <div className="no-margin-absolute">

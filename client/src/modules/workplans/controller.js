@@ -57,6 +57,11 @@ const WorkPlansController = function () {
       setSelectedRecord(opts, getLocalRecord(opts), false);
       model.set('state', opts.action, true);
     }
+
+    if (opts.action === 'add_plan_item') {
+      setSelectedRecord(opts, getLocalRecord(opts), false);
+      model.set('state', opts.action, true);
+    }
   };
 
   const addClick = (opts) => {
@@ -273,6 +278,10 @@ const WorkPlansController = function () {
   };
 
   const setActiveIndex = (index) => {
+    model.set('active_index', index, true);
+  };
+
+  const addPlanItem = (opts) => {
     model.set('active_index', index, true);
   };
 

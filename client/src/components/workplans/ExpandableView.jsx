@@ -109,8 +109,11 @@ const _panel = (record, opts, props, index) => {
   //Renderizar solo la escena abierta
   if (parseInt(props.model.active_index, 10) === index) {
     //La primera tabla es la información del Plan
-    //const btns = getPlanBtns();
-    cells.push(<Table.Cell style={{width: '1%'}} key={'btns_'+index+ '_' +record._id}>{'btns'}</Table.Cell>)
+    const btn_add = <Button type="button" className='accordion_btn' floated='right' key={'btn_add_plan_item' + index} icon='plus' color='blue' size='tiny' onClick={props.controller.itemClick.bind(this, {
+      action: 'add_plan_item',
+      id: record._id
+    })} />;
+    cells.push(<Table.Cell style={{width: '1%'}} key={'btns_'+index+ '_' +record._id}>{btn_add}</Table.Cell>)
     const records = props.model.records || [];
     const head = _renderHeader(records, props.model.config, props);
     const table = <Table celled attached='top'>
