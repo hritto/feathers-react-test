@@ -1,0 +1,132 @@
+
+/*-----------------------------------------------------------------*/
+/*---------------------------- POPUP ------------------------------*/
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+
+div#btnPopUp{
+	background-color: #3696DE;
+	border: 2px solid #fff;
+	color:#fff;
+	border-radius: 5px;
+	width: 110px;
+	height:50px;
+	padding:5px;
+	text-align:center;
+	z-index:9999;
+}
+div#btnPopUp.right{
+	 -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    writing-mode: tb-rl;
+}
+div#btnPopUp.left{
+	 -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    writing-mode: tb-rl;
+}
+div#btnPopUp:hover{
+	cursor:pointer;
+	box-shadow: 0px 0px 10px 1px rgba(210, 210, 210, 0.75);
+	-moz-box-shadow: 0px 0px 10px 1px rgba(210, 210, 210, 0.75);
+	-webkit-box-shadow: 0px 0px 10px 1px rgba(210, 210, 210, 0.75);
+}
+div#btnPopUp:active{
+	border-color:#ccc;
+}
+
+
+   
+div#btnPopUp[data-pantalla='1']{
+	background-color: #3696DE;
+	border: 2px solid #fff;
+	color:#fff;
+	border-radius: 50px;
+	width: 60px;
+	height:60px;
+	padding:5px;
+    padding-top:10px;
+	text-align:center;
+	z-index:9999;
+}
+
+div#btnPopUp[data-pantalla='1']:active{
+	transform: scale(0.9);
+	-ms-transform: scale(0.9); /* IE 9 */
+	-webkit-transform: scale(0.9); /* Safari and Chrome */
+}
+
+
+
+div#ventanaPopUp{
+	background-color: #fff;
+	border: 5px solid #3696DE;
+	border-radius: 10px;
+	width: 90%;
+	height:90%;
+	position:absolute;
+  overflow:hidden;
+	top:50%;
+	left:50%;
+	margin: auto;
+	z-index:9999;
+
+	box-shadow: 0px 0px 10px 4px rgba(119, 119, 119, 0.75);
+	-moz-box-shadow: 0px 0px 10px 4px rgba(119, 119, 119, 0.75);
+	-webkit-box-shadow: 0px 0px 10px 4px rgba(119, 119, 119, 0.75);
+}
+
+
+
+div#ventanaPopUp > #popUpTitle{
+    position:relative;
+	background-color: #3696DE;
+	width: 100%;
+	height:30px;
+	padding:5px;
+    color:#fff;
+    font-size:20px;
+    text-indent:5px;
+	border-bottom:2px solid #d2d3d1;
+}
+div#ventanaPopUp.ui-draggable > #popUpTitle{
+    cursor:move;
+}
+div#ventanaPopUp > #popUpTitle > #popUpClose{
+	background-color: #3696DE;
+    text-indent:1px;
+	width: 15px;
+	height:15px;
+    line-height:15px;
+	padding:5px;
+    margin:0px;
+    text-align:center;
+    color:#fff;
+    font-size:24px;
+    font-family:Helvetica, arial, sans-serif, Verdana, Tahoma, Geneva;
+	border-radius: 50px;
+	border:2px solid #fff;
+    position:absolute;
+    top:5px;
+    right:20px;
+}
+
+div#ventanaPopUp > #popUpTitle > #popUpClose:hover{
+	border-color:#fff;
+	background-color: #fff;
+    color:#3696DE;
+    cursor:pointer;
+}
+
+
+div#ventanaPopUp > #popUpContent{
+	background-color: #fff;
+	width: 96%;
+    height:auto;
+	max-height:90%;
+	padding:2%;
+	overflow-y:scroll;
+}

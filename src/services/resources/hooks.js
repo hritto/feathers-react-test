@@ -8,11 +8,14 @@ const path = require("path");
 module.exports = {
   beforeCreateHook: function (hook) {
     let original_name = '';
+    let uri = null;
+    let file = null;
+    console.log(!hook.data.uri && hook.params.file)
     if (!hook.data.uri && hook.params.file) {
-      const file = hook.params.file;
-      const uri = dauria.getBase64DataURI(file.buffer, file.mimetype);
+      file = hook.params.file;
+      uri = dauria.getBase64DataURI(file.buffer, file.mimetype);
       original_name = hook.params.file.originalname;
-      //console.log(uri)
+      // console.log(uri)
     }
     hook.data = {
       uri: uri,

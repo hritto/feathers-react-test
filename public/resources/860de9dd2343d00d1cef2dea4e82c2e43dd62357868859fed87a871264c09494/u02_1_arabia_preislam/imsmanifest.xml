@@ -1,0 +1,102 @@
+<?xml version="1.0" standalone="no" ?>
+<manifest identifier="com.anaya.es" version="1"
+		 xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+		 xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd
+				 http://www.imsglobal.org/xsd/imsmd_rootv1p2p1 imsmd_rootv1p2p1.xsd
+				 http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+	<metadata>
+		<schema>ADL SCORM</schema>
+		<schemaversion>SCORM 1.2</schemaversion>
+		<adlcp:location>metadataLOMES.xml</adlcp:location> 
+	</metadata>
+	<organizations default="ANAYA">
+		<organization identifier="ANAYA">
+			<title>Anaya Educación</title>
+			<item identifier="ITEM1" identifierref="resource_1">
+				<title>Actividad interactiva</title>
+			</item>
+		</organization>
+	</organizations>
+
+	<resources>
+		<resource identifier="resource_1" type="webcontent" adlcp:scormtype="sco" href="index.html">
+
+			 
+				<file href="imscp_rootv1p1p2.xsd" />
+				<file href="index.html" />
+				<file href="config/js/galeria_control.js" />
+				<file href="config/js/ayuda.js" />
+				<file href="config/js/script.js" />
+				<file href="config/js/editor_notas.js" />
+				<file href="config/js/webkitdragdrop.js" />
+				<file href="config/js/act_dragndrop.js" />
+				<file href="config/js/modernizr.custom.js" />
+				<file href="config/js/jquery.control.js" />
+				<file href="config/js/popup_control.js" />
+				<file href="config/js/jquery-ui.js" />
+				<file href="config/js/video_control.js" />
+				<file href="config/js/html5.js" />
+				<file href="config/js/scorm.js" />
+				<file href="config/js/jquery.js" />
+				<file href="config/js/file_control.js" />
+				<file href="config/js/scormdriver.js" />
+				<file href="config/js/audio_control.js" />
+				<file href="config/js/idioma.js" />
+				<file href="config/communication/KitabooCommunicationManager.js" />
+				<file href="config/img/point.png" />
+				<file href="config/img/icon_file.png" />
+				<file href="config/img/icon_audio.png" />
+				<file href="config/img/OK.png" />
+				<file href="config/img/logo_anaya.png" />
+				<file href="config/img/icon_video.png" />
+				<file href="config/img/OK_min.png" />
+				<file href="config/img/pen.png" />
+				<file href="config/img/icon_imagen.png" />
+				<file href="config/img/KO_min.png" />
+				<file href="config/img/cursor_lapiz.png" />
+				<file href="config/img/KO.png" />
+				<file href="config/css/style.css" />
+				<file href="config/css/popup.css" />
+				<file href="config/css/layout.css" />
+				<file href="config/css/custom-theme/images/ui-icons_454545_256x240.png" />
+				<file href="config/css/custom-theme/images/ui-icons_3e0125_256x240.png" />
+				<file href="config/css/custom-theme/images/ui-bg_glass_65_ff0095_1x400.png" />
+				<file href="config/css/custom-theme/images/ui-bg_glass_95_fef1ec_1x400.png" />
+				<file href="config/css/custom-theme/images/ui-bg_flat_75_ffd4ed_40x100.png" />
+				<file href="config/css/custom-theme/images/ui-bg_glass_75_ff91d1_1x400.png" />
+				<file href="config/css/custom-theme/images/ui-bg_flat_0_aaaaaa_40x100.png" />
+				<file href="config/css/custom-theme/images/ui-bg_glass_55_fbf9ee_1x400.png" />
+				<file href="config/css/custom-theme/images/ui-bg_flat_75_ffffff_40x100.png" />
+				<file href="config/css/custom-theme/images/ui-bg_flat_0_876679_40x100.png" />
+				<file href="config/css/custom-theme/images/ui-icons_360020_256x240.png" />
+				<file href="config/css/custom-theme/images/ui-icons_2e83ff_256x240.png" />
+				<file href="config/css/custom-theme/images/ui-icons_0360020_256x240.png" />
+				<file href="config/css/custom-theme/images/ui-icons_cd0a0a_256x240.png" />
+				<file href="config/css/custom-theme/images/ui-bg_flat_75_d07eae_40x100.png" />
+				<file href="config/css/custom-theme/jquery-ui-1.9.2.custom.css" />
+				<file href="config/iconos/generico/generico-default.png" />
+				<file href="config/iconos/generico/generico-active.png" />
+				<file href="config/iconos/generico/generico-hover.png" />
+				<file href="config/iconos/logos/xerais.png" />
+				<file href="config/iconos/logos/barcanova.png" />
+				<file href="config/iconos/logos/bruno.png" />
+				<file href="config/iconos/logos/anaya.png" />
+				<file href="config/iconos/logos/anaya_old.png" />
+				<file href="config/iconos/logos/algaida.png" />
+				<file href="config/iconos/css/barraAnaya.css" />
+				<file href="adlcp_rootv1p2.xsd" />
+				<file href="imagenes/mapa.png" />
+				<file href="imsmd_rootv1p2p1.xsd" />
+				<file href="lomCustom.xsd" />
+				<file href="control.json" />
+				<file href="ScormEnginePackageProperties.xsd" />
+				<file href="data0.xml" />
+				<file href="imsmanifest.xml" />
+				<file href="ims_xml.xsd" />
+				<file href="metadataLOMES.xml" />
+
+		</resource>
+	</resources>
+</manifest>

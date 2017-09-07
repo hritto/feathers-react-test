@@ -92,7 +92,7 @@ class ResourceForm extends Component {
 
   getDropZoneConfig(t) {
     const tipo = parseInt(t, 10);
-    if(!tipo){
+    if(!tipo && tipo !== 0){
       return {};
     }
     let iconFiletypes = ['.zip'];

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<elements>
+	<element type="drag" id="0" place_objects="left"> 
+		<control>logo,notas,siguiente,comprobar,audio</control>
+		<intentos>3</intentos>
+		<audio_titulo></audio_titulo>
+		<audio_pantalla></audio_pantalla>
+		
+		<titulo>Arabia preislámica</titulo>
+		<headercolor>#005ea8</headercolor>
+		<colortitulo>#FFFFFF</colortitulo>
+		<fuentetitulo>Verdana, Tahoma, Geneva, sans-serif</fuentetitulo>
+		<tamanotitulo>26</tamanotitulo>
+		
+		<enunciado>Completa el mapa arrastrando los rótulos hasta su lugar.</enunciado>
+		<colortexto>#005ea8</colortexto>
+		<fuentetexto>Verdana</fuentetexto>
+		<justificaciontexto>justify</justificaciontexto>
+		<tamanotexto>18</tamanotexto>
+		
+		<imagenes></imagenes>
+		
+		<aleatorios>0</aleatorios>
+	
+<!-- DRAG -->
+		<drag_and_drop>
+			<drag_one2one>1</drag_one2one> <!--Si es 0 dejar poner más de un elemento por caja, si es 1 te restringe a un solo elemento por caja -->	
+			<drag_erase>1</drag_erase> <!--Si es 0 añade el texto arrastrado al texto destino, si es 1 sustituye el contenido-->		
+			<drags_solo_uno>0</drags_solo_uno><!-- Si es 1, muestra solo una opción de Drag a la vez -->
+		
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Arabia</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Egipto</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="15">
+				<palabra>Golfo Pérsico</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Imperio bizantino</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="15">
+				<palabra>Imperio persa sasánida</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+			
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>La Meca</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+						
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Mar Caspio</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+									
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Mar Mediterráneo</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+									
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Mar Negro</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+									
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Mar Rojo</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+									
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Medina (Yatrib)</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+									
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>OCÉANO ÍNDICO</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+									
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="15">
+				<palabra>Principales rutas comerciales</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+									
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Región de Hiyaz</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+									
+			<drag_item posH="0" posV="0" w="130" h="28" BgColor="#ffffff" opaBG="1" opaFont="1" Color="#000000" FontSize="11" L-Height="20">
+				<palabra>Yemen</palabra>
+				<img></img>
+				<yooigo></yooigo>
+				<yoveo></yoveo>
+			</drag_item>
+									
+
+			
+
+			
+			
+			
+			
+	<!-- DROP -->
+			
+			<dropArea BGImg="mapa.png" posH="" posV="" w="" h=""  BgColor="" opaBG="" fontColor=""  fontSize="16"  fontFamily=""  textAlign="justify" >
+			<![CDATA[
+				<article>
+					<div class='columnas'>	
+
+					[#Mar Negro##130x25#-62,-20] 
+					[#Mar Caspio##130x25#166,-25] 
+					[#Mar Mediterráneo##110x35#-399,149] 
+					[#Egipto##110x25#-480,240] 
+					[#Región de Hiyaz##110x25#167,262] 
+					[#Medina (Yatrib)##120x25#-240,224] 
+					[#Golfo Pérsico##110x25#196,256] 
+					[#La Meca##110x25#-500,305] 
+					[#Mar Rojo##110x25#-98,338] 
+					[#Yemen##110x25#128,380] 
+					[#OCÉANO ÍNDICO##120x25#221,337] 
+					[#Arabia##150x25#-327,444] 
+					[#Imperio bizantino##150x25#67,419] 
+					[#Imperio persa sasánida##180x25#125,388] 
+					[#Principales rutas comerciales##180x25#-68,416] 
+
+					</div>
+				</article>
+				]]>
+				
+			</dropArea>
+		</drag_and_drop>
+	</element>
+</elements>
