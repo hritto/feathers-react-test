@@ -130,7 +130,20 @@ const _panel = (record, opts, props, index) => {
         </tbody>
       </Table>
 
-    //Los elementos del plan??
+    //Los elementos del plan?? TODO
+    const table_items = (
+      <Table celled attached='top'>
+        <Table.Header>
+          <Table.Row key='theader_row'>
+            <Table.HeaderCell key={'th_'+_.uniqueId('head')}>Actividad / Recurso</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <tbody>
+          <Table.Row key={'row_'+record._id}>
+            <Table.Cell key={'test_row'+_.uniqueId('test')}>Contenido test...</Table.Cell>
+          </Table.Row>
+        </tbody>
+      </Table>);
 
     return {
       key: `panel-${index}`,
@@ -140,6 +153,7 @@ const _panel = (record, opts, props, index) => {
       content: (
         <div>
           {table}
+          {table_items}
         </div>)
     }
   }
