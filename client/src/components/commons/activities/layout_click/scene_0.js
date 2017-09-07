@@ -125,7 +125,7 @@ const Scene_0 = function () {
     return new Promise(function (resolve, reject) {
       _.each(config.elements, function (value, key) {
 
-        if (value.type !== "audio") {
+        if (!value.audio) {
           el = "<div class='resize-drag' id='" + key + "' data-x='" + resizer.getPosition(value.pos).x + "' data-y='" + resizer.getPosition(value.pos).y + "'></div>";
           $(scene_el).append(el);
           $('#' + key).css({
@@ -134,7 +134,7 @@ const Scene_0 = function () {
             left: resizer.getPosition(value.pos).x
           });
         }
-        if (value.type === "image") {
+        if (value.image) {
           setupInitImage(value, key);
         }
       });

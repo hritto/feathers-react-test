@@ -1,5 +1,5 @@
 import React from 'react'
-import { Icon, Label, Menu, Image, Header, Message, Accordion, Button, Item, Table } from 'semantic-ui-react'
+import { Icon, Label, Menu, Image, Header, Message, Accordion, Button, Item, Table, Popup } from 'semantic-ui-react'
 import ButtonIcon from '../commons/ButtonIcon.jsx';
 import Helpers from '../commons/helpers.js';
 import R from 'ramda';
@@ -79,7 +79,8 @@ const _panel = (record, opts, props, index) => {
     content = '',
     row_id = '',
     conf = null,
-    options = null;
+    options = null,
+    btn_add = '';
   let cells = R.map((column) => {
     display = '';
     conf = R.find(R.propEq('name', column))(config) || {};
@@ -103,14 +104,23 @@ const _panel = (record, opts, props, index) => {
           content = conf.renderer(record[column]);
       }
     }
+
+    btn_add = <Popup
+      trigger={<Button type="button" className='accordion_btn' floated='right' key={'btn_add_plan_item' + index} icon='plus' color='blue' size='tiny' onClick={props.controller.itemClick.bind(this, {
+        action: 'add_plan_item',
+        id: record._id
+      })} />}
+      content={'Agregar actividades o recursos al plan: ' + record.name } />
+
     return <Table.Cell style={{display: display, width: width}} key={conf.name+'_'+record._id}>{content}</Table.Cell>;
   }, columns);
+
+  // Agregar el botón de add_plan_item
+  cells.push(<Table.Cell style={{width: '1%'}} key={'btns_'+index+ '_' +record._id}>{btn_add}</Table.Cell>)
 
   //Renderizar solo la escena abierta
   if (parseInt(props.model.active_index, 10) === index) {
     //La primera tabla es la información del Plan
-    //const btns = getPlanBtns();
-    cells.push(<Table.Cell style={{width: '1%'}} key={'btns_'+index+ '_' +record._id}>{'btns'}</Table.Cell>)
     const records = props.model.records || [];
     const head = _renderHeader(records, props.model.config, props);
     const table = <Table celled attached='top'>
@@ -120,7 +130,20 @@ const _panel = (record, opts, props, index) => {
         </tbody>
       </Table>
 
-    //Los elementos del plan??
+    //Los elementos del plan?? TODO
+    const table_items = (
+      <Table celled attached='top'>
+        <Table.Header>
+          <Table.Row key='theader_row'>
+            <Table.HeaderCell key={'th_'+_.uniqueId('head')}>Actividad / Recurso</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <tbody>
+          <Table.Row key={'row_'+record._id}>
+            <Table.Cell key={'test_row'+_.uniqueId('test')}>Contenido test...</Table.Cell>
+          </Table.Row>
+        </tbody>
+      </Table>);
 
     return {
       key: `panel-${index}`,
@@ -130,6 +153,7 @@ const _panel = (record, opts, props, index) => {
       content: (
         <div>
           {table}
+          {table_items}
         </div>)
     }
   }

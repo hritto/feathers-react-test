@@ -21,7 +21,6 @@ const Scene_1 = () => {
   var elements_layout = {};
 
   var initialize = function (options, med, res, resizer_obj, layout_obj) {
-
     config = options;
     media = med;
     resizer = resizer_obj;
@@ -201,7 +200,7 @@ const Scene_1 = () => {
           h: event.rect.height
         };
         elements_layout[target.id].pos = {
-          y: x,
+          x: x,
           y: y
         };
         // update the position attributes

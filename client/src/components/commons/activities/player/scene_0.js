@@ -159,7 +159,7 @@ const Scene_0 = function() {
     return new Promise(function(resolve, reject){
       _.each(config.elements, function(value, key){
 
-        if(value.type !== "audio"){
+        if(!value.audio){
           el = "<div id='"+key+"'></div>";
           $(scene_el).append(el);
           $('#'+key).css({
@@ -172,7 +172,7 @@ const Scene_0 = function() {
           setupInitAnimation(value, key);
           animations.push('#'+key);
         }
-        if(value.type === "image"){
+        if(value.image){
           setupInitImage(value, key);
         }
       });
