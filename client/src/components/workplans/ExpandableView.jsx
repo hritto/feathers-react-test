@@ -105,12 +105,12 @@ const _panel = (record, opts, props, index) => {
       }
     }
 
-    btn_add =  <Popup
+    btn_add = <Popup
       trigger={<Button type="button" className='accordion_btn' floated='right' key={'btn_add_plan_item' + index} icon='plus' color='blue' size='tiny' onClick={props.controller.itemClick.bind(this, {
         action: 'add_plan_item',
         id: record._id
       })} />}
-      content='Agregar actividades o recursos al plan de trabajo' />
+      content={'Agregar actividades o recursos al plan: ' + record.name } />
 
     return <Table.Cell style={{display: display, width: width}} key={conf.name+'_'+record._id}>{content}</Table.Cell>;
   }, columns);
